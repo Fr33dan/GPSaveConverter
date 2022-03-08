@@ -13,15 +13,16 @@ namespace GPSaveConverter
 
         static GameLibrary()
         {
-            LoadCSV("GameLibrary.psv");
+            LoadPSV();
         }
 
-        public static void LoadCSV(string libraryFile)
+        public static void LoadPSV()
         {
+            StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
             library = new Dictionary<string, string>();
-            string[] gameList = File.ReadAllLines(libraryFile);
-            foreach(string game in gameList)
+            while (!stream.EndOfStream)
             {
+                string game = stream.ReadLine();
                 string[] gameData = game.Split('|');
                 library.Add(gameData[0], gameData[1]);
             }
