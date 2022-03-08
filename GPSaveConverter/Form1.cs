@@ -22,23 +22,23 @@ namespace GPSaveConverter
 
         }
 
-        private void sourceFiles(string folder)
+        private void fetchNonXboxSaveFiles(string folder)
         {
             foreach(string file in Directory.GetFiles(folder))
             {
-                this.sourceFileListBox.Items.Add(file.Replace(sourceParentFolder, ""));
+                this.sourceFilesListBox.Items.Add(file.Replace(sourceParentFolder, ""));
             }
 
             foreach(string dir in Directory.GetDirectories(folder))
             {
-                sourceFiles(dir);
+                fetchNonXboxSaveFiles(dir);
             }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             this.packagesListBox.Items.AddRange(GameList.GetList());
-            sourceFiles(sourceParentFolder);
+            fetchNonXboxSaveFiles(sourceParentFolder);
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -60,7 +60,7 @@ namespace GPSaveConverter
             }
             else
             {
-                foreach (string item in this.sourceFileListBox.SelectedItems)
+                foreach (string item in this.sourceFilesListBox.SelectedItems)
                 {
                     this.currentContainer.AddFile(item, sourceParentFolder);
                 }
@@ -69,9 +69,9 @@ namespace GPSaveConverter
 
         private void selectAllButton_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < sourceFileListBox.Items.Count; i++)
+            for (int i = 0; i < sourceFilesListBox.Items.Count; i++)
             {
-                sourceFileListBox.SetSelected(i, true);
+                sourceFilesListBox.SetSelected(i, true);
             }
         }
     }
