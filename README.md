@@ -1,4 +1,4 @@
-# PC Gamepass Save file converter
+# PC Gamepass Save File Converter
 Games available through PC Game Pass or purchased via the Xbox app keep their save files in an arbitrary file structure. This means if you purchase a game on another storefront moving your save files to or from the Xbox version is extremely difficult. This software aims to make that process easy.
 
 Finds games by listing any Microsoft Store package with a wgs folder (believed to stand for "Windows Game Save"). This means some non-game applications may be shown
