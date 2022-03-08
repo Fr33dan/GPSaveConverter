@@ -98,6 +98,7 @@ namespace GPSaveConverter
 
             if (nonXboxFileLocation.Contains("<profile>"))
             {
+                this.profileListBox.Enabled = true;
                 fetchProfiles();
             }
             else
