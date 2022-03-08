@@ -19,7 +19,6 @@ namespace GPSaveConverter
                 string wgsFolder = Path.Combine(package, "SystemAppData", "wgs");
                 if(Directory.Exists(wgsFolder) && Directory.GetDirectories(wgsFolder).Length == 2)
                 {
-                    ;
                     list.Add(Path.GetFileName(package));
                 }
             }

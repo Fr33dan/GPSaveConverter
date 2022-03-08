@@ -24,6 +24,7 @@ namespace GPSaveConverter
         internal const int EntryByteLength = EncodedPathByteLength + FileNameDataLength + FileNameDataLength;
         string EncodedPath;
         byte[] FileCode;
+        DateTime timestamp;
         ContainerManager parent;
 
         internal FileInfo(ContainerManager parent, byte[] sourceFile,int index)
@@ -37,13 +38,15 @@ namespace GPSaveConverter
             byte[] fileNameDuplicate = new byte[FileNameDataLength];
             Array.Copy(sourceFile, index + EncodedPathByteLength + FileNameDataLength, fileNameDuplicate, 0, FileNameDataLength);
 
+            string 
             if (!FileCode.SequenceEqual(fileNameDuplicate))
             {
                 throw new FileFormatException();
-            } else if (!File.Exists(Path.Combine(parent.getSaveFilePath(), this.getFileName())))
+            } else if (!File.Exists(getFilePath()))
             {
                 throw new FileNotFoundException("Could not find file for " + this.GetRelativeFilePath() + " (" + getFileName() + ")");
             }
+            this.timestamp = File.GetLastWriteTime(getFilePath());
         }
         internal FileInfo(ContainerManager parent,string filePath, string relativeFilePath)
         {
