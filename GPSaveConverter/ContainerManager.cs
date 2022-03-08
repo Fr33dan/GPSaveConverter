@@ -9,6 +9,7 @@ namespace GPSaveConverter
 {
     internal class ContainerManager
     {
+        public string PackageName;
         string wgsFolder;
         string wgsProfile;
         string saveFilePath;
@@ -17,9 +18,10 @@ namespace GPSaveConverter
         const int ContainerHeaderLength = 8;
         string containerPath;
         byte[] containerData;
-        private List<FileInfo> fileList;
+        private List<XboxFileInfo> fileList;
         public ContainerManager(string packageName)
         {
+            this.PackageName = packageName;
             initPaths(packageName);
         }
 
@@ -28,7 +30,7 @@ namespace GPSaveConverter
             return saveFilePath;
         }
 
-        public FileInfo[] getFileList()
+        public XboxFileInfo[] getFileList()
         {
             if(fileList == null)
             {
@@ -56,10 +58,10 @@ namespace GPSaveConverter
         private void parseContainer()
         {
             containerData = File.ReadAllBytes(containerPath);
-            this.fileList = new List<FileInfo>();
-            for(int j = ContainerHeaderLength; j < containerData.Length;j += FileInfo.EntryByteLength)
+            this.fileList = new List<XboxFileInfo>();
+            for(int j = ContainerHeaderLength; j < containerData.Length;j += XboxFileInfo.EntryByteLength)
             {
-                fileList.Add(new FileInfo(this,containerData, j));
+                fileList.Add(new XboxFileInfo(this,containerData, j));
             }
 
         }
@@ -72,7 +74,7 @@ namespace GPSaveConverter
 
             s.Write(BitConverter.GetBytes(this.fileList.Count), 0, 4);
 
-            foreach(FileInfo file in this.fileList)
+            foreach(XboxFileInfo file in this.fileList)
             {
                 file.Write(s);
             }
@@ -82,14 +84,14 @@ namespace GPSaveConverter
         public void AddFile(string relativePath, string sourceParent)
         {
             string filePath = Path.Combine(sourceParent, relativePath);
-            FileInfo existingFile = this.fileList.Where(i => i.GetRelativeFilePath() == relativePath).FirstOrDefault();
+            XboxFileInfo existingFile = this.fileList.Where(i => i.GetRelativeFilePath() == relativePath).FirstOrDefault();
             if (existingFile != null)
             {
                 File.Copy(filePath, existingFile.getFilePath(), true);
             }
             else
             {
-                this.fileList.Add(new FileInfo(this, filePath, relativePath));
+                this.fileList.Add(new XboxFileInfo(this, filePath, relativePath));
                 this.SaveContainer();
             }
         }

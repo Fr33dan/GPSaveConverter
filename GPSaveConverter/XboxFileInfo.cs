@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GPSaveConverter
 {
-    internal class FileInfo
+    internal class XboxFileInfo
     {
         public static byte[] GetChecksum(string filename)
         {
@@ -22,15 +22,19 @@ namespace GPSaveConverter
         internal const int EncodedPathByteLength = 128;
         internal const int FileNameDataLength = 16;
         internal const int EntryByteLength = EncodedPathByteLength + FileNameDataLength + FileNameDataLength;
-        string EncodedPath;
+        string encodedPath;
         byte[] FileCode;
         DateTime timestamp;
         ContainerManager parent;
 
-        internal FileInfo(ContainerManager parent, byte[] sourceFile,int index)
+        public string EncodedPath { get { return encodedPath; } }
+
+        public DateTime Timestamp { get { return timestamp; } }
+
+        internal XboxFileInfo(ContainerManager parent, byte[] sourceFile,int index)
         {
             this.parent = parent;
-            EncodedPath = Encoding.Unicode.GetString(sourceFile, index, EncodedPathByteLength).Trim('\0');
+            encodedPath = Encoding.Unicode.GetString(sourceFile, index, EncodedPathByteLength).Trim('\0');
 
             FileCode = new byte[FileNameDataLength];
             Array.Copy(sourceFile, index + EncodedPathByteLength, FileCode, 0, FileNameDataLength);
@@ -38,21 +42,20 @@ namespace GPSaveConverter
             byte[] fileNameDuplicate = new byte[FileNameDataLength];
             Array.Copy(sourceFile, index + EncodedPathByteLength + FileNameDataLength, fileNameDuplicate, 0, FileNameDataLength);
 
-            string 
             if (!FileCode.SequenceEqual(fileNameDuplicate))
             {
-                throw new FileFormatException();
+                //throw new FileFormatException();
             } else if (!File.Exists(getFilePath()))
             {
                 throw new FileNotFoundException("Could not find file for " + this.GetRelativeFilePath() + " (" + getFileName() + ")");
             }
             this.timestamp = File.GetLastWriteTime(getFilePath());
         }
-        internal FileInfo(ContainerManager parent,string filePath, string relativeFilePath)
+        internal XboxFileInfo(ContainerManager parent,string filePath, string relativeFilePath)
         {
             this.parent=parent;
 
-            this.EncodedPath = relativeFilePath;
+            this.encodedPath = relativeFilePath;
             this.FileCode = GetChecksum(filePath);
             File.Copy(filePath, getFilePath());
         }
@@ -106,7 +109,7 @@ namespace GPSaveConverter
         /// <returns></returns>
         public string GetRelativeFilePath()
         {
-            return EncodedPath;
+            return encodedPath;
         }
     }
 }
