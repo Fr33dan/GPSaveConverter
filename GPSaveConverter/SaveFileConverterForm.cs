@@ -135,7 +135,7 @@ namespace GPSaveConverter
 
         private void moveFilesToXbox(System.Collections.IEnumerable rows)
         {
-            DialogResult res = MessageBox.Show(this, "This will overwrite any existing save files in the Xbox save data. This cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
+            DialogResult res = MessageBox.Show(this, "This could overwrite files in your Xbox save data which cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
             if (res == DialogResult.Yes)
             {
                 string nonXboxParentLocation = expandedNonXboxFilesLocation();
@@ -155,7 +155,7 @@ namespace GPSaveConverter
                 return;
             }
 
-            DialogResult res = MessageBox.Show(this, "This will overwrite any existing save files in the your non-Xbox save data. This cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
+            DialogResult res = MessageBox.Show(this, "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
             if (res == DialogResult.Yes)
             {
                 string nonXboxParentLocation = expandedNonXboxFilesLocation();
