@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace GPSaveConverter
 {
-    internal class GameList
+    internal class XboxPackageList
     {
         private static string[] internalList;
-        static GameList()
+        static XboxPackageList()
         {
             string packageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages");
             List<string> list = new List<string>();
