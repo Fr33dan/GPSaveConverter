@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContainerManager.cs" />
+    <Compile Include="GameInfo.cs" />
     <Compile Include="NonXboxFileInfo.cs" />
     <Compile Include="XboxFileInfo.cs" />
     <Compile Include="SaveFileConverterForm.cs">
