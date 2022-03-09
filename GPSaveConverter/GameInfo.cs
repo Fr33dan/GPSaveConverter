@@ -13,7 +13,7 @@ namespace GPSaveConverter
             string[] gameData = psvDataLine.Split('|');
             this.Name = gameData[0];
             this.PackageName = gameData[1];
-            this.NonXboxSaveLocation = Environment.ExpandEnvironmentVariables(gameData[2]);
+            this.NonXboxSaveLocation = GameLibrary.ExpandSaveFileLocation(gameData[2]);
         }
         internal GameInfo()
         {
