@@ -3,6 +3,8 @@ Games available through PC Game Pass or purchased via the Xbox app keep their sa
 
 Finds games by listing any Microsoft Store package with a wgs folder (believed to stand for "Windows Game Save"). This means some non-game applications may be shown
 
-There is an extremely small (as of now at least) game library that contains the locations of non-Xbox save files. Some other game storefronts/save systems support multiple profiles, if this is the case with your game profiles will be shown by the file name identifing them. If your game is not found in this library you will be prompted to select the location manually when a package is selected.
+There is an extremely small (as of now at least) game library that contains the locations of non-Xbox save files. Some other game storefronts/save systems support multiple profiles, if this is the case with your game profiles will be shown by the file name identifying them. If your game is not found in this library you will be prompted to select the location manually when a package is selected.
 
 It is strongly recommended you back up both save file folders before using this application. 
+
+![PC Game Pass Save File Converter Screenshot](https://user-images.githubusercontent.com/4670572/157337932-0bc1c3bc-ee32-4f78-833d-53441e080cce.png)
