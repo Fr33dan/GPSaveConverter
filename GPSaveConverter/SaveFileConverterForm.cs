@@ -13,6 +13,7 @@ namespace GPSaveConverter
 {
     public partial class SaveFileConverterForm : Form
     {
+        private const string NonSteamProfileMarker = "<user-id>";
         ContainerManager currentContainer;
         GameInfo gameInfo;
         string profileID = string.Empty;
@@ -27,7 +28,7 @@ namespace GPSaveConverter
 
         private string expandedNonXboxFilesLocation()
         {
-            return gameInfo.NonXboxSaveLocation.Replace("<profile>", this.profileID);
+            return gameInfo.NonXboxSaveLocation.Replace(NonSteamProfileMarker, this.profileID);
 
         }
 
@@ -57,7 +58,7 @@ namespace GPSaveConverter
 
         private void fetchProfiles()
         {
-            string profilesDir = gameInfo.NonXboxSaveLocation.Substring(0, gameInfo.NonXboxSaveLocation.IndexOf("<profile>"));
+            string profilesDir = gameInfo.NonXboxSaveLocation.Substring(0, gameInfo.NonXboxSaveLocation.IndexOf(NonSteamProfileMarker));
 
             foreach(string p in Directory.GetDirectories(profilesDir))
             {
@@ -96,7 +97,7 @@ namespace GPSaveConverter
                 else return;
             }
 
-            if (gameInfo.NonXboxSaveLocation.Contains("<profile>"))
+            if (gameInfo.NonXboxSaveLocation.Contains(NonSteamProfileMarker))
             {
                 this.profileListBox.Enabled = true;
                 fetchProfiles();
