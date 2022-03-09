@@ -9,7 +9,7 @@ namespace GPSaveConverter
 {
     internal class GameLibrary
     {
-        private static Dictionary<string, string> library;
+        private static Dictionary<string, GameInfo> library;
 
         static GameLibrary()
         {
@@ -19,22 +19,22 @@ namespace GPSaveConverter
         public static void LoadPSV()
         {
             StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
-            library = new Dictionary<string, string>();
+            library = new Dictionary<string, GameInfo>();
             while (!stream.EndOfStream)
             {
-                string game = stream.ReadLine();
-                string[] gameData = game.Split('|');
-                library.Add(gameData[0], gameData[1]);
+                GameInfo newGame = new GameInfo(stream.ReadLine());
+                library.Add(newGame.PackageName, newGame);
             }
         }
 
-        public static string getNonXboxSaveLocation(string gamePassID)
+        public static GameInfo getGameInfo(string gamePassID)
         {
-            string location = null;
+            GameInfo location;
 
-            if(library.TryGetValue(gamePassID, out location))
+            if(!library.TryGetValue(gamePassID, out location))
             {
-                location = Environment.ExpandEnvironmentVariables(location);
+                location = new GameInfo();
+                location.PackageName = gamePassID;
             }
 
             return location;

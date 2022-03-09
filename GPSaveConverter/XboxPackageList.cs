@@ -9,23 +9,24 @@ namespace GPSaveConverter
 {
     internal class XboxPackageList
     {
-        private static string[] internalList;
+        private static GameInfo[] internalList;
         static XboxPackageList()
         {
             string packageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages");
-            List<string> list = new List<string>();
+            List<GameInfo> list = new List<GameInfo>();
             foreach(string package in Directory.GetDirectories(packageFolder))
             {
                 string wgsFolder = Path.Combine(package, "SystemAppData", "wgs");
                 if(Directory.Exists(wgsFolder) && Directory.GetDirectories(wgsFolder).Length == 2)
                 {
-                    list.Add(Path.GetFileName(package));
+                    GameInfo info = GameLibrary.getGameInfo(Path.GetFileName(package));
+                    list.Add(info);
                 }
             }
             internalList = list.ToArray();
         }
 
-        public static string[] GetList()
+        public static GameInfo[] GetList()
         {
             return internalList.ToArray();
         }

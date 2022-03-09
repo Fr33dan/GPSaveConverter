@@ -14,7 +14,7 @@ namespace GPSaveConverter
     public partial class SaveFileConverterForm : Form
     {
         ContainerManager currentContainer;
-        string nonXboxFileLocation;
+        GameInfo gameInfo;
         string profileID = string.Empty;
         bool nonXboxFetchReady = false;
         List<NonXboxFileInfo> nonXboxFiles;
@@ -27,7 +27,7 @@ namespace GPSaveConverter
 
         private string expandedNonXboxFilesLocation()
         {
-            return nonXboxFileLocation.Replace("<profile>", this.profileID);
+            return gameInfo.NonXboxSaveLocation.Replace("<profile>", this.profileID);
 
         }
 
@@ -57,7 +57,7 @@ namespace GPSaveConverter
 
         private void fetchProfiles()
         {
-            string profilesDir = nonXboxFileLocation.Substring(0, nonXboxFileLocation.IndexOf("<profile>"));
+            string profilesDir = gameInfo.NonXboxSaveLocation.Substring(0, gameInfo.NonXboxSaveLocation.IndexOf("<profile>"));
 
             foreach(string p in Directory.GetDirectories(profilesDir))
             {
@@ -75,12 +75,12 @@ namespace GPSaveConverter
             ClearForm();
             this.nonXboxFetchReady = false;
 
-            currentContainer = new ContainerManager((string)this.packagesListBox.SelectedItem);
-            nonXboxFileLocation = GameLibrary.getNonXboxSaveLocation(currentContainer.PackageName);
+            gameInfo = (GameInfo)this.packagesListBox.SelectedItem;
+            currentContainer = new ContainerManager(gameInfo.PackageName);
 
             this.xboxFilesTable.DataSource = currentContainer.getFileList();
 
-            if (nonXboxFileLocation == null)
+            if (gameInfo.NonXboxSaveLocation == null || gameInfo.NonXboxSaveLocation == string.Empty)
             {
                 DialogResult res = MessageBox.Show(this, "Non-Xbox save location not found in library. Please select save file location.", "Non-Xbox save location not found", MessageBoxButtons.OKCancel);
                 if (res == DialogResult.OK)
@@ -89,14 +89,14 @@ namespace GPSaveConverter
                     res = dialog.ShowDialog();
                     if (res == DialogResult.OK)
                     {
-                        nonXboxFileLocation = dialog.SelectedPath;
+                        gameInfo.NonXboxSaveLocation = dialog.SelectedPath;
                     }
                     else return;
                 }
                 else return;
             }
 
-            if (nonXboxFileLocation.Contains("<profile>"))
+            if (gameInfo.NonXboxSaveLocation.Contains("<profile>"))
             {
                 this.profileListBox.Enabled = true;
                 fetchProfiles();
