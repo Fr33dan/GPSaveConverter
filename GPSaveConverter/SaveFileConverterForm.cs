@@ -89,6 +89,10 @@ namespace GPSaveConverter
                 }
 
                 this.profileListBox.Enabled = true;
+                if(this.profileListBox.Items.Count == 1)
+                {
+                    this.profileListBox.SelectedItem = this.profileListBox.Items[0];
+                }
             }
             else
             {
