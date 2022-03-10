@@ -78,6 +78,7 @@
             this.profileListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.profileListBox.Enabled = false;
             this.profileListBox.FormattingEnabled = true;
             this.profileListBox.Location = new System.Drawing.Point(3, 19);
             this.profileListBox.Name = "profileListBox";

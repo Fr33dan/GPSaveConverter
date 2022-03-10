@@ -34,7 +34,9 @@ namespace GPSaveConverter
         {
             nonXboxFiles = new List<NonXboxFileInfo>();
             string fetchLocation = expandedNonXboxFilesLocation();
-            fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
+
+            if(Directory.Exists(fetchLocation)) fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
+
             this.nonXboxFilesTable.DataSource = nonXboxFiles;
         }
         private void fetchNonXboxSaveFiles(string folder,string root)
@@ -54,14 +56,43 @@ namespace GPSaveConverter
             }
         }
 
+        private bool promptForNonXboxSaveLocation(string reason)
+        {
+            DialogResult res = MessageBox.Show(this, reason + " Please select save file location.", "Non-Xbox save location not found", MessageBoxButtons.OKCancel);
+            if (res == DialogResult.OK)
+            {
+                FolderBrowserDialog dialog = new FolderBrowserDialog();
+                res = dialog.ShowDialog();
+                if (res == DialogResult.OK)
+                {
+                    gameInfo.NonXboxSaveLocation = dialog.SelectedPath;
+                    fetchNonXboxSaveFiles();
+                    return true;
+                }
+                else return false;
+            }
+            else return false;
+        }
+
         private void fetchProfiles()
         {
             string profilesDir = gameInfo.NonXboxSaveLocation.Substring(0, gameInfo.NonXboxSaveLocation.IndexOf(GameLibrary.NonSteamProfileMarker));
 
-            foreach(string p in Directory.GetDirectories(profilesDir))
+            if (Directory.Exists(profilesDir))
             {
-                this.profileListBox.Items.Add(p.Replace(profilesDir, ""));
+                foreach (string p in Directory.GetDirectories(profilesDir))
+                {
+                    this.profileListBox.Items.Add(p.Replace(profilesDir, ""));
+                }
+
+                this.profileListBox.Enabled = true;
             }
+            else
+            {
+                this.profileListBox.Items.Add("No profiles found");
+                promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
+            }
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -81,31 +112,21 @@ namespace GPSaveConverter
 
             if (gameInfo.NonXboxSaveLocation == null || gameInfo.NonXboxSaveLocation == string.Empty)
             {
-                DialogResult res = MessageBox.Show(this, "Non-Xbox save location not found in library. Please select save file location.", "Non-Xbox save location not found", MessageBoxButtons.OKCancel);
-                if (res == DialogResult.OK)
-                {
-                    FolderBrowserDialog dialog = new FolderBrowserDialog();
-                    res = dialog.ShowDialog();
-                    if (res == DialogResult.OK)
-                    {
-                        gameInfo.NonXboxSaveLocation = dialog.SelectedPath;
-                    }
-                    else return;
-                }
-                else return;
-            }
-
-            if (gameInfo.NonXboxSaveLocation.Contains(GameLibrary.NonSteamProfileMarker))
-            {
-                this.profileListBox.Enabled = true;
-                fetchProfiles();
+                promptForNonXboxSaveLocation("Non-Xbox save location not found in game library.");
             }
             else
             {
-                this.profileListBox.Items.Add("Profiles not defined in game library");
-                this.profileListBox.Enabled = false;
-                this.nonXboxFetchReady = true;
-                fetchNonXboxSaveFiles();
+                if (gameInfo.NonXboxSaveLocation.Contains(GameLibrary.NonSteamProfileMarker))
+                {
+                    fetchProfiles();
+                }
+                else
+                {
+                    this.profileListBox.Items.Add("Profiles not defined in game library");
+                    this.profileListBox.Enabled = false;
+                    this.nonXboxFetchReady = true;
+                    fetchNonXboxSaveFiles();
+                }
             }
         }
 
