@@ -28,12 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.packagesListBox = new System.Windows.Forms.ListBox();
             this.profileListBox = new System.Windows.Forms.ListBox();
             this.packagesLabel = new System.Windows.Forms.Label();
             this.profileLabel = new System.Windows.Forms.Label();
             this.nonXboxFilesLabel = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.xboxFileLabel = new System.Windows.Forms.Label();
             this.xboxFilesTable = new System.Windows.Forms.DataGridView();
             this.File = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LastEdit = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -51,6 +52,9 @@
             this.moveSelectionFromXboxButton = new System.Windows.Forms.Button();
             this.moveAllFromXboxButton = new System.Windows.Forms.Button();
             this.moveSelectionToXboxButton = new System.Windows.Forms.Button();
+            this.foldersToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.viewXboxFilesButton = new System.Windows.Forms.Button();
+            this.viewNonXboxFileButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.basePanel.SuspendLayout();
@@ -107,20 +111,20 @@
             // nonXboxFilesLabel
             // 
             this.nonXboxFilesLabel.AutoSize = true;
-            this.nonXboxFilesLabel.Location = new System.Drawing.Point(3, 0);
+            this.nonXboxFilesLabel.Location = new System.Drawing.Point(3, 15);
             this.nonXboxFilesLabel.Name = "nonXboxFilesLabel";
             this.nonXboxFilesLabel.Size = new System.Drawing.Size(109, 13);
             this.nonXboxFilesLabel.TabIndex = 10;
             this.nonXboxFilesLabel.Text = "Non-Xbox Save Files:";
             // 
-            // label1
+            // xboxFileLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(86, 13);
-            this.label1.TabIndex = 12;
-            this.label1.Text = "Xbox Save Files:";
+            this.xboxFileLabel.AutoSize = true;
+            this.xboxFileLabel.Location = new System.Drawing.Point(3, 15);
+            this.xboxFileLabel.Name = "xboxFileLabel";
+            this.xboxFileLabel.Size = new System.Drawing.Size(86, 13);
+            this.xboxFileLabel.TabIndex = 12;
+            this.xboxFileLabel.Text = "Xbox Save Files:";
             // 
             // xboxFilesTable
             // 
@@ -133,11 +137,11 @@
             this.xboxFilesTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.File,
             this.LastEdit});
-            this.xboxFilesTable.Location = new System.Drawing.Point(3, 16);
+            this.xboxFilesTable.Location = new System.Drawing.Point(3, 31);
             this.xboxFilesTable.Name = "xboxFilesTable";
             this.xboxFilesTable.ReadOnly = true;
             this.xboxFilesTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.xboxFilesTable.Size = new System.Drawing.Size(403, 289);
+            this.xboxFilesTable.Size = new System.Drawing.Size(403, 274);
             this.xboxFilesTable.TabIndex = 13;
             // 
             // File
@@ -169,11 +173,11 @@
             this.dataGridViewTextBoxColumn1,
             this.FullPath,
             this.dataGridViewTextBoxColumn2});
-            this.nonXboxFilesTable.Location = new System.Drawing.Point(0, 16);
+            this.nonXboxFilesTable.Location = new System.Drawing.Point(0, 31);
             this.nonXboxFilesTable.Name = "nonXboxFilesTable";
             this.nonXboxFilesTable.ReadOnly = true;
             this.nonXboxFilesTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.nonXboxFilesTable.Size = new System.Drawing.Size(407, 289);
+            this.nonXboxFilesTable.Size = new System.Drawing.Size(407, 274);
             this.nonXboxFilesTable.TabIndex = 14;
             // 
             // dataGridViewTextBoxColumn1
@@ -236,7 +240,8 @@
             // 
             // panel2
             // 
-            this.panel2.Controls.Add(this.label1);
+            this.panel2.Controls.Add(this.viewXboxFilesButton);
+            this.panel2.Controls.Add(this.xboxFileLabel);
             this.panel2.Controls.Add(this.xboxFilesTable);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(0, 121);
@@ -247,6 +252,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.viewNonXboxFileButton);
             this.panel1.Controls.Add(this.nonXboxFilesTable);
             this.panel1.Controls.Add(this.nonXboxFilesLabel);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -332,6 +338,28 @@
             this.moveSelectionToXboxButton.UseVisualStyleBackColor = true;
             this.moveSelectionToXboxButton.Click += new System.EventHandler(this.moveSelectionToXboxButton_Click);
             // 
+            // viewXboxFilesButton
+            // 
+            this.viewXboxFilesButton.Enabled = false;
+            this.viewXboxFilesButton.Location = new System.Drawing.Point(279, 3);
+            this.viewXboxFilesButton.Name = "viewXboxFilesButton";
+            this.viewXboxFilesButton.Size = new System.Drawing.Size(124, 22);
+            this.viewXboxFilesButton.TabIndex = 14;
+            this.viewXboxFilesButton.Text = "Explore Xbox Files";
+            this.viewXboxFilesButton.UseVisualStyleBackColor = true;
+            this.viewXboxFilesButton.Click += new System.EventHandler(this.viewXboxFilesButton_Click);
+            // 
+            // viewNonXboxFileButton
+            // 
+            this.viewNonXboxFileButton.Enabled = false;
+            this.viewNonXboxFileButton.Location = new System.Drawing.Point(280, 3);
+            this.viewNonXboxFileButton.Name = "viewNonXboxFileButton";
+            this.viewNonXboxFileButton.Size = new System.Drawing.Size(124, 22);
+            this.viewNonXboxFileButton.TabIndex = 15;
+            this.viewNonXboxFileButton.Text = "Explore non-Xbox Files";
+            this.viewNonXboxFileButton.UseVisualStyleBackColor = true;
+            this.viewNonXboxFileButton.Click += new System.EventHandler(this.viewNonXboxFileButton_Click);
+            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -364,7 +392,7 @@
         private System.Windows.Forms.Label packagesLabel;
         private System.Windows.Forms.Label profileLabel;
         private System.Windows.Forms.Label nonXboxFilesLabel;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label xboxFileLabel;
         private System.Windows.Forms.DataGridView xboxFilesTable;
         private System.Windows.Forms.DataGridView nonXboxFilesTable;
         private System.Windows.Forms.DataGridViewTextBoxColumn File;
@@ -382,6 +410,9 @@
         private System.Windows.Forms.Button moveAllToXboxButton;
         private System.Windows.Forms.Button moveSelectionFromXboxButton;
         private System.Windows.Forms.Button moveAllFromXboxButton;
+        private System.Windows.Forms.ToolTip foldersToolTip;
+        private System.Windows.Forms.Button viewXboxFilesButton;
+        private System.Windows.Forms.Button viewNonXboxFileButton;
     }
 }
 

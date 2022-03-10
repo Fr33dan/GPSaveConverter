@@ -35,9 +35,12 @@ namespace GPSaveConverter
             nonXboxFiles = new List<NonXboxFileInfo>();
             string fetchLocation = expandedNonXboxFilesLocation();
 
+            this.foldersToolTip.SetToolTip(this.nonXboxFilesLabel, fetchLocation);
+
             if(Directory.Exists(fetchLocation)) fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
 
             this.nonXboxFilesTable.DataSource = nonXboxFiles;
+            this.viewNonXboxFileButton.Enabled = true;
         }
         private void fetchNonXboxSaveFiles(string folder,string root)
         {
@@ -108,6 +111,8 @@ namespace GPSaveConverter
             gameInfo = (GameInfo)this.packagesListBox.SelectedItem;
             currentContainer = new ContainerManager(gameInfo.PackageName);
 
+            this.viewXboxFilesButton.Enabled = true;
+            this.foldersToolTip.SetToolTip(this.xboxFileLabel,currentContainer.getSaveFilePath());
             this.xboxFilesTable.DataSource = currentContainer.getFileList();
 
             if (gameInfo.NonXboxSaveLocation == null || gameInfo.NonXboxSaveLocation == string.Empty)
@@ -124,14 +129,26 @@ namespace GPSaveConverter
                 {
                     this.profileListBox.Items.Add("Profiles not defined in game library");
                     this.profileListBox.Enabled = false;
-                    this.nonXboxFetchReady = true;
-                    fetchNonXboxSaveFiles();
+
+
+                    if (Directory.Exists(expandedNonXboxFilesLocation()))
+                    {
+                        fetchNonXboxSaveFiles();
+                    }
+                    else
+                    {
+                        promptForNonXboxSaveLocation("Non-Xbox save location from library does not exist.");
+                    }
                 }
             }
         }
 
         private void ClearForm()
         {
+            this.foldersToolTip.RemoveAll();
+
+            this.viewXboxFilesButton.Enabled = false;
+            this.viewNonXboxFileButton.Enabled = false;
             this.profileListBox.Items.Clear();
             this.xboxFilesTable.DataSource = null;
             this.xboxFilesTable.Columns.Clear();
@@ -206,6 +223,16 @@ namespace GPSaveConverter
         private void moveAllFromXboxButton_Click(object sender, EventArgs e)
         {
             moveFilesFromXbox(this.xboxFilesTable.Rows);
+        }
+
+        private void viewXboxFilesButton_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(this.currentContainer.getSaveFilePath());
+        }
+
+        private void viewNonXboxFileButton_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(expandedNonXboxFilesLocation());
         }
     }
 }
