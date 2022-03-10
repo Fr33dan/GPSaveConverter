@@ -80,21 +80,40 @@ namespace GPSaveConverter
         private void fetchProfiles()
         {
             string profilesDir = gameInfo.NonXboxSaveLocation.Substring(0, gameInfo.NonXboxSaveLocation.IndexOf(GameLibrary.NonSteamProfileMarker));
+            bool failed = false;
 
             if (Directory.Exists(profilesDir))
             {
                 foreach (string p in Directory.GetDirectories(profilesDir))
                 {
-                    this.profileListBox.Items.Add(p.Replace(profilesDir, ""));
-                }
+                    string testProfileID = p.Replace(profilesDir, "");
 
-                this.profileListBox.Enabled = true;
-                if(this.profileListBox.Items.Count == 1)
+                    string testProfileSaveFolder = gameInfo.NonXboxSaveLocation.Replace(GameLibrary.NonSteamProfileMarker, testProfileID);
+
+                    if (Directory.Exists(testProfileSaveFolder))
+                    {
+                        this.profileListBox.Items.Add(testProfileID);
+                    }
+                }
+                if (profileListBox.Items.Count == 0)
                 {
-                    this.profileListBox.SelectedItem = this.profileListBox.Items[0];
+                    failed = true;
+                }
+                else
+                {
+                    this.profileListBox.Enabled = true;
+                    if (this.profileListBox.Items.Count == 1)
+                    {
+                        this.profileListBox.SelectedItem = this.profileListBox.Items[0];
+                    }
                 }
             }
             else
+            {
+                failed = true;
+            }
+
+            if (failed) 
             {
                 this.profileListBox.Items.Add("No profiles found");
                 promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
@@ -154,6 +173,7 @@ namespace GPSaveConverter
             this.viewXboxFilesButton.Enabled = false;
             this.viewNonXboxFileButton.Enabled = false;
             this.profileListBox.Items.Clear();
+            this.profileListBox.Enabled = false;
             this.xboxFilesTable.DataSource = null;
             this.xboxFilesTable.Columns.Clear();
             this.xboxFilesTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.File,
@@ -170,7 +190,7 @@ namespace GPSaveConverter
             if (this.currentContainer != null)
             {
                 this.profileID = (string)this.profileListBox.SelectedItem;
-                this.nonXboxFetchReady = true;
+
                 fetchNonXboxSaveFiles();
             }
         }
