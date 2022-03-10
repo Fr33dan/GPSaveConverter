@@ -42,7 +42,7 @@ namespace GPSaveConverter
                 }
                 else
                 {
-                    returnVal.Replace(SteamInstallMarker, steamLocation);
+                    returnVal = returnVal.Replace(SteamInstallMarker, steamLocation);
                 }
             }
 
