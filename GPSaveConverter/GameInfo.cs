@@ -22,18 +22,22 @@ namespace GPSaveConverter
         {
             get
             {
-                Image returnVal = null;
-                if (File.Exists(IconLocation))
+                if (gameIcon == null)
                 {
-                    returnVal = Image.FromFile(IconLocation);
+                    if (File.Exists(IconLocation))
+                    {
+                        gameIcon = Image.FromFile(IconLocation);
+                    }
+                    else
+                    {
+                        gameIcon = new Bitmap(150, 150);
+                    }
                 }
-                else
-                {
-                    returnVal = new Bitmap(150, 150);
-                }
-                return returnVal;
+                return gameIcon;
             }
         }
+
+        private Image gameIcon;
 
         internal GameInfo(string psvDataLine)
         {
