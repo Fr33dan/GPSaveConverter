@@ -11,21 +11,67 @@ namespace GPSaveConverter
     {
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
-        private static Dictionary<string, GameInfo> library;
+        private static Dictionary<string, GameInfo> psvLibrary;
+        private static Dictionary<string, GameInfo> uwpLibrary;
 
         static GameLibrary()
         {
             LoadPSV();
+            uwpLibrary = GetInstalledApps();
+        }
+
+        /// <summary>
+        /// Gets a list of installed UWP Apps on the system, containing each app name + AUMID, separated by '|' 
+        /// </summary>
+        /// <returns>List of installed UWP Apps</returns>
+        public static Dictionary<string, GameInfo> GetInstalledApps()
+        {
+            Dictionary<string, GameInfo> result = new Dictionary<string, GameInfo>();
+            try
+            {
+                using (Stream stream = new MemoryStream(GPSaveConverter.Properties.Resources.GetAUMIDScript))
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string scriptText = reader.ReadToEnd();
+                        string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
+
+                        foreach(string app in scriptOutput.Split(';'))
+                        {
+                            if (app != String.Empty)
+                            {
+                                string[] appInfo = app.Split('|');
+                                GameInfo gameInfo = new GameInfo();
+                                string name = appInfo[0].Trim();
+                                gameInfo.Name = name == string.Empty? null: name;
+                                gameInfo.IconLocation = appInfo[1];
+                                gameInfo.PackageName = appInfo[2];
+                                if (!result.ContainsKey(gameInfo.PackageName))
+                                {
+                                    result.Add(gameInfo.PackageName, gameInfo);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error trying to get installed apps on your PC " + Environment.NewLine + e.Message, e.InnerException);
+            }
+
+            return result;
         }
 
         public static void LoadPSV()
         {
             StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
-            library = new Dictionary<string, GameInfo>();
+            psvLibrary = new Dictionary<string, GameInfo>();
             while (!stream.EndOfStream)
             {
                 GameInfo newGame = new GameInfo(stream.ReadLine());
-                library.Add(newGame.PackageName, newGame);
+
+                psvLibrary.Add(newGame.PackageName, newGame);
             }
         }
 
@@ -51,15 +97,20 @@ namespace GPSaveConverter
 
         public static GameInfo getGameInfo(string gamePassID)
         {
-            GameInfo location;
+            GameInfo uwpInfo;
 
-            if(!library.TryGetValue(gamePassID, out location))
+            if (!uwpLibrary.TryGetValue(gamePassID, out uwpInfo))
             {
-                location = new GameInfo();
-                location.PackageName = gamePassID;
+                throw new Exception("Game info no found in UWP library");
+            }
+            GameInfo psvInfo;
+
+            if(psvLibrary.TryGetValue(gamePassID, out psvInfo))
+            {
+                uwpInfo.NonXboxSaveLocation = psvInfo.NonXboxSaveLocation;
             }
 
-            return location;
+            return uwpInfo;
         }
     }
 }

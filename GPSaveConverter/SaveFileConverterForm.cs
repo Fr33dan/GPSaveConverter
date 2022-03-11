@@ -121,49 +121,29 @@ namespace GPSaveConverter
 
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private async void Form1_Load(object sender, EventArgs e)
         {
-            this.packagesListBox.Items.AddRange(XboxPackageList.GetList());
+            this.infoStatusLabel.Text = "Loading game info...";
+
+            GameInfo[] gameInfo = await LoadGameInfo();
+
+            this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
+
+            this.packagesDataGridView.DataSource = gameInfo;
+
+            this.infoStatusLabel.Text = "Load Successful";
         }
+
+        private async Task<GameInfo[]> LoadGameInfo()
+        {
+            GameInfo[] result = null;
+            await Task.Run(() => result =XboxPackageList.GetList());
+            return result;
+        }
+
 
         private void packagesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ClearForm();
-            this.nonXboxFetchReady = false;
-
-            gameInfo = (GameInfo)this.packagesListBox.SelectedItem;
-            currentContainer = new ContainerManager(gameInfo.PackageName);
-
-            this.viewXboxFilesButton.Enabled = true;
-            this.foldersToolTip.SetToolTip(this.xboxFileLabel,currentContainer.getSaveFilePath());
-            this.xboxFilesTable.DataSource = currentContainer.getFileList();
-
-            if (gameInfo.NonXboxSaveLocation == null || gameInfo.NonXboxSaveLocation == string.Empty)
-            {
-                promptForNonXboxSaveLocation("Non-Xbox save location not found in game library.");
-            }
-            else
-            {
-                if (gameInfo.NonXboxSaveLocation.Contains(GameLibrary.NonSteamProfileMarker))
-                {
-                    fetchProfiles();
-                }
-                else
-                {
-                    this.profileListBox.Items.Add("Profiles not defined in game library");
-                    this.profileListBox.Enabled = false;
-
-
-                    if (Directory.Exists(expandedNonXboxFilesLocation()))
-                    {
-                        fetchNonXboxSaveFiles();
-                    }
-                    else
-                    {
-                        promptForNonXboxSaveLocation("Non-Xbox save location from library does not exist.");
-                    }
-                }
-            }
         }
 
         private void ClearForm()
@@ -257,6 +237,46 @@ namespace GPSaveConverter
         private void viewNonXboxFileButton_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(expandedNonXboxFilesLocation());
+        }
+
+        private void packagesDataGridView_Click(object sender, EventArgs e)
+        {
+            ClearForm();
+            this.nonXboxFetchReady = false;
+
+            gameInfo = (GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
+            currentContainer = new ContainerManager(gameInfo.PackageName);
+
+            this.viewXboxFilesButton.Enabled = true;
+            this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.getSaveFilePath());
+            this.xboxFilesTable.DataSource = currentContainer.getFileList();
+
+            if (gameInfo.NonXboxSaveLocation == null || gameInfo.NonXboxSaveLocation == string.Empty)
+            {
+                promptForNonXboxSaveLocation("Non-Xbox save location not found in game library.");
+            }
+            else
+            {
+                if (gameInfo.NonXboxSaveLocation.Contains(GameLibrary.NonSteamProfileMarker))
+                {
+                    fetchProfiles();
+                }
+                else
+                {
+                    this.profileListBox.Items.Add("Profiles not defined in game library");
+                    this.profileListBox.Enabled = false;
+
+
+                    if (Directory.Exists(expandedNonXboxFilesLocation()))
+                    {
+                        fetchNonXboxSaveFiles();
+                    }
+                    else
+                    {
+                        promptForNonXboxSaveLocation("Non-Xbox save location from library does not exist.");
+                    }
+                }
+            }
         }
     }
 }
