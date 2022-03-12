@@ -85,19 +85,12 @@ namespace GPSaveConverter.Xbox
             s.Close();
         }
 
-        public void AddFile(string relativePath, string sourceParent)
+        public XboxFileInfo AddFile(NonXboxFileInfo info, string xboxFileID)
         {
-            string filePath = Path.Combine(sourceParent, relativePath);
-            XboxFileInfo existingFile = this.fileList.Where(i => i.GetRelativeFilePath() == relativePath).FirstOrDefault();
-            if (existingFile != null)
-            {
-                File.Copy(filePath, existingFile.getFilePath(), true);
-            }
-            else
-            {
-                this.fileList.Add(new XboxFileInfo(this, filePath, relativePath));
-                this.SaveContainer();
-            }
+            XboxFileInfo returnVal = new XboxFileInfo(this, info.FilePath, xboxFileID);
+            this.fileList.Add(returnVal);
+            this.SaveContainer();
+            return returnVal;
         }
     }
 }

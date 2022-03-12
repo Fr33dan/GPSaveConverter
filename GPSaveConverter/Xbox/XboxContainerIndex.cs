@@ -18,7 +18,7 @@ namespace GPSaveConverter.Xbox
 
             string wgsFolder = XboxPackageList.getWGSFolder(packageName);
             string xboxProfileFolder = Directory.GetDirectories(wgsFolder, xboxProfileID + "_*").First();
-            string indexPath = Path.Combine(wgsFolder, xboxProfileFolder, "containers.index");
+            string indexPath = Path.Combine(xboxProfileFolder, "containers.index");
             byte[] containerData = File.ReadAllBytes(indexPath);
 
             int currentByte = 4;
@@ -80,6 +80,18 @@ namespace GPSaveConverter.Xbox
                 Children[j] = new XboxFileContainer(packageName, containerStrings, folderName, containerTimestamp);
                 currentByte += 16;
             }
+        }
+
+        internal XboxFileInfo[] getFileList()
+        {
+            List<XboxFileInfo> returnVal = new List<XboxFileInfo>();
+
+            foreach(XboxFileInfo[] files in this.Children.Select(c => c.getFileList()).ToArray())
+            {
+                returnVal.AddRange(files); 
+            }
+
+            return returnVal.ToArray();
         }
     }
 }

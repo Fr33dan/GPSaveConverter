@@ -10,8 +10,10 @@ namespace GPSaveConverter.Library
     {
         public string ContainerName1 { get; set; }
         public string ContainerName2 { get; set; }
-        public string NonXboxFilename { get; set; }
-        public string XboxFileID { get; set; }
+        public string NonXboxRegex { get; set; }
+        public string NonXboxSubstitution { get; set; }
+        public string XboxFileIDRegex { get; set; }
+        public string XboxFileIDSubstitution { get; set; }
 
         public FileTranslation() { }
     }

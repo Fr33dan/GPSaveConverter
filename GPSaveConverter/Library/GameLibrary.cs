@@ -10,15 +10,20 @@ namespace GPSaveConverter.Library
 {
     internal class GameLibrary
     {
+        public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
         private static Dictionary<string, GameInfo> psvLibrary;
         private static Dictionary<string, GameInfo> uwpLibrary;
 
+        public static string ProfileID;
+
         static GameLibrary()
         {
             LoadPSV();
             uwpLibrary = GetInstalledApps();
+
+            DefaultTranslation = new FileTranslation();
         }
 
         /// <summary>
@@ -73,7 +78,7 @@ namespace GPSaveConverter.Library
             psvLibrary = new Dictionary<string, GameInfo>();
             foreach (GameInfo newGame in jsonLibrary)
             {
-                newGame.NonXboxSaveLocation = ExpandSaveFileLocation(newGame.NonXboxSaveLocation);
+                newGame.BaseNonXboxSaveLocation = newGame.BaseNonXboxSaveLocation;
                 psvLibrary.Add(newGame.PackageName, newGame);
             }
 
@@ -105,8 +110,18 @@ namespace GPSaveConverter.Library
                     returnVal = returnVal.Replace(SteamInstallMarker, steamLocation);
                 }
             }
+            if (returnVal.Contains(NonSteamProfileMarker))
+            {
+                returnVal = returnVal.Replace(NonSteamProfileMarker, ProfileID);
+            }
+
 
             return returnVal;
+        }
+
+        public static string GetNonXboxProfileLocation(string baseSaveFileLocation)
+        {
+            return ExpandSaveFileLocation(baseSaveFileLocation.Substring(0, baseSaveFileLocation.IndexOf(Library.GameLibrary.NonSteamProfileMarker)));
         }
 
         public static GameInfo getGameInfo(string gamePassID)
@@ -121,7 +136,8 @@ namespace GPSaveConverter.Library
 
             if(psvLibrary.TryGetValue(gamePassID, out psvInfo))
             {
-                uwpInfo.NonXboxSaveLocation = psvInfo.NonXboxSaveLocation;
+                uwpInfo.BaseNonXboxSaveLocation = psvInfo.BaseNonXboxSaveLocation;
+                uwpInfo.FileTranslations = psvInfo.FileTranslations;
             }
 
             return uwpInfo;

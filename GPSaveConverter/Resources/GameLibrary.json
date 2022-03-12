@@ -1,26 +1,73 @@
 ﻿[
   {
     "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
-    "NonXboxSaveLocation": "%HOMEDRIVE%%HOMEPATH%\\AppData\\LocalLow\\Two Point Studios\\Two Point Hospital\\Cloud\\<user-id>\\",
+    "BaseNonXboxSaveLocation": "%HOMEDRIVE%%HOMEPATH%\\AppData\\LocalLow\\Two Point Studios\\Two Point Hospital\\Cloud\\<user-id>\\",
     "FileTranslations": [
       {
         "ContainerName1": "TPHCONTAINER",
         "ContainerName2": "TPHCONTAINER",
-        "NonXboxFilename": "{Filename|[\\w\\-. \\\\]}",
-        "XboxFileID": "{Filename}"
+        "NonXboxRegex": "([\\w\\-. \\\\])",
+        "NonXboxSubstitution": "$1",
+        "XboxFileIDRegex": "([\\w\\-. \\\\])",
+        "XboxFileIDSubstitution": "$1"
       }
     ]
   },
   {
     "PackageName": "Microsoft.OriandtheBlindForestDefinitiveEdition_8wekyb3d8bbwe",
-    "NonXboxSaveLocation": "%LOCALAPPDATA%\\Ori and the Blind Forest DE\\"
+    "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Ori and the Blind Forest DE\\",
+    "FileTranslations": [
+      {
+        "ContainerName1": "SaveGame",
+        "ContainerName2": "",
+        "_bkpup0": null,
+        "NonXboxRegex": "saveFile([0-9](_bkup[0-9]|))\\.sav",
+        "NonXboxSubstitution": "SaveSlot$1",
+        "XboxFileIDRegex": "SaveSlot([0-9](_bkup[0-9]|))",
+        "XboxFileIDSubstitution": "saveFile$1.sav"
+      }
+    ]
   },
   {
     "PackageName": "Microsoft.624F8B84B80_8wekyb3d8bbwe",
-    "NonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id>\\"
+    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id>\\"
   },
   {
     "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
-    "NonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\"
+    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\",
+    "FileTranslations": [
+      {
+        "ContainerName1": "game_profile.bin",
+        "ContainerName2": "game_profile.bin",
+        "NonXboxRegex": "game_profile\\.bin",
+        "NonXboxSubstitution": "$1",
+        "XboxFileIDRegex": "(game_profile\\.bin)",
+        "XboxFileIDSubstitution": "$1"
+      },
+      {
+        "ContainerName1": "gotgsavegame0002.dat",
+        "ContainerName2": "gotgsavegame0002.dat",
+        "NonXboxRegex": "(gotgsavegame0002\\.dat)",
+        "NonXboxSubstitution": "$1",
+        "XboxFileIDRegex": "(gotgsavegame0002\\.dat)",
+        "XboxFileIDSubstitution": "$1"
+      },
+      {
+        "ContainerName1": "gotgsavegame0001.dat",
+        "ContainerName2": "gotgsavegame0001.dat",
+        "NonXboxRegex": "(gotgsavegame0001\\.dat)",
+        "NonXboxSubstitution": "$1",
+        "XboxFileIDRegex": "(gotgsavegame0001\\.dat)",
+        "XboxFileIDSubstitution": "$1"
+      },
+      {
+        "ContainerName1": "gotgsavegame0000.dat",
+        "ContainerName2": "gotgsavegame0000.dat",
+        "NonXboxRegex": "(gotgsavegame0000\\.dat)",
+        "NonXboxSubstitution": "$1",
+        "XboxFileIDRegex": "(gotgsavegame0000\\.dat)",
+        "XboxFileIDSubstitution": "$1"
+      }
+    ]
   }
 ]

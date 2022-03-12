@@ -27,7 +27,7 @@ namespace GPSaveConverter.Xbox
         }
         internal static string getWGSFolder(string packageName)
         {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", packageName, "SystemAppData", "wgs");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", packageName, "SystemAppData", "wgs") + "\\";
         }
 
         public static Library.GameInfo[] GetList()
