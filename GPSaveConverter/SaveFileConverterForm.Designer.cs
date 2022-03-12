@@ -36,19 +36,17 @@
             this.xboxFileLabel = new System.Windows.Forms.Label();
             this.xboxFilesTable = new System.Windows.Forms.DataGridView();
             this.nonXboxFilesTable = new System.Windows.Forms.DataGridView();
-            this.basePanel = new System.Windows.Forms.TableLayoutPanel();
+            this.saveFilesBasePanel = new System.Windows.Forms.TableLayoutPanel();
             this.packagesBasePanel = new System.Windows.Forms.Panel();
             this.packagesScrollPanel = new System.Windows.Forms.Panel();
             this.packagesDataGridView = new System.Windows.Forms.DataGridView();
             this.GameIcon = new System.Windows.Forms.DataGridViewImageColumn();
             this.GameName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.xboxFileBasePanel = new System.Windows.Forms.Panel();
             this.viewXboxFilesButton = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.promptNonXboxLocationButton = new System.Windows.Forms.Button();
             this.viewNonXboxFileButton = new System.Windows.Forms.Button();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.centerControlsPanel = new System.Windows.Forms.TableLayoutPanel();
             this.moveAllToXboxButton = new System.Windows.Forms.Button();
             this.moveSelectionFromXboxButton = new System.Windows.Forms.Button();
             this.moveAllFromXboxButton = new System.Windows.Forms.Button();
@@ -56,25 +54,25 @@
             this.foldersToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.infoStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.profilesBasePanel = new System.Windows.Forms.TableLayoutPanel();
             this.nonXboxProfilePanel = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.xboxProfileListBox = new System.Windows.Forms.ListBox();
             this.xboxProfileLabel = new System.Windows.Forms.Label();
+            this.moveControlPanel = new System.Windows.Forms.TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
-            this.basePanel.SuspendLayout();
+            this.saveFilesBasePanel.SuspendLayout();
             this.packagesBasePanel.SuspendLayout();
             this.packagesScrollPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.packagesDataGridView)).BeginInit();
-            this.panel2.SuspendLayout();
+            this.xboxFileBasePanel.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.panel4.SuspendLayout();
-            this.centerControlsPanel.SuspendLayout();
             this.statusStrip1.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
+            this.profilesBasePanel.SuspendLayout();
             this.nonXboxProfilePanel.SuspendLayout();
             this.panel3.SuspendLayout();
+            this.moveControlPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // nonXboxProfileListBox
@@ -139,7 +137,7 @@
             this.xboxFilesTable.ReadOnly = true;
             this.xboxFilesTable.RowHeadersVisible = false;
             this.xboxFilesTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.xboxFilesTable.Size = new System.Drawing.Size(403, 273);
+            this.xboxFilesTable.Size = new System.Drawing.Size(497, 272);
             this.xboxFilesTable.TabIndex = 13;
             this.xboxFilesTable.SelectionChanged += new System.EventHandler(this.xboxFilesTable_SelectionChanged);
             // 
@@ -156,41 +154,39 @@
             this.nonXboxFilesTable.ReadOnly = true;
             this.nonXboxFilesTable.RowHeadersVisible = false;
             this.nonXboxFilesTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.nonXboxFilesTable.Size = new System.Drawing.Size(407, 273);
+            this.nonXboxFilesTable.Size = new System.Drawing.Size(500, 273);
             this.nonXboxFilesTable.TabIndex = 14;
             this.nonXboxFilesTable.SelectionChanged += new System.EventHandler(this.nonXboxFilesTable_SelectionChanged);
             // 
-            // basePanel
+            // saveFilesBasePanel
             // 
-            this.basePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.saveFilesBasePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.basePanel.ColumnCount = 3;
-            this.basePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.basePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
-            this.basePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.basePanel.Controls.Add(this.packagesBasePanel, 0, 0);
-            this.basePanel.Controls.Add(this.panel2, 0, 1);
-            this.basePanel.Controls.Add(this.panel1, 2, 1);
-            this.basePanel.Controls.Add(this.panel4, 2, 0);
-            this.basePanel.Controls.Add(this.centerControlsPanel, 1, 1);
-            this.basePanel.Location = new System.Drawing.Point(12, 12);
-            this.basePanel.Name = "basePanel";
-            this.basePanel.RowCount = 2;
-            this.basePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 28.40376F));
-            this.basePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 71.59624F));
-            this.basePanel.Size = new System.Drawing.Size(863, 424);
-            this.basePanel.TabIndex = 15;
+            this.saveFilesBasePanel.ColumnCount = 1;
+            this.saveFilesBasePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.saveFilesBasePanel.Controls.Add(this.panel1, 0, 2);
+            this.saveFilesBasePanel.Controls.Add(this.xboxFileBasePanel, 0, 0);
+            this.saveFilesBasePanel.Controls.Add(this.moveControlPanel, 0, 1);
+            this.saveFilesBasePanel.Location = new System.Drawing.Point(422, 12);
+            this.saveFilesBasePanel.Name = "saveFilesBasePanel";
+            this.saveFilesBasePanel.RowCount = 3;
+            this.saveFilesBasePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.saveFilesBasePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.saveFilesBasePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.saveFilesBasePanel.Size = new System.Drawing.Size(500, 657);
+            this.saveFilesBasePanel.TabIndex = 15;
             // 
             // packagesBasePanel
             // 
+            this.packagesBasePanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.packagesBasePanel.Controls.Add(this.packagesScrollPanel);
             this.packagesBasePanel.Controls.Add(this.packagesLabel);
-            this.packagesBasePanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.packagesBasePanel.Location = new System.Drawing.Point(0, 0);
+            this.packagesBasePanel.Location = new System.Drawing.Point(9, 12);
             this.packagesBasePanel.Margin = new System.Windows.Forms.Padding(0);
             this.packagesBasePanel.Name = "packagesBasePanel";
-            this.packagesBasePanel.Size = new System.Drawing.Size(406, 120);
+            this.packagesBasePanel.Size = new System.Drawing.Size(407, 537);
             this.packagesBasePanel.TabIndex = 16;
             // 
             // packagesScrollPanel
@@ -200,9 +196,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.packagesScrollPanel.AutoScroll = true;
             this.packagesScrollPanel.Controls.Add(this.packagesDataGridView);
-            this.packagesScrollPanel.Location = new System.Drawing.Point(6, 19);
+            this.packagesScrollPanel.Location = new System.Drawing.Point(0, 19);
             this.packagesScrollPanel.Name = "packagesScrollPanel";
-            this.packagesScrollPanel.Size = new System.Drawing.Size(400, 98);
+            this.packagesScrollPanel.Size = new System.Drawing.Size(407, 515);
             this.packagesScrollPanel.TabIndex = 9;
             // 
             // packagesDataGridView
@@ -217,13 +213,14 @@
             this.GameIcon,
             this.GameName});
             this.packagesDataGridView.Location = new System.Drawing.Point(0, 0);
+            this.packagesDataGridView.Margin = new System.Windows.Forms.Padding(0);
             this.packagesDataGridView.MultiSelect = false;
             this.packagesDataGridView.Name = "packagesDataGridView";
             this.packagesDataGridView.ReadOnly = true;
             this.packagesDataGridView.RowHeadersVisible = false;
             this.packagesDataGridView.RowTemplate.Height = 75;
             this.packagesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.packagesDataGridView.Size = new System.Drawing.Size(397, 98);
+            this.packagesDataGridView.Size = new System.Drawing.Size(407, 515);
             this.packagesDataGridView.TabIndex = 9;
             this.packagesDataGridView.Click += new System.EventHandler(this.packagesDataGridView_Click);
             // 
@@ -246,22 +243,23 @@
             this.GameName.Name = "GameName";
             this.GameName.ReadOnly = true;
             // 
-            // panel2
+            // xboxFileBasePanel
             // 
-            this.panel2.Controls.Add(this.viewXboxFilesButton);
-            this.panel2.Controls.Add(this.xboxFileLabel);
-            this.panel2.Controls.Add(this.xboxFilesTable);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 120);
-            this.panel2.Margin = new System.Windows.Forms.Padding(0);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(406, 304);
-            this.panel2.TabIndex = 16;
+            this.xboxFileBasePanel.Controls.Add(this.viewXboxFilesButton);
+            this.xboxFileBasePanel.Controls.Add(this.xboxFileLabel);
+            this.xboxFileBasePanel.Controls.Add(this.xboxFilesTable);
+            this.xboxFileBasePanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.xboxFileBasePanel.Location = new System.Drawing.Point(0, 0);
+            this.xboxFileBasePanel.Margin = new System.Windows.Forms.Padding(0);
+            this.xboxFileBasePanel.Name = "xboxFileBasePanel";
+            this.xboxFileBasePanel.Size = new System.Drawing.Size(500, 303);
+            this.xboxFileBasePanel.TabIndex = 16;
             // 
             // viewXboxFilesButton
             // 
+            this.viewXboxFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.viewXboxFilesButton.Enabled = false;
-            this.viewXboxFilesButton.Location = new System.Drawing.Point(279, 3);
+            this.viewXboxFilesButton.Location = new System.Drawing.Point(373, 3);
             this.viewXboxFilesButton.Name = "viewXboxFilesButton";
             this.viewXboxFilesButton.Size = new System.Drawing.Size(124, 22);
             this.viewXboxFilesButton.TabIndex = 14;
@@ -276,17 +274,17 @@
             this.panel1.Controls.Add(this.nonXboxFilesTable);
             this.panel1.Controls.Add(this.nonXboxFilesLabel);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(456, 120);
+            this.panel1.Location = new System.Drawing.Point(0, 353);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(407, 304);
+            this.panel1.Size = new System.Drawing.Size(500, 304);
             this.panel1.TabIndex = 0;
             // 
             // promptNonXboxLocationButton
             // 
             this.promptNonXboxLocationButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.promptNonXboxLocationButton.Enabled = false;
-            this.promptNonXboxLocationButton.Location = new System.Drawing.Point(118, 3);
+            this.promptNonXboxLocationButton.Location = new System.Drawing.Point(211, 3);
             this.promptNonXboxLocationButton.Name = "promptNonXboxLocationButton";
             this.promptNonXboxLocationButton.Size = new System.Drawing.Size(156, 22);
             this.promptNonXboxLocationButton.TabIndex = 16;
@@ -298,7 +296,7 @@
             // 
             this.viewNonXboxFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.viewNonXboxFileButton.Enabled = false;
-            this.viewNonXboxFileButton.Location = new System.Drawing.Point(280, 3);
+            this.viewNonXboxFileButton.Location = new System.Drawing.Point(373, 3);
             this.viewNonXboxFileButton.Name = "viewNonXboxFileButton";
             this.viewNonXboxFileButton.Size = new System.Drawing.Size(124, 22);
             this.viewNonXboxFileButton.TabIndex = 15;
@@ -306,78 +304,47 @@
             this.viewNonXboxFileButton.UseVisualStyleBackColor = true;
             this.viewNonXboxFileButton.Click += new System.EventHandler(this.viewNonXboxFileButton_Click);
             // 
-            // panel4
-            // 
-            this.panel4.Controls.Add(this.tableLayoutPanel1);
-            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(456, 0);
-            this.panel4.Margin = new System.Windows.Forms.Padding(0);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(407, 120);
-            this.panel4.TabIndex = 17;
-            // 
-            // centerControlsPanel
-            // 
-            this.centerControlsPanel.ColumnCount = 1;
-            this.centerControlsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.centerControlsPanel.Controls.Add(this.moveAllToXboxButton, 0, 2);
-            this.centerControlsPanel.Controls.Add(this.moveSelectionFromXboxButton, 0, 3);
-            this.centerControlsPanel.Controls.Add(this.moveAllFromXboxButton, 0, 4);
-            this.centerControlsPanel.Controls.Add(this.moveSelectionToXboxButton, 0, 1);
-            this.centerControlsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.centerControlsPanel.Location = new System.Drawing.Point(409, 123);
-            this.centerControlsPanel.Name = "centerControlsPanel";
-            this.centerControlsPanel.RowCount = 6;
-            this.centerControlsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.00001F));
-            this.centerControlsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.centerControlsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.centerControlsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.centerControlsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.centerControlsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.centerControlsPanel.Size = new System.Drawing.Size(44, 298);
-            this.centerControlsPanel.TabIndex = 18;
-            // 
             // moveAllToXboxButton
             // 
             this.moveAllToXboxButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.moveAllToXboxButton.Location = new System.Drawing.Point(8, 123);
+            this.moveAllToXboxButton.Location = new System.Drawing.Point(216, 4);
             this.moveAllToXboxButton.Name = "moveAllToXboxButton";
-            this.moveAllToXboxButton.Size = new System.Drawing.Size(27, 23);
+            this.moveAllToXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveAllToXboxButton.TabIndex = 1;
-            this.moveAllToXboxButton.Text = "<<";
+            this.moveAllToXboxButton.Text = "˄\r\n˄";
             this.moveAllToXboxButton.UseVisualStyleBackColor = true;
             this.moveAllToXboxButton.Click += new System.EventHandler(this.moveAllToXboxButton_Click);
             // 
             // moveSelectionFromXboxButton
             // 
             this.moveSelectionFromXboxButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.moveSelectionFromXboxButton.Location = new System.Drawing.Point(8, 152);
+            this.moveSelectionFromXboxButton.Location = new System.Drawing.Point(251, 4);
             this.moveSelectionFromXboxButton.Name = "moveSelectionFromXboxButton";
-            this.moveSelectionFromXboxButton.Size = new System.Drawing.Size(27, 23);
+            this.moveSelectionFromXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveSelectionFromXboxButton.TabIndex = 2;
-            this.moveSelectionFromXboxButton.Text = ">";
+            this.moveSelectionFromXboxButton.Text = "˅";
             this.moveSelectionFromXboxButton.UseVisualStyleBackColor = true;
             this.moveSelectionFromXboxButton.Click += new System.EventHandler(this.moveSelectionFromXboxButton_Click);
             // 
             // moveAllFromXboxButton
             // 
             this.moveAllFromXboxButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.moveAllFromXboxButton.Location = new System.Drawing.Point(8, 181);
+            this.moveAllFromXboxButton.Location = new System.Drawing.Point(286, 4);
             this.moveAllFromXboxButton.Name = "moveAllFromXboxButton";
-            this.moveAllFromXboxButton.Size = new System.Drawing.Size(27, 23);
+            this.moveAllFromXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveAllFromXboxButton.TabIndex = 3;
-            this.moveAllFromXboxButton.Text = ">>";
+            this.moveAllFromXboxButton.Text = "˅\r\n˅";
             this.moveAllFromXboxButton.UseVisualStyleBackColor = true;
             this.moveAllFromXboxButton.Click += new System.EventHandler(this.moveAllFromXboxButton_Click);
             // 
             // moveSelectionToXboxButton
             // 
             this.moveSelectionToXboxButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.moveSelectionToXboxButton.Location = new System.Drawing.Point(8, 94);
+            this.moveSelectionToXboxButton.Location = new System.Drawing.Point(181, 4);
             this.moveSelectionToXboxButton.Name = "moveSelectionToXboxButton";
-            this.moveSelectionToXboxButton.Size = new System.Drawing.Size(27, 23);
+            this.moveSelectionToXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveSelectionToXboxButton.TabIndex = 0;
-            this.moveSelectionToXboxButton.Text = "<";
+            this.moveSelectionToXboxButton.Text = "˄";
             this.moveSelectionToXboxButton.UseVisualStyleBackColor = true;
             this.moveSelectionToXboxButton.Click += new System.EventHandler(this.moveSelectionToXboxButton_Click);
             // 
@@ -385,9 +352,9 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.infoStatusLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 439);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 683);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(887, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(934, 22);
             this.statusStrip1.TabIndex = 16;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -397,20 +364,21 @@
             this.infoStatusLabel.Size = new System.Drawing.Size(88, 17);
             this.infoStatusLabel.Text = "infoStatusLabel";
             // 
-            // tableLayoutPanel1
+            // profilesBasePanel
             // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.panel3, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.nonXboxProfilePanel, 1, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(407, 120);
-            this.tableLayoutPanel1.TabIndex = 10;
+            this.profilesBasePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.profilesBasePanel.ColumnCount = 2;
+            this.profilesBasePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.profilesBasePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.profilesBasePanel.Controls.Add(this.panel3, 0, 0);
+            this.profilesBasePanel.Controls.Add(this.nonXboxProfilePanel, 1, 0);
+            this.profilesBasePanel.Location = new System.Drawing.Point(9, 549);
+            this.profilesBasePanel.Margin = new System.Windows.Forms.Padding(0);
+            this.profilesBasePanel.Name = "profilesBasePanel";
+            this.profilesBasePanel.RowCount = 1;
+            this.profilesBasePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.profilesBasePanel.Size = new System.Drawing.Size(407, 120);
+            this.profilesBasePanel.TabIndex = 10;
             // 
             // nonXboxProfilePanel
             // 
@@ -456,36 +424,58 @@
             this.xboxProfileLabel.TabIndex = 9;
             this.xboxProfileLabel.Text = "Xbox Profile:";
             // 
+            // moveControlPanel
+            // 
+            this.moveControlPanel.ColumnCount = 6;
+            this.moveControlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.moveControlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.moveControlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.moveControlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.moveControlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.moveControlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.moveControlPanel.Controls.Add(this.moveAllFromXboxButton, 4, 0);
+            this.moveControlPanel.Controls.Add(this.moveSelectionFromXboxButton, 3, 0);
+            this.moveControlPanel.Controls.Add(this.moveAllToXboxButton, 2, 0);
+            this.moveControlPanel.Controls.Add(this.moveSelectionToXboxButton, 1, 0);
+            this.moveControlPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.moveControlPanel.Location = new System.Drawing.Point(3, 306);
+            this.moveControlPanel.Name = "moveControlPanel";
+            this.moveControlPanel.RowCount = 1;
+            this.moveControlPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.moveControlPanel.Size = new System.Drawing.Size(494, 44);
+            this.moveControlPanel.TabIndex = 17;
+            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(887, 461);
+            this.ClientSize = new System.Drawing.Size(934, 705);
+            this.Controls.Add(this.packagesBasePanel);
+            this.Controls.Add(this.profilesBasePanel);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.basePanel);
+            this.Controls.Add(this.saveFilesBasePanel);
             this.Name = "SaveFileConverterForm";
             this.Text = "Xbox Save File Converter";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).EndInit();
-            this.basePanel.ResumeLayout(false);
+            this.saveFilesBasePanel.ResumeLayout(false);
             this.packagesBasePanel.ResumeLayout(false);
             this.packagesBasePanel.PerformLayout();
             this.packagesScrollPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.packagesDataGridView)).EndInit();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
+            this.xboxFileBasePanel.ResumeLayout(false);
+            this.xboxFileBasePanel.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
-            this.panel4.ResumeLayout(false);
-            this.centerControlsPanel.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.tableLayoutPanel1.ResumeLayout(false);
+            this.profilesBasePanel.ResumeLayout(false);
             this.nonXboxProfilePanel.ResumeLayout(false);
             this.nonXboxProfilePanel.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
+            this.moveControlPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -499,12 +489,10 @@
         private System.Windows.Forms.Label xboxFileLabel;
         private System.Windows.Forms.DataGridView xboxFilesTable;
         private System.Windows.Forms.DataGridView nonXboxFilesTable;
-        private System.Windows.Forms.TableLayoutPanel basePanel;
+        private System.Windows.Forms.TableLayoutPanel saveFilesBasePanel;
         private System.Windows.Forms.Panel packagesBasePanel;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel xboxFileBasePanel;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.TableLayoutPanel centerControlsPanel;
         private System.Windows.Forms.Button moveSelectionToXboxButton;
         private System.Windows.Forms.Button moveAllToXboxButton;
         private System.Windows.Forms.Button moveSelectionFromXboxButton;
@@ -519,11 +507,12 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn GameName;
         private System.Windows.Forms.Panel packagesScrollPanel;
         private System.Windows.Forms.Button promptNonXboxLocationButton;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.TableLayoutPanel profilesBasePanel;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.ListBox xboxProfileListBox;
         private System.Windows.Forms.Label xboxProfileLabel;
         private System.Windows.Forms.Panel nonXboxProfilePanel;
+        private System.Windows.Forms.TableLayoutPanel moveControlPanel;
     }
 }
 
