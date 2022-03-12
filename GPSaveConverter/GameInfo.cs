@@ -37,14 +37,15 @@ namespace GPSaveConverter
             }
         }
 
+        
+
         private Image gameIcon;
 
         internal GameInfo(string psvDataLine)
         {
             string[] gameData = psvDataLine.Split('|');
-            this.Name = gameData[0];
-            this.PackageName = gameData[1];
-            this.NonXboxSaveLocation = GameLibrary.ExpandSaveFileLocation(gameData[2]);
+            this.PackageName = gameData[0];
+            this.NonXboxSaveLocation = GameLibrary.ExpandSaveFileLocation(gameData[1]);
         }
         internal GameInfo()
         {
