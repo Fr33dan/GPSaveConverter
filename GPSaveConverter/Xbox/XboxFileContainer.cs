@@ -5,24 +5,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GPSaveConverter
+namespace GPSaveConverter.Xbox
 {
-    internal class ContainerManager
+    internal class XboxFileContainer
     {
-        public string PackageName;
+        internal string PackageName;
+        internal string ContainerID { get; private set; }
         string wgsFolder;
         string wgsProfile;
         string saveFilePath;
+        string containerFolder;
         byte[] containersIndexData;
         int indexHeaderCount = 16;
         const int ContainerHeaderLength = 8;
         string containerPath;
         byte[] containerData;
         private List<XboxFileInfo> fileList;
-        public ContainerManager(string packageName)
+        public XboxFileContainer(string packageName, string containerID, string folderName,DateTime timestamp)
         {
+            this.ContainerID = containerID;
             this.PackageName = packageName;
-            initPaths(packageName);
+            this.containerFolder = folderName;
+            initPaths();
         }
 
         internal string getSaveFilePath()
@@ -39,12 +43,12 @@ namespace GPSaveConverter
             return fileList.ToArray();
         }
 
-        private void initPaths(string packageName)
+        private void initPaths()
         {
-            wgsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", packageName, "SystemAppData", "wgs");
+            wgsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", PackageName, "SystemAppData", "wgs");
             wgsProfile = Directory.GetDirectories(wgsFolder).Where(s => s != "t").First();
 
-            saveFilePath = Directory.GetDirectories(wgsProfile).First();
+            saveFilePath = Path.Combine(wgsProfile, this.containerFolder);
             containerPath = Directory.GetFiles(saveFilePath, "container.*").First();
         }
 
@@ -59,7 +63,7 @@ namespace GPSaveConverter
         {
             containerData = File.ReadAllBytes(containerPath);
             this.fileList = new List<XboxFileInfo>();
-            for(int j = ContainerHeaderLength; j < containerData.Length;j += XboxFileInfo.EntryByteLength)
+            for(int j = ContainerHeaderLength; j < containerData.Length;j += XboxHelper.EntryByteLength)
             {
                 fileList.Add(new XboxFileInfo(this,containerData, j));
             }

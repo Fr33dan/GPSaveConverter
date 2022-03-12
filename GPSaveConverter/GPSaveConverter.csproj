@@ -57,7 +57,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContainerManager.cs" />
+    <Compile Include="Xbox\XboxContainerIndex.cs" />
+    <Compile Include="Xbox\XboxFileContainer.cs" />
     <Compile Include="GameInfo.cs" />
     <Compile Include="NonXboxFileInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -66,7 +67,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="ScriptManager.cs" />
-    <Compile Include="XboxFileInfo.cs" />
+    <Compile Include="Xbox\XboxFileInfo.cs" />
     <Compile Include="SaveFileConverterForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,7 +75,8 @@
       <DependentUpon>SaveFileConverterForm.cs</DependentUpon>
     </Compile>
     <Compile Include="GameLibrary.cs" />
-    <Compile Include="XboxPackageList.cs" />
+    <Compile Include="Xbox\XboxHelper.cs" />
+    <Compile Include="Xbox\XboxPackageList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="SaveFileConverterForm.resx">

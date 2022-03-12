@@ -13,7 +13,7 @@ namespace GPSaveConverter
 {
     public partial class SaveFileConverterForm : Form
     {
-        ContainerManager currentContainer;
+        Xbox.XboxContainerIndex currentContainer;
         GameInfo gameInfo;
         string profileID = string.Empty;
         bool nonXboxFetchReady = false;
@@ -137,7 +137,7 @@ namespace GPSaveConverter
         private async Task<GameInfo[]> LoadGameInfo()
         {
             GameInfo[] result = null;
-            await Task.Run(() => result =XboxPackageList.GetList());
+            await Task.Run(() => result = Xbox.XboxPackageList.GetList());
             return result;
         }
 
@@ -184,7 +184,7 @@ namespace GPSaveConverter
                 foreach (DataGridViewRow row in rows)
                 {
                     NonXboxFileInfo file = row.DataBoundItem as NonXboxFileInfo;
-                    this.currentContainer.AddFile(file.RelativePath, nonXboxParentLocation);
+                    currentContainer.Children[0].AddFile(file.RelativePath, nonXboxParentLocation);
                 }
             }
         }
@@ -203,7 +203,7 @@ namespace GPSaveConverter
                 string nonXboxParentLocation = expandedNonXboxFilesLocation();
                 foreach (DataGridViewRow row in rows)
                 {
-                    XboxFileInfo file = row.DataBoundItem as XboxFileInfo;
+                    Xbox.XboxFileInfo file = row.DataBoundItem as Xbox.XboxFileInfo;
                     System.IO.File.Copy(file.getFilePath(), Path.Combine(this.expandedNonXboxFilesLocation(), file.GetRelativeFilePath()), true);
                 }
             }
@@ -231,7 +231,7 @@ namespace GPSaveConverter
 
         private void viewXboxFilesButton_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(this.currentContainer.getSaveFilePath());
+            System.Diagnostics.Process.Start(this.currentContainer.Children[0].getSaveFilePath());
         }
 
         private void viewNonXboxFileButton_Click(object sender, EventArgs e)
@@ -245,11 +245,11 @@ namespace GPSaveConverter
             this.nonXboxFetchReady = false;
 
             gameInfo = (GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
-            currentContainer = new ContainerManager(gameInfo.PackageName);
+            currentContainer = new Xbox.XboxContainerIndex(gameInfo.PackageName, "0009000000293F71");
 
             this.viewXboxFilesButton.Enabled = true;
-            this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.getSaveFilePath());
-            this.xboxFilesTable.DataSource = currentContainer.getFileList();
+            this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
+            this.xboxFilesTable.DataSource = currentContainer.Children[0].getFileList();
 
             if (gameInfo.NonXboxSaveLocation == null || gameInfo.NonXboxSaveLocation == string.Empty)
             {

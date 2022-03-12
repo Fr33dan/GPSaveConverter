@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GPSaveConverter
+namespace GPSaveConverter.Xbox
 {
     internal class XboxFileInfo
     {
@@ -19,28 +19,25 @@ namespace GPSaveConverter
                 }
             }
         }
-        internal const int EncodedPathByteLength = 128;
-        internal const int FileNameDataLength = 16;
-        internal const int EntryByteLength = EncodedPathByteLength + FileNameDataLength + FileNameDataLength;
         string encodedPath;
         byte[] FileCode;
         DateTime timestamp;
-        ContainerManager parent;
+        XboxFileContainer parent;
 
         public string EncodedPath { get { return encodedPath; } }
 
         public DateTime Timestamp { get { return timestamp; } }
 
-        internal XboxFileInfo(ContainerManager parent, byte[] sourceFile,int index)
+        internal XboxFileInfo(XboxFileContainer parent, byte[] sourceFile,int index)
         {
             this.parent = parent;
-            encodedPath = Encoding.Unicode.GetString(sourceFile, index, EncodedPathByteLength).Trim('\0');
+            encodedPath = Encoding.Unicode.GetString(sourceFile, index, XboxHelper.EncodedPathByteLength).Trim('\0');
 
-            FileCode = new byte[FileNameDataLength];
-            Array.Copy(sourceFile, index + EncodedPathByteLength, FileCode, 0, FileNameDataLength);
+            FileCode = new byte[XboxHelper.FileNameDataLength];
+            Array.Copy(sourceFile, index + XboxHelper.EncodedPathByteLength, FileCode, 0, XboxHelper.FileNameDataLength);
 
-            byte[] fileNameDuplicate = new byte[FileNameDataLength];
-            Array.Copy(sourceFile, index + EncodedPathByteLength + FileNameDataLength, fileNameDuplicate, 0, FileNameDataLength);
+            byte[] fileNameDuplicate = new byte[XboxHelper.FileNameDataLength];
+            Array.Copy(sourceFile, index + XboxHelper.EncodedPathByteLength + XboxHelper.FileNameDataLength, fileNameDuplicate, 0, XboxHelper.FileNameDataLength);
 
             if (!FileCode.SequenceEqual(fileNameDuplicate))
             {
@@ -51,7 +48,7 @@ namespace GPSaveConverter
             }
             this.timestamp = File.GetLastWriteTime(getFilePath());
         }
-        internal XboxFileInfo(ContainerManager parent,string filePath, string relativeFilePath)
+        internal XboxFileInfo(XboxFileContainer parent,string filePath, string relativeFilePath)
         {
             this.parent=parent;
 
@@ -62,7 +59,7 @@ namespace GPSaveConverter
 
         internal void Write(Stream s)
         {
-            byte[] pathData = new byte[EncodedPathByteLength];
+            byte[] pathData = new byte[XboxHelper.EncodedPathByteLength];
             Encoding.Unicode.GetBytes(GetRelativeFilePath(), 0, GetRelativeFilePath().Length, pathData, 0);
 
             s.Write(pathData, 0, pathData.Length);
@@ -82,25 +79,7 @@ namespace GPSaveConverter
 
         public string getFileName()
         {
-            string filePath;
-            byte[] firstSectionData = new byte[4];
-            Array.Copy(FileCode, 0, firstSectionData, 0, firstSectionData.Length);
-            string firstSection = BitConverter.ToString(firstSectionData.Reverse().ToArray()).Replace("-", "");
-
-            byte[] secondSectionData = new byte[2];
-            Array.Copy(FileCode, 4, secondSectionData, 0, secondSectionData.Length);
-            string secondSection = BitConverter.ToString(secondSectionData.Reverse().ToArray()).Replace("-", "");
-
-            byte[] thirdSectionData = new byte[2];
-            Array.Copy(FileCode, 6, thirdSectionData, 0, thirdSectionData.Length);
-            string thirdSection = BitConverter.ToString(thirdSectionData.Reverse().ToArray()).Replace("-", "");
-
-            byte[] fourthSectionData = new byte[8];
-            Array.Copy(FileCode, 8, fourthSectionData, 0, fourthSectionData.Length);
-            string fourthSection = BitConverter.ToString(fourthSectionData.ToArray()).Replace("-", "");
-
-            filePath = string.Concat(firstSection, secondSection, thirdSection, fourthSection);
-            return filePath;
+            return XboxHelper.DecodeFileName(FileCode);
         }
 
         /// <summary>

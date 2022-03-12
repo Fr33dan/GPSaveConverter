@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GPSaveConverter
+namespace GPSaveConverter.Xbox
 {
     internal class XboxPackageList
     {
@@ -17,13 +17,17 @@ namespace GPSaveConverter
             foreach(string package in Directory.GetDirectories(packageFolder))
             {
                 string wgsFolder = Path.Combine(package, "SystemAppData", "wgs");
-                if(Directory.Exists(wgsFolder) && Directory.GetDirectories(wgsFolder).Length == 2)
+                if(Directory.Exists(wgsFolder) && Directory.GetDirectories(wgsFolder).Length >= 2)
                 {
                     GameInfo info = GameLibrary.getGameInfo(Path.GetFileName(package));
                     list.Add(info);
                 }
             }
             internalList = list.ToArray();
+        }
+        internal static string getWGSFolder(string packageName)
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", packageName, "SystemAppData", "wgs");
         }
 
         public static GameInfo[] GetList()
