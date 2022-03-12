@@ -7,4 +7,4 @@ There is an extremely small (as of now at least) game library that contains the 
 
 It is strongly recommended you back up both save file folders before using this application. 
 
-![PC Game Pass Save File Converter v0.2.0 Screenshot](https://user-images.githubusercontent.com/4670572/157587281-1fef1422-b2dd-418f-a1ba-83a9038d0c3d.png)
+![PC Game Pass Save File Converter v0 3 0](https://user-images.githubusercontent.com/4670572/158036060-3a9b85ee-0135-4f6a-93a1-3a0d7ca62004.png)
