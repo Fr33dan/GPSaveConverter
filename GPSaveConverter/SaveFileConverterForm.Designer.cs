@@ -60,6 +60,7 @@
             this.xboxProfileListBox = new System.Windows.Forms.ListBox();
             this.xboxProfileLabel = new System.Windows.Forms.Label();
             this.moveControlPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.buttonsToolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -264,6 +265,7 @@
             this.viewXboxFilesButton.Size = new System.Drawing.Size(124, 22);
             this.viewXboxFilesButton.TabIndex = 14;
             this.viewXboxFilesButton.Text = "Explore Xbox Files";
+            this.buttonsToolTip.SetToolTip(this.viewXboxFilesButton, "Open Xbox files in Windows Explorer");
             this.viewXboxFilesButton.UseVisualStyleBackColor = true;
             this.viewXboxFilesButton.Click += new System.EventHandler(this.viewXboxFilesButton_Click);
             // 
@@ -289,6 +291,7 @@
             this.promptNonXboxLocationButton.Size = new System.Drawing.Size(156, 22);
             this.promptNonXboxLocationButton.TabIndex = 16;
             this.promptNonXboxLocationButton.Text = "Select non-Xbox Location";
+            this.buttonsToolTip.SetToolTip(this.promptNonXboxLocationButton, "Select non-Xbox save file location (overrides library)");
             this.promptNonXboxLocationButton.UseVisualStyleBackColor = true;
             this.promptNonXboxLocationButton.Click += new System.EventHandler(this.promptNonXboxLocationButton_Click);
             // 
@@ -301,6 +304,7 @@
             this.viewNonXboxFileButton.Size = new System.Drawing.Size(124, 22);
             this.viewNonXboxFileButton.TabIndex = 15;
             this.viewNonXboxFileButton.Text = "Explore non-Xbox Files";
+            this.buttonsToolTip.SetToolTip(this.viewNonXboxFileButton, "Open non-Xbox files in Windows Explorer");
             this.viewNonXboxFileButton.UseVisualStyleBackColor = true;
             this.viewNonXboxFileButton.Click += new System.EventHandler(this.viewNonXboxFileButton_Click);
             // 
@@ -312,6 +316,7 @@
             this.moveAllToXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveAllToXboxButton.TabIndex = 1;
             this.moveAllToXboxButton.Text = "˄\r\n˄";
+            this.buttonsToolTip.SetToolTip(this.moveAllToXboxButton, "Move all files to the Xbox saves");
             this.moveAllToXboxButton.UseVisualStyleBackColor = true;
             this.moveAllToXboxButton.Click += new System.EventHandler(this.moveAllToXboxButton_Click);
             // 
@@ -323,6 +328,7 @@
             this.moveSelectionFromXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveSelectionFromXboxButton.TabIndex = 2;
             this.moveSelectionFromXboxButton.Text = "˅";
+            this.buttonsToolTip.SetToolTip(this.moveSelectionFromXboxButton, "Move the selected files to the non-Xbox saves");
             this.moveSelectionFromXboxButton.UseVisualStyleBackColor = true;
             this.moveSelectionFromXboxButton.Click += new System.EventHandler(this.moveSelectionFromXboxButton_Click);
             // 
@@ -334,6 +340,7 @@
             this.moveAllFromXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveAllFromXboxButton.TabIndex = 3;
             this.moveAllFromXboxButton.Text = "˅\r\n˅";
+            this.buttonsToolTip.SetToolTip(this.moveAllFromXboxButton, "Move all files to the non-Xbox saves");
             this.moveAllFromXboxButton.UseVisualStyleBackColor = true;
             this.moveAllFromXboxButton.Click += new System.EventHandler(this.moveAllFromXboxButton_Click);
             // 
@@ -345,6 +352,7 @@
             this.moveSelectionToXboxButton.Size = new System.Drawing.Size(27, 36);
             this.moveSelectionToXboxButton.TabIndex = 0;
             this.moveSelectionToXboxButton.Text = "˄";
+            this.buttonsToolTip.SetToolTip(this.moveSelectionToXboxButton, "Move the selected files to the Xbox saves");
             this.moveSelectionToXboxButton.UseVisualStyleBackColor = true;
             this.moveSelectionToXboxButton.Click += new System.EventHandler(this.moveSelectionToXboxButton_Click);
             // 
@@ -513,6 +521,7 @@
         private System.Windows.Forms.Label xboxProfileLabel;
         private System.Windows.Forms.Panel nonXboxProfilePanel;
         private System.Windows.Forms.TableLayoutPanel moveControlPanel;
+        private System.Windows.Forms.ToolTip buttonsToolTip;
     }
 }
 
