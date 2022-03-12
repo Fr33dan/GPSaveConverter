@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace GPSaveConverter
+namespace GPSaveConverter.Library
 {
     internal class GameLibrary
     {
@@ -66,13 +67,25 @@ namespace GPSaveConverter
         public static void LoadPSV()
         {
             StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
+
+            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(stream.ReadToEnd());
+
+            psvLibrary = new Dictionary<string, GameInfo>();
+            foreach (GameInfo newGame in jsonLibrary)
+            {
+                psvLibrary.Add(newGame.PackageName, newGame);
+            }
+
+            stream.Close();
+
+            /*StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
             psvLibrary = new Dictionary<string, GameInfo>();
             while (!stream.EndOfStream)
             {
                 GameInfo newGame = new GameInfo(stream.ReadLine());
 
                 psvLibrary.Add(newGame.PackageName, newGame);
-            }
+            }*/
         }
 
         public static string ExpandSaveFileLocation(string unexpanedSaveFileLocation)

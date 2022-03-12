@@ -10,6 +10,7 @@ namespace GPSaveConverter.Xbox
     internal class XboxContainerIndex
     {
         string packageName;
+
         internal XboxFileContainer[] Children { get; private set; }
         internal XboxContainerIndex(string packName, string xboxProfileID)
         {
@@ -43,15 +44,10 @@ namespace GPSaveConverter.Xbox
             DateTime timestamp = DateTime.FromFileTimeUtc(BitConverter.ToInt64(containerData, currentByte));
             currentByte += 8;
 
-
             int unknownNumber = BitConverter.ToInt32(containerData, currentByte);
             currentByte += 4;
 
             Children = new XboxFileContainer[count];
-            /*if (containerData[currentByte++] != 0x02 || containerData[currentByte++] != 0x00 || containerData[currentByte++] != 0x00 || containerData[currentByte++] != 0x00)
-            {
-                throw new FileFormatException("Unicode start string not found");
-            }*/
             int stringLength = BitConverter.ToInt32(containerData, currentByte);
             currentByte += 4;
 
@@ -81,22 +77,9 @@ namespace GPSaveConverter.Xbox
                 currentByte += 8;
 
 
-                Children[j] = new XboxFileContainer(packageName, containerStrings[0], folderName, containerTimestamp);
+                Children[j] = new XboxFileContainer(packageName, containerStrings, folderName, containerTimestamp);
                 currentByte += 16;
             }
-        }
-
-        private int findUnicodeLength(byte[] data,int start)
-        {
-            int returnVal = -1;
-
-            for(int j = start;returnVal == -1 && j < data.Length; j+= 2){
-                if (data[j] == 0x02 && data[j + 1] == 0x00 && data[j + 2] == 0x00 && data[j + 3] == 0x00)
-                {
-                    returnVal = (j + 3) - start;
-                }
-            }
-            return returnVal;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace GPSaveConverter.Xbox
     internal class XboxFileContainer
     {
         internal string PackageName;
-        internal string ContainerID { get; private set; }
+        internal string[] ContainerID { get; private set; }
         string wgsFolder;
         string wgsProfile;
         string saveFilePath;
@@ -21,7 +21,7 @@ namespace GPSaveConverter.Xbox
         string containerPath;
         byte[] containerData;
         private List<XboxFileInfo> fileList;
-        public XboxFileContainer(string packageName, string containerID, string folderName,DateTime timestamp)
+        public XboxFileContainer(string packageName, string[] containerID, string folderName,DateTime timestamp)
         {
             this.ContainerID = containerID;
             this.PackageName = packageName;

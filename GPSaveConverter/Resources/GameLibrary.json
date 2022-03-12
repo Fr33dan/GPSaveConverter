@@ -1,0 +1,26 @@
+﻿[
+  {
+    "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
+    "NonXboxSaveLocation": "%HOMEDRIVE%%HOMEPATH%\\AppData\\LocalLow\\Two Point Studios\\Two Point Hospital\\Cloud\\<user-id>\\",
+    "FileTranslations": [
+      {
+        "ContainerName1": "TPHCONTAINER",
+        "ContainerName2": "TPHCONTAINER",
+        "NonXboxFilename": "{Filename|[\\w\\-. \\\\]}",
+        "XboxFileID": "{Filename}"
+      }
+    ]
+  },
+  {
+    "PackageName": "Microsoft.OriandtheBlindForestDefinitiveEdition_8wekyb3d8bbwe",
+    "NonXboxSaveLocation": "%LOCALAPPDATA%\\Ori and the Blind Forest DE\\"
+  },
+  {
+    "PackageName": "Microsoft.624F8B84B80_8wekyb3d8bbwe",
+    "NonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id>\\"
+  },
+  {
+    "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
+    "NonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\"
+  }
+]

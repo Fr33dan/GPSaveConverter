@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 
-namespace GPSaveConverter
+namespace GPSaveConverter.Library
 {
     internal class GameInfo
     {
@@ -37,6 +38,9 @@ namespace GPSaveConverter
             }
         }
 
+        [Browsable(false)]
+        public IList<FileTranslation> FileTranslations { get; set; }
+
         
 
         private Image gameIcon;
@@ -47,7 +51,7 @@ namespace GPSaveConverter
             this.PackageName = gameData[0];
             this.NonXboxSaveLocation = GameLibrary.ExpandSaveFileLocation(gameData[1]);
         }
-        internal GameInfo()
+        public GameInfo()
         {
         }
 

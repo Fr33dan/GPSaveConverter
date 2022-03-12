@@ -14,7 +14,7 @@ namespace GPSaveConverter
     public partial class SaveFileConverterForm : Form
     {
         Xbox.XboxContainerIndex currentContainer;
-        GameInfo gameInfo;
+        Library.GameInfo gameInfo;
         string profileID = string.Empty;
         bool nonXboxFetchReady = false;
         List<NonXboxFileInfo> nonXboxFiles;
@@ -26,7 +26,7 @@ namespace GPSaveConverter
 
         private string expandedNonXboxFilesLocation()
         {
-            return gameInfo.NonXboxSaveLocation.Replace(GameLibrary.NonSteamProfileMarker, this.profileID);
+            return gameInfo.NonXboxSaveLocation.Replace(Library.GameLibrary.NonSteamProfileMarker, this.profileID);
 
         }
 
@@ -79,7 +79,7 @@ namespace GPSaveConverter
 
         private void fetchProfiles()
         {
-            string profilesDir = gameInfo.NonXboxSaveLocation.Substring(0, gameInfo.NonXboxSaveLocation.IndexOf(GameLibrary.NonSteamProfileMarker));
+            string profilesDir = gameInfo.NonXboxSaveLocation.Substring(0, gameInfo.NonXboxSaveLocation.IndexOf(Library.GameLibrary.NonSteamProfileMarker));
             bool failed = false;
 
             if (Directory.Exists(profilesDir))
@@ -88,7 +88,7 @@ namespace GPSaveConverter
                 {
                     string testProfileID = p.Replace(profilesDir, "");
 
-                    string testProfileSaveFolder = gameInfo.NonXboxSaveLocation.Replace(GameLibrary.NonSteamProfileMarker, testProfileID);
+                    string testProfileSaveFolder = gameInfo.NonXboxSaveLocation.Replace(Library.GameLibrary.NonSteamProfileMarker, testProfileID);
 
                     if (Directory.Exists(testProfileSaveFolder))
                     {
@@ -125,7 +125,7 @@ namespace GPSaveConverter
         {
             this.infoStatusLabel.Text = "Loading game info...";
 
-            GameInfo[] gameInfo = await LoadGameInfo();
+            Library.GameInfo[] gameInfo = await LoadGameInfo();
 
             this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
 
@@ -134,9 +134,9 @@ namespace GPSaveConverter
             this.infoStatusLabel.Text = "Load Successful";
         }
 
-        private async Task<GameInfo[]> LoadGameInfo()
+        private async Task<Library.GameInfo[]> LoadGameInfo()
         {
-            GameInfo[] result = null;
+            Library.GameInfo[] result = null;
             await Task.Run(() => result = Xbox.XboxPackageList.GetList());
             return result;
         }
@@ -244,7 +244,7 @@ namespace GPSaveConverter
             ClearForm();
             this.nonXboxFetchReady = false;
 
-            gameInfo = (GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
+            gameInfo = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
             currentContainer = new Xbox.XboxContainerIndex(gameInfo.PackageName, "0009000000293F71");
 
             this.viewXboxFilesButton.Enabled = true;
@@ -257,7 +257,7 @@ namespace GPSaveConverter
             }
             else
             {
-                if (gameInfo.NonXboxSaveLocation.Contains(GameLibrary.NonSteamProfileMarker))
+                if (gameInfo.NonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker))
                 {
                     fetchProfiles();
                 }
