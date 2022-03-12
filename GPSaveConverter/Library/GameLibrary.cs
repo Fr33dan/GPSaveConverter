@@ -73,6 +73,7 @@ namespace GPSaveConverter.Library
             psvLibrary = new Dictionary<string, GameInfo>();
             foreach (GameInfo newGame in jsonLibrary)
             {
+                newGame.NonXboxSaveLocation = ExpandSaveFileLocation(newGame.NonXboxSaveLocation);
                 psvLibrary.Add(newGame.PackageName, newGame);
             }
 
