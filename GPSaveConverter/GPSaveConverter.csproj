@@ -262,7 +262,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="GPSaveConverterUnprotected.snk" />
-    <None Include="nlog.config" />
+    <None Include="Resources\nlog.config" />
     <None Include="packages.config" />
     <None Include="Resources\GameLibrary.json" />
     <None Include="GPSaveConverter.pfx" />
