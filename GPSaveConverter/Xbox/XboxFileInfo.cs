@@ -22,7 +22,8 @@ namespace GPSaveConverter.Xbox
             }
         }
         string fileID;
-        byte[] FileCode;
+        Guid FileCode;
+        Guid PreviousFileCode;
         DateTime timestamp;
         XboxFileContainer parent;
 
@@ -47,18 +48,16 @@ namespace GPSaveConverter.Xbox
         internal XboxFileInfo(XboxFileContainer parent, byte[] sourceFile,int index)
         {
             this.parent = parent;
-            fileID = Encoding.Unicode.GetString(sourceFile, index, XboxHelper.EncodedPathByteLength).Trim('\0');
+            fileID = Encoding.Unicode.GetString(sourceFile, index, XboxHelper.FileIDByteLength).Trim('\0');
 
-            FileCode = new byte[XboxHelper.FileNameDataLength];
-            Array.Copy(sourceFile, index + XboxHelper.EncodedPathByteLength, FileCode, 0, XboxHelper.FileNameDataLength);
+            byte[] guidTempArray = new byte[XboxHelper.GuidLength];
+            Array.Copy(sourceFile, index + XboxHelper.FileIDByteLength, guidTempArray, 0, XboxHelper.GuidLength);
+            this.PreviousFileCode = new Guid(guidTempArray);
 
-            byte[] fileNameDuplicate = new byte[XboxHelper.FileNameDataLength];
-            Array.Copy(sourceFile, index + XboxHelper.EncodedPathByteLength + XboxHelper.FileNameDataLength, fileNameDuplicate, 0, XboxHelper.FileNameDataLength);
+            Array.Copy(sourceFile, index + XboxHelper.FileIDByteLength + XboxHelper.GuidLength, guidTempArray, 0, XboxHelper.GuidLength);
+            this.FileCode = new Guid(guidTempArray);
 
-            if (!FileCode.SequenceEqual(fileNameDuplicate))
-            {
-                //throw new FileFormatException();
-            } else if (!File.Exists(getFilePath()))
+            if (!File.Exists(getFilePath()))
             {
                 throw new FileNotFoundException("Could not find file for " + this.GetRelativeFilePath() + " (" + getFileName() + ")");
             }
@@ -69,7 +68,7 @@ namespace GPSaveConverter.Xbox
             this.parent=parent;
 
             this.fileID = xboxFileID;
-            this.FileCode = GetChecksum(filePath);
+            this.FileCode = Guid.NewGuid();
             File.Copy(filePath, getFilePath());
         }
 
@@ -88,13 +87,13 @@ namespace GPSaveConverter.Xbox
         /// <param name="s">Stream to container file.</param>
         internal void Write(Stream s)
         {
-            byte[] pathData = new byte[XboxHelper.EncodedPathByteLength];
+            byte[] pathData = new byte[XboxHelper.FileIDByteLength];
             Encoding.Unicode.GetBytes(GetRelativeFilePath(), 0, GetRelativeFilePath().Length, pathData, 0);
 
             s.Write(pathData, 0, pathData.Length);
 
-            s.Write(FileCode, 0, FileCode.Length);
-            s.Write(FileCode, 0, FileCode.Length);
+            s.Write(PreviousFileCode.ToByteArray(), 0, XboxHelper.FileIDByteLength);
+            s.Write(FileCode.ToByteArray(), 0, XboxHelper.FileIDByteLength);
         }
 
         /// <summary>
@@ -108,7 +107,7 @@ namespace GPSaveConverter.Xbox
 
         public string getFileName()
         {
-            return XboxHelper.DecodeFileName(FileCode);
+            return FileCode.ToString().ToUpper().Replace("-","");
         }
 
         /// <summary>

@@ -9,23 +9,19 @@ namespace GPSaveConverter.Xbox
 {
     internal class XboxFileContainer
     {
-        internal string PackageName;
+        private XboxContainerIndex parent;
         internal string[] ContainerID { get; private set; }
-        string wgsFolder;
-        string wgsProfile;
+        internal Guid ContainerGuid { get; private set; }
         string saveFilePath;
-        string containerFolder;
-        byte[] containersIndexData;
-        int indexHeaderCount = 16;
         const int ContainerHeaderLength = 8;
         string containerPath;
         byte[] containerData;
         private List<XboxFileInfo> fileList;
-        public XboxFileContainer(string packageName, string[] containerID, string folderName,DateTime timestamp)
+        public XboxFileContainer(XboxContainerIndex parent, Guid containerGuid, string[] containerID,DateTime timestamp)
         {
+            this.parent = parent;
+            this.ContainerGuid = containerGuid;
             this.ContainerID = containerID;
-            this.PackageName = packageName;
-            this.containerFolder = folderName;
             initPaths();
         }
 
@@ -45,18 +41,8 @@ namespace GPSaveConverter.Xbox
 
         private void initPaths()
         {
-            wgsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", PackageName, "SystemAppData", "wgs");
-            wgsProfile = Directory.GetDirectories(wgsFolder).Where(s => s != "t").First();
-
-            saveFilePath = Path.Combine(wgsProfile, this.containerFolder);
+            saveFilePath = Path.Combine(parent.xboxProfileFolder, this.ContainerGuid.ToString().ToUpper().Replace("-",""));
             containerPath = Directory.GetFiles(saveFilePath, "container.*").First();
-        }
-
-        public string getIndexText()
-        {
-            containersIndexData = File.ReadAllBytes(Path.Combine(wgsProfile, "containers.index"));
-            string unicode = Encoding.Unicode.GetString(containersIndexData, indexHeaderCount, containersIndexData.Length - indexHeaderCount);
-            return unicode;
         }
 
         private void parseContainer()

@@ -4,21 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using GPSaveConverter.Library;
 
 namespace GPSaveConverter.Xbox
 {
     internal class XboxContainerIndex
     {
         string packageName;
+        string wgsFolder;
+        internal string xboxProfileFolder;
+        string indexPath;
 
         internal XboxFileContainer[] Children { get; private set; }
-        internal XboxContainerIndex(string packName, string xboxProfileID)
+        internal XboxContainerIndex(GameInfo info, string xboxProfileID)
         {
-            this.packageName = packName;
+            this.packageName = info.PackageName;
 
-            string wgsFolder = XboxPackageList.getWGSFolder(packageName);
-            string xboxProfileFolder = Directory.GetDirectories(wgsFolder, xboxProfileID + "_*").First();
-            string indexPath = Path.Combine(xboxProfileFolder, "containers.index");
+            wgsFolder = XboxPackageList.getWGSFolder(packageName);
+            xboxProfileFolder = Directory.GetDirectories(wgsFolder, xboxProfileID + "_*" + (info.WGSProfileSuffix != null ? info.WGSProfileSuffix : "")).First();
+            indexPath = Path.Combine(xboxProfileFolder, "containers.index");
             byte[] containerData = File.ReadAllBytes(indexPath);
 
             int currentByte = 4;
@@ -69,15 +73,18 @@ namespace GPSaveConverter.Xbox
                 }
                 
                 currentByte+= 5;
-                
-                string folderName = XboxHelper.DecodeFileName(containerData, currentByte);
-                currentByte += XboxHelper.FileNameDataLength;
+
+                byte[] tempGuidArray = new byte[XboxHelper.GuidLength];
+                Array.Copy(containerData, currentByte, tempGuidArray, 0, XboxHelper.GuidLength);
+                currentByte += XboxHelper.GuidLength;
+
+                Guid containerGuid = new Guid(tempGuidArray);
 
                 DateTime containerTimestamp = DateTime.FromFileTime(BitConverter.ToInt64(containerData, currentByte));
                 currentByte += 8;
 
 
-                Children[j] = new XboxFileContainer(packageName, containerStrings, folderName, containerTimestamp);
+                Children[j] = new XboxFileContainer(this, containerGuid, containerStrings, containerTimestamp);
                 currentByte += 16;
             }
         }
