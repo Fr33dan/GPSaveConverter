@@ -230,6 +230,12 @@
   <ItemGroup>
     <Compile Include="Library\FileTranslation.cs" />
     <Compile Include="LogHelper.cs" />
+    <Compile Include="PreferencesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PreferencesForm.Designer.cs">
+      <DependentUpon>PreferencesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Xbox\XboxContainerIndex.cs" />
     <Compile Include="Xbox\XboxFileContainer.cs" />
     <Compile Include="Library\GameInfo.cs" />
@@ -252,6 +258,9 @@
     <Compile Include="Xbox\XboxPackageList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="PreferencesForm.resx">
+      <DependentUpon>PreferencesForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SaveFileConverterForm.resx">
       <DependentUpon>SaveFileConverterForm.cs</DependentUpon>
       <SubType>Designer</SubType>

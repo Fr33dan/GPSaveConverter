@@ -17,6 +17,7 @@ namespace GPSaveConverter
         Xbox.XboxContainerIndex currentContainer;
         Library.GameInfo gameInfo;
         List<NonXboxFileInfo> nonXboxFiles;
+        private PreferencesForm prefsForm;
 
         public SaveFileConverterForm()
         {
@@ -422,6 +423,16 @@ namespace GPSaveConverter
             this.viewXboxFilesButton.Enabled = true;
             //this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
             this.xboxFilesTable.DataSource = currentContainer.getFileList();
+        }
+
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(prefsForm == null)
+            {
+                prefsForm = new PreferencesForm();
+            }
+
+            prefsForm.Show(this);
         }
     }
 }
