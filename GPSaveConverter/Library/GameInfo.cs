@@ -39,6 +39,10 @@ namespace GPSaveConverter.Library
                     if (File.Exists(IconLocation))
                     {
                         gameIcon = Image.FromFile(IconLocation);
+                    } else if (File.Exists(IconLocation.Replace(".png", ".scale-200.png")))
+                    {
+                        gameIcon = Image.FromFile(IconLocation.Replace(".png", ".scale-200.png"));
+
                     }
                     else
                     {
