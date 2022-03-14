@@ -33,13 +33,28 @@
     "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id>\\"
   },
   {
+    "PackageName": "39EA002F.DQXISWW_n746a19ndrrjg",
+    "WGSProfileSuffix": "746B3305",
+    "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\DRAGON QUEST XI S\\Steam\\<user-id>\\Saved\\SaveGames\\Book\\",
+    "FileTranslations": [
+      {
+        "ContainerName1": "Book",
+        "ContainerName2": "Book",
+        "NonXboxRegex": "([\\w\\-. \\\\])",
+        "NonXboxSubstitution": "$1",
+        "XboxFileIDRegex": "([\\w\\-. \\\\])",
+        "XboxFileIDSubstitution": "$1"
+      }
+    ]
+  },
+  {
     "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
     "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\",
     "FileTranslations": [
       {
         "ContainerName1": "game_profile.bin",
         "ContainerName2": "game_profile.bin",
-        "NonXboxRegex": "game_profile\\.bin",
+        "NonXboxRegex": "(game_profile\\.bin)",
         "NonXboxSubstitution": "$1",
         "XboxFileIDRegex": "(game_profile\\.bin)",
         "XboxFileIDSubstitution": "$1"
