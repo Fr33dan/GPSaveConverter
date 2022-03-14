@@ -10,6 +10,7 @@ namespace GPSaveConverter.Library
 {
     internal class GameInfo
     {
+        private static NLog.Logger logger = LogHelper.getClassLogger();
         public string Name { get; set; }
 
         [Browsable(false)]
@@ -125,6 +126,7 @@ namespace GPSaveConverter.Library
 
                 if (createOrUpdate)
                 {
+                    logger.Info("Extracting Xbox save file: {0} -> {1}", file.FileID, returnVal.FilePath);
                     File.Copy(file.getFilePath(), returnVal.FilePath, true);
                     returnVal.Timestamp = File.GetLastWriteTime(returnVal.FilePath);
                 }
@@ -161,10 +163,12 @@ namespace GPSaveConverter.Library
                     {
                         if (matchedFile != null)
                         {
+                            logger.Info("Replacing existing Xbox Save file: {0} -> {1} ({2})", file.FilePath, matchedFile.FileID, matchedFile.getFileName());
                             matchedFile.Replace(file);
                         }
                         else
                         {
+                            logger.Info("Adding Xbox Save file: {0} -> {1}", file.FilePath, xboxFileID);
                             matchedFile = xboxFileContainer.AddFile(file, xboxFileID);
                         }
                     }

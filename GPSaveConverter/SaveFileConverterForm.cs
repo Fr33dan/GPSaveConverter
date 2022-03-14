@@ -260,14 +260,21 @@ namespace GPSaveConverter
 
                             if (res == DialogResult.Abort)
                             {
+                                logger.Info("Transfer aborted");
                                 return;
                             }
                         }
                     } while (res == DialogResult.Retry);
                 }
 
+                logger.Info("Transfer complete");
+
+                // Reload to refresh UI.
+                currentContainer = new Xbox.XboxContainerIndex(gameInfo, (string)this.xboxProfileListBox.SelectedItem);
                 this.xboxFilesTable.DataSource = currentContainer.getFileList();
             }
+            else { logger.Info("Transfer canceled"); }
+            
         }
 
         private void moveFilesFromXbox(System.Collections.IEnumerable rows)
@@ -291,13 +298,19 @@ namespace GPSaveConverter
 
                             if (res == DialogResult.Abort)
                             {
+                                logger.Info("Transfer aborted");
                                 return;
                             }
                         }
                     } while (res == DialogResult.Retry);
                 }
+                
+                logger.Info("Transfer complete");
+
+                // Reload to refresh UI.
                 this.fetchNonXboxSaveFiles();
             }
+            else { logger.Info("Transfer canceled"); }
         }
 
         private void moveSelectionToXboxButton_Click(object sender, EventArgs e)
