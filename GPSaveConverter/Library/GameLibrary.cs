@@ -83,15 +83,6 @@ namespace GPSaveConverter.Library
             }
 
             stream.Close();
-
-            /*StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
-            psvLibrary = new Dictionary<string, GameInfo>();
-            while (!stream.EndOfStream)
-            {
-                GameInfo newGame = new GameInfo(stream.ReadLine());
-
-                psvLibrary.Add(newGame.PackageName, newGame);
-            }*/
         }
 
         public static string ExpandSaveFileLocation(string unexpanedSaveFileLocation)
