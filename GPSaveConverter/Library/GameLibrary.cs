@@ -138,6 +138,7 @@ namespace GPSaveConverter.Library
             {
                 uwpInfo.BaseNonXboxSaveLocation = psvInfo.BaseNonXboxSaveLocation;
                 uwpInfo.FileTranslations = psvInfo.FileTranslations;
+                uwpInfo.WGSProfileSuffix = psvInfo.WGSProfileSuffix;
             }
 
             return uwpInfo;

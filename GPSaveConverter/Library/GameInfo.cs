@@ -50,6 +50,9 @@ namespace GPSaveConverter.Library
         }
 
         [Browsable(false)]
+        public string WGSProfileSuffix { get; set; }
+
+        [Browsable(false)]
         public IList<FileTranslation> FileTranslations { get; set; }
 
         
