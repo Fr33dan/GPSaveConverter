@@ -33,7 +33,7 @@ foreach ($app in $installedapps)
                     $logo = $app.InstallLocation + "\" + $appx.Package.Applications.Application.VisualElements.Square150x150Logo;
 
                     $aumidList += $name + "|" + $logo + "|" +
-                    $app.packagefamilyname + ";"
+                    $app.packagefamilyname #+ "`r"
                 }
             }
         }

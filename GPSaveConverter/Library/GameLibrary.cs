@@ -10,6 +10,7 @@ namespace GPSaveConverter.Library
 {
     internal class GameLibrary
     {
+        private static NLog.Logger logger = LogHelper.getClassLogger();
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
@@ -40,13 +41,18 @@ namespace GPSaveConverter.Library
                     using (StreamReader reader = new StreamReader(stream))
                     {
                         string scriptText = reader.ReadToEnd();
+                        logger.Debug("Starting Powershell script to retreive UWP package manifests.");
                         string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
+                        logger.Debug("Powershell script results:\n{0}", scriptOutput);
 
-                        foreach(string app in scriptOutput.Split(';'))
+                        StringReader sr = new StringReader(scriptOutput);
+
+                        string appInfoLine = null;
+                        while ((appInfoLine = sr.ReadLine()) != null)
                         {
-                            if (app != String.Empty)
+                            if (appInfoLine != String.Empty)
                             {
-                                string[] appInfo = app.Split('|');
+                                string[] appInfo = appInfoLine.Split('|');
                                 GameInfo gameInfo = new GameInfo();
                                 string name = appInfo[0].Trim();
                                 gameInfo.Name = name == string.Empty? null: name;
