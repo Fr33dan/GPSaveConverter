@@ -92,8 +92,8 @@ namespace GPSaveConverter.Xbox
 
             s.Write(pathData, 0, pathData.Length);
 
-            s.Write(PreviousFileCode.ToByteArray(), 0, XboxHelper.FileIDByteLength);
-            s.Write(FileCode.ToByteArray(), 0, XboxHelper.FileIDByteLength);
+            s.Write(PreviousFileCode.ToByteArray(), 0, XboxHelper.GuidLength);
+            s.Write(FileCode.ToByteArray(), 0, XboxHelper.GuidLength);
         }
 
         /// <summary>
