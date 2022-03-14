@@ -15,8 +15,6 @@ namespace GPSaveConverter
     {
         Xbox.XboxContainerIndex currentContainer;
         Library.GameInfo gameInfo;
-        string profileID = string.Empty;
-        bool nonXboxFetchReady = false;
         List<NonXboxFileInfo> nonXboxFiles;
 
         public SaveFileConverterForm()
@@ -91,7 +89,10 @@ namespace GPSaveConverter
                 if(underscoreLocation != -1)
                 {
                     string profileID = folderName.Substring(0, underscoreLocation);
-                    this.xboxProfileListBox.Items.Add(profileID);
+                    if (!this.xboxProfileListBox.Items.Contains(profileID))
+                    {
+                        this.xboxProfileListBox.Items.Add(profileID);
+                    }
                 }
 
                 if (xboxProfileListBox.Items.Count == 0)
@@ -119,6 +120,7 @@ namespace GPSaveConverter
             string profilesDir = Library.GameLibrary.GetNonXboxProfileLocation(gameInfo.BaseNonXboxSaveLocation);
             bool failed = false;
 
+            this.nonXboxProfileListBox.Items.Clear();
             if (Directory.Exists(profilesDir))
             {
                 foreach (string p in Directory.GetDirectories(profilesDir))
@@ -192,10 +194,9 @@ namespace GPSaveConverter
 
         private void profileListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Library.GameLibrary.ProfileID = (string)this.nonXboxProfileListBox.SelectedItem;
             if (this.currentContainer != null)
             {
-                this.profileID = (string)this.nonXboxProfileListBox.SelectedItem;
-
                 fetchNonXboxSaveFiles();
             }
         }
@@ -330,7 +331,6 @@ namespace GPSaveConverter
         private void packagesDataGridView_Click(object sender, EventArgs e)
         {
             ClearForm();
-            this.nonXboxFetchReady = false;
 
             gameInfo = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
 
@@ -417,9 +417,9 @@ namespace GPSaveConverter
 
         private void xboxProfileListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentContainer = new Xbox.XboxContainerIndex(gameInfo.PackageName, (string)this.xboxProfileListBox.SelectedItem);
+            currentContainer = new Xbox.XboxContainerIndex(gameInfo, (string)this.xboxProfileListBox.SelectedItem);
             this.viewXboxFilesButton.Enabled = true;
-            this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
+            //this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
             this.xboxFilesTable.DataSource = currentContainer.getFileList();
         }
     }
