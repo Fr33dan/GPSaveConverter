@@ -43,25 +43,22 @@ namespace GPSaveConverter.Library
                         string scriptText = reader.ReadToEnd();
                         logger.Debug("Starting Powershell script to retreive UWP package manifests.");
                         string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
-                        logger.Debug("Powershell script results:\n{0}", scriptOutput);
+                        logger.Trace("Powershell script results:\n{0}", scriptOutput);
 
                         StringReader sr = new StringReader(scriptOutput);
 
                         string appInfoLine = null;
                         while ((appInfoLine = sr.ReadLine()) != null)
                         {
-                            if (appInfoLine != String.Empty)
+                            string[] appInfo = appInfoLine.Split('|');
+                            GameInfo gameInfo = new GameInfo();
+                            string name = appInfo[0].Trim();
+                            gameInfo.Name = name == string.Empty? null: name;
+                            gameInfo.IconLocation = appInfo[1];
+                            gameInfo.PackageName = appInfo[2];
+                            if (!result.ContainsKey(gameInfo.PackageName))
                             {
-                                string[] appInfo = appInfoLine.Split('|');
-                                GameInfo gameInfo = new GameInfo();
-                                string name = appInfo[0].Trim();
-                                gameInfo.Name = name == string.Empty? null: name;
-                                gameInfo.IconLocation = appInfo[1];
-                                gameInfo.PackageName = appInfo[2];
-                                if (!result.ContainsKey(gameInfo.PackageName))
-                                {
-                                    result.Add(gameInfo.PackageName, gameInfo);
-                                }
+                                result.Add(gameInfo.PackageName, gameInfo);
                             }
                         }
                     }
