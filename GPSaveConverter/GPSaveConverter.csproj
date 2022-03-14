@@ -229,6 +229,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\FileTranslation.cs" />
+    <Compile Include="LogHelper.cs" />
     <Compile Include="Xbox\XboxContainerIndex.cs" />
     <Compile Include="Xbox\XboxFileContainer.cs" />
     <Compile Include="Library\GameInfo.cs" />
@@ -261,6 +262,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="GPSaveConverterUnprotected.snk" />
+    <None Include="nlog.config" />
     <None Include="packages.config" />
     <None Include="Resources\GameLibrary.json" />
     <None Include="GPSaveConverter.pfx" />

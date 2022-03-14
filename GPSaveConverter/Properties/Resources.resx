@@ -124,4 +124,7 @@
   <data name="GetAUMIDScript" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\getaumidscript.ps1;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="nlog_config" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\nlog.config;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
