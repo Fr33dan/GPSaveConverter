@@ -17,6 +17,27 @@ namespace GPSaveConverter
             InitializeComponent();
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.R))
+            {
+                this.BeginInvoke((Action)ResetKeycode_Pressed);
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void ResetKeycode_Pressed()
+        {
+            DialogResult res = MessageBox.Show(this, "Remove all local configurations? (Software will then exit)", "Are you sure?", MessageBoxButtons.YesNoCancel);
+            if(res == DialogResult.Yes)
+            {
+                Properties.Settings.Default.Reset();
+                Application.Exit();
+            }
+
+        }
+
         private void PreferencesForm_Load(object sender, EventArgs e)
         {
             this.logLevelComboBox.Items.AddRange(NLog.LogLevel.AllLevels.ToArray());
