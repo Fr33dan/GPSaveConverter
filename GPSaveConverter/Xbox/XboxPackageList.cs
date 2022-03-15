@@ -9,9 +9,11 @@ namespace GPSaveConverter.Xbox
 {
     internal class XboxPackageList
     {
+        private static readonly NLog.Logger logger = LogHelper.getClassLogger();
         private static Library.GameInfo[] internalList;
         static XboxPackageList()
         {
+            logger.Info("Loading UWP Package List...");
             string packageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages");
             List<Library.GameInfo> list = new List<Library.GameInfo>();
             foreach(string package in Directory.GetDirectories(packageFolder))
@@ -24,6 +26,7 @@ namespace GPSaveConverter.Xbox
                 }
             }
             internalList = list.ToArray();
+            logger.Info("UWP Packages loaded!");
         }
         internal static string getWGSFolder(string packageName)
         {

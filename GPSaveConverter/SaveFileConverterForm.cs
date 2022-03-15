@@ -161,17 +161,14 @@ namespace GPSaveConverter
 
         }
 
-        private async void Form1_Load(object sender, EventArgs e)
+        private async void SaveFileConverterForm_Load(object sender, EventArgs e)
         {
-            logger.Info("Loading game info...");
             
             Library.GameInfo[] gameInfo = await LoadGameInfo();
 
             this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
 
             this.packagesDataGridView.DataSource = gameInfo;
-
-            logger.Info("Load Successful");
         }
 
         private async Task<Library.GameInfo[]> LoadGameInfo()

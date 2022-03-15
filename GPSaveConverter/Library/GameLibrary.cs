@@ -11,7 +11,7 @@ namespace GPSaveConverter.Library
 {
     internal class GameLibrary
     {
-        private static NLog.Logger logger = LogHelper.getClassLogger();
+        private static readonly NLog.Logger logger = LogHelper.getClassLogger();
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
