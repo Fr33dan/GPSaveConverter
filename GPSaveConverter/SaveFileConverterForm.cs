@@ -163,7 +163,16 @@ namespace GPSaveConverter
 
         private async void SaveFileConverterForm_Load(object sender, EventArgs e)
         {
-            
+            if (GPSaveConverter.Properties.Settings.Default.FirstRun)
+            {
+                DialogResult res;
+                do {
+                    res = MessageBox.Show(this, "Xbox Save File Converter can lookup save file locations online from pcgamingwiki.com." + Environment.NewLine + Environment.NewLine + "Do you allow this? (Can be changed any time in preferences)", "Allow internet access?", MessageBoxButtons.YesNo);
+                }while (res == DialogResult.Cancel);
+                GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch = res == DialogResult.Yes;
+                GPSaveConverter.Properties.Settings.Default.FirstRun = false;
+                GPSaveConverter.Properties.Settings.Default.Save();
+            }
             Library.GameInfo[] gameInfo = await LoadGameInfo();
 
             this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
