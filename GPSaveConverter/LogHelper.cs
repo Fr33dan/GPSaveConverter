@@ -22,7 +22,7 @@ namespace GPSaveConverter
         {
             System.Diagnostics.StackFrame frame = new System.Diagnostics.StackFrame(1, false);
 
-            return NLog.LogManager.GetLogger(frame.GetMethod().DeclaringType.FullName);
+            return NLog.LogManager.GetLogger(frame.GetMethod().DeclaringType.FullName.Replace("GPSaveConverter.",""));
 
         }
     }

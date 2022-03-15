@@ -62,6 +62,8 @@ namespace GPSaveConverter.Library
                                 result.Add(gameInfo.PackageName, gameInfo);
                             }
                         }
+
+                        logger.Debug("Found {0} UWP Packages.", result.Count);
                     }
                 }
             }
