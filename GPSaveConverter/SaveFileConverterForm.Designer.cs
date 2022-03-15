@@ -358,7 +358,7 @@
             this.packagesDataGridView.RowHeadersVisible = false;
             this.packagesDataGridView.RowTemplate.Height = 75;
             this.packagesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.packagesDataGridView.Size = new System.Drawing.Size(390, 515);
+            this.packagesDataGridView.Size = new System.Drawing.Size(407, 500);
             this.packagesDataGridView.TabIndex = 9;
             this.packagesDataGridView.Click += new System.EventHandler(this.packagesDataGridView_Click);
             // 
@@ -477,7 +477,7 @@
             // preferencesToolStripMenuItem
             // 
             this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
-            this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.preferencesToolStripMenuItem.Text = "Preferences";
             this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
             // 
