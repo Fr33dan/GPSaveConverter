@@ -82,6 +82,7 @@
             this.Controls.Add(this.logLevelComboBox);
             this.Name = "PreferencesForm";
             this.Text = "Preferences";
+            this.Icon = GPSaveConverter.Properties.Resources.Icon;
             this.Load += new System.EventHandler(this.PreferencesForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
