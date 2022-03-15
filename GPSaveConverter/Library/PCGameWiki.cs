@@ -60,7 +60,7 @@ namespace GPSaveConverter.Library
                 }
                 catch (Exception e)
                 {
-                    logger.Debug(e, "Unable to fetch save data location");
+                    logger.Info(e, "Unable to fetch save data location");
                 }
             }
 
