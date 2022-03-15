@@ -229,6 +229,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Library\FileTranslation.cs" />
+    <Compile Include="Library\PCGameWiki.cs" />
     <Compile Include="LogHelper.cs" />
     <Compile Include="PreferencesForm.cs">
       <SubType>Form</SubType>

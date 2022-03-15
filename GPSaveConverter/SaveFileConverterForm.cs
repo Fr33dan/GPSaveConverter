@@ -24,7 +24,7 @@ namespace GPSaveConverter
             InitializeComponent();
         }
 
-        private void fetchNonXboxSaveFiles()
+        private async Task fetchNonXboxSaveFiles()
         {
             nonXboxFiles = new List<NonXboxFileInfo>();
             string fetchLocation = gameInfo.NonXboxSaveLocation;
@@ -53,7 +53,7 @@ namespace GPSaveConverter
             }
         }
 
-        private bool promptForNonXboxSaveLocation(string reason)
+        private async Task<bool> promptForNonXboxSaveLocation(string reason)
         {
             DialogResult res;
             if (reason != null)
@@ -71,7 +71,7 @@ namespace GPSaveConverter
                 if (res == DialogResult.OK)
                 {
                     gameInfo.BaseNonXboxSaveLocation = dialog.SelectedPath + "\\";
-                    fetchNonXboxSaveFiles();
+                    await fetchNonXboxSaveFiles();
                     return true;
                 }
                 else return false;
@@ -79,7 +79,7 @@ namespace GPSaveConverter
             else return false;
         }
 
-        private void fetchXboxProfiles()
+        private async Task fetchXboxProfiles()
         {
             bool failed = false;
             string wgsFolder = Xbox.XboxPackageList.getWGSFolder(gameInfo.PackageName);
@@ -117,7 +117,7 @@ namespace GPSaveConverter
             }
         }
 
-        private void fetchNonXboxProfiles()
+        private async Task fetchNonXboxProfiles()
         {
             string profilesDir = Library.GameLibrary.GetNonXboxProfileLocation(gameInfo.BaseNonXboxSaveLocation);
             bool failed = false;
@@ -156,7 +156,7 @@ namespace GPSaveConverter
             if (failed) 
             {
                 this.nonXboxProfileListBox.Items.Add("No profiles found");
-                promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
+                await promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
             }
 
         }
@@ -194,12 +194,12 @@ namespace GPSaveConverter
             this.nonXboxFilesTable.DataSource = null;
         }
 
-        private void profileListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async void profileListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             Library.GameLibrary.ProfileID = (string)this.nonXboxProfileListBox.SelectedItem;
             if (this.currentContainer != null)
             {
-                fetchNonXboxSaveFiles();
+                await fetchNonXboxSaveFiles();
             }
         }
 
@@ -239,7 +239,7 @@ namespace GPSaveConverter
             return true;
         }
 
-        private void moveFilesToXbox(System.Collections.IEnumerable rows)
+        private async Task moveFilesToXbox(System.Collections.IEnumerable rows)
         {
             if (!CheckReadyToMove()) return;
 
@@ -277,7 +277,7 @@ namespace GPSaveConverter
             
         }
 
-        private void moveFilesFromXbox(System.Collections.IEnumerable rows)
+        private async Task moveFilesFromXbox(System.Collections.IEnumerable rows)
         {
             if (!CheckReadyToMove()) return;
             DialogResult res = MessageBox.Show(this, "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
@@ -308,29 +308,29 @@ namespace GPSaveConverter
                 logger.Info("Transfer complete");
 
                 // Reload to refresh UI.
-                this.fetchNonXboxSaveFiles();
+                await this.fetchNonXboxSaveFiles();
             }
             else { logger.Info("Transfer canceled"); }
         }
 
-        private void moveSelectionToXboxButton_Click(object sender, EventArgs e)
+        private async void moveSelectionToXboxButton_Click(object sender, EventArgs e)
         {
-            moveFilesToXbox(this.nonXboxFilesTable.SelectedRows);
+            await moveFilesToXbox(this.nonXboxFilesTable.SelectedRows);
         }
 
-        private void moveAllToXboxButton_Click(object sender, EventArgs e)
+        private async void moveAllToXboxButton_Click(object sender, EventArgs e)
         {
-            moveFilesToXbox(this.nonXboxFilesTable.Rows);
+            await moveFilesToXbox(this.nonXboxFilesTable.Rows);
         }
 
-        private void moveSelectionFromXboxButton_Click(object sender, EventArgs e)
+        private async void moveSelectionFromXboxButton_Click(object sender, EventArgs e)
         {
-            moveFilesFromXbox(this.xboxFilesTable.SelectedRows);
+            await moveFilesFromXbox(this.xboxFilesTable.SelectedRows);
         }
 
-        private void moveAllFromXboxButton_Click(object sender, EventArgs e)
+        private async void moveAllFromXboxButton_Click(object sender, EventArgs e)
         {
-            moveFilesFromXbox(this.xboxFilesTable.Rows);
+            await moveFilesFromXbox(this.xboxFilesTable.Rows);
         }
 
         private void viewXboxFilesButton_Click(object sender, EventArgs e)
@@ -343,25 +343,30 @@ namespace GPSaveConverter
             System.Diagnostics.Process.Start(gameInfo.NonXboxSaveLocation);
         }
 
-        private void packagesDataGridView_Click(object sender, EventArgs e)
+        private async void packagesDataGridView_Click(object sender, EventArgs e)
         {
             ClearForm();
 
             gameInfo = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
 
-            this.fetchXboxProfiles();
+            if (!gameInfo.nonUWPFetched)
+            {
+                await Library.GameLibrary.FetchNonUWPInformation(gameInfo);
+            }
+
+            await fetchXboxProfiles();
 
             this.promptNonXboxLocationButton.Enabled = true;
 
             if (gameInfo.BaseNonXboxSaveLocation == null || gameInfo.BaseNonXboxSaveLocation == string.Empty)
             {
-                promptForNonXboxSaveLocation("Non-Xbox save location not found in game library.");
+                await promptForNonXboxSaveLocation("Non-Xbox save location not found in game library.");
             }
             else
             {
                 if (gameInfo.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker))
                 {
-                    fetchNonXboxProfiles();
+                    await fetchNonXboxProfiles();
                 }
                 else
                 {
@@ -371,19 +376,19 @@ namespace GPSaveConverter
 
                     if (Directory.Exists(gameInfo.NonXboxSaveLocation))
                     {
-                        fetchNonXboxSaveFiles();
+                        await fetchNonXboxSaveFiles();
                     }
                     else
                     {
-                        promptForNonXboxSaveLocation("Non-Xbox save location from library does not exist.");
+                        await promptForNonXboxSaveLocation("Non-Xbox save location from library does not exist.");
                     }
                 }
             }
         }
 
-        private void promptNonXboxLocationButton_Click(object sender, EventArgs e)
+        private async void promptNonXboxLocationButton_Click(object sender, EventArgs e)
         {
-            this.promptForNonXboxSaveLocation(null);
+            await this.promptForNonXboxSaveLocation(null);
         }
 
         private bool suspendCrossMatch = false;

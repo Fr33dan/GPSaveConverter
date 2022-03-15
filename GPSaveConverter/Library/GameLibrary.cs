@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -81,6 +82,7 @@ namespace GPSaveConverter.Library
             psvLibrary = new Dictionary<string, GameInfo>();
             foreach (GameInfo newGame in jsonLibrary)
             {
+                newGame.nonUWPFetched = true;
                 newGame.BaseNonXboxSaveLocation = newGame.BaseNonXboxSaveLocation;
                 psvLibrary.Add(newGame.PackageName, newGame);
             }
@@ -113,6 +115,26 @@ namespace GPSaveConverter.Library
             return returnVal;
         }
 
+
+        public static async Task FetchNonUWPInformation(GameInfo i)
+        {
+            GameInfo psvInfo;
+            i.nonUWPFetched = true;
+
+            if (psvLibrary.TryGetValue(i.PackageName, out psvInfo))
+            {
+                i.BaseNonXboxSaveLocation = psvInfo.BaseNonXboxSaveLocation;
+                i.FileTranslations = psvInfo.FileTranslations;
+                i.WGSProfileSuffix = psvInfo.WGSProfileSuffix;
+            }
+
+            if (i.BaseNonXboxSaveLocation == null && GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+            {
+                await PCGameWiki.FetchSaveLocation(i);
+            }
+        }
+        
+
         public static string GetNonXboxProfileLocation(string baseSaveFileLocation)
         {
             return ExpandSaveFileLocation(baseSaveFileLocation.Substring(0, baseSaveFileLocation.IndexOf(Library.GameLibrary.NonSteamProfileMarker)));
@@ -124,17 +146,8 @@ namespace GPSaveConverter.Library
 
             if (!uwpLibrary.TryGetValue(gamePassID, out uwpInfo))
             {
-                throw new Exception("Game info no found in UWP library");
+                throw new Exception("Game info not found in UWP library");
             }
-            GameInfo psvInfo;
-
-            if(psvLibrary.TryGetValue(gamePassID, out psvInfo))
-            {
-                uwpInfo.BaseNonXboxSaveLocation = psvInfo.BaseNonXboxSaveLocation;
-                uwpInfo.FileTranslations = psvInfo.FileTranslations;
-                uwpInfo.WGSProfileSuffix = psvInfo.WGSProfileSuffix;
-            }
-
             return uwpInfo;
         }
     }

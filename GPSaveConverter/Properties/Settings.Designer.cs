@@ -34,5 +34,17 @@ namespace GPSaveConverter.Properties {
                 this["FileLogLevel"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AllowWebDataFetch {
+            get {
+                return ((bool)(this["AllowWebDataFetch"]));
+            }
+            set {
+                this["AllowWebDataFetch"] = value;
+            }
+        }
     }
 }

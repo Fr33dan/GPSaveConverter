@@ -5,5 +5,8 @@
     <Setting Name="FileLogLevel" Type="NLog.LogLevel" Scope="User">
       <Value Profile="(Default)">Debug</Value>
     </Setting>
+    <Setting Name="AllowWebDataFetch" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

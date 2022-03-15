@@ -11,6 +11,8 @@ namespace GPSaveConverter.Library
     internal class GameInfo
     {
         private static NLog.Logger logger = LogHelper.getClassLogger();
+
+        internal bool nonUWPFetched;
         public string Name { get; set; }
 
         [Browsable(false)]
@@ -25,8 +27,21 @@ namespace GPSaveConverter.Library
             }
         }
 
+        private string baseNonXboxSaveLocation;
+
         [Browsable(false)]
-        public string BaseNonXboxSaveLocation { get; set; }
+        public string BaseNonXboxSaveLocation
+        {
+            get
+            {
+                if (!nonUWPFetched) GameLibrary.FetchNonUWPInformation(this);
+                return baseNonXboxSaveLocation;
+            }
+            set
+            {
+                baseNonXboxSaveLocation = value;
+            }
+        }
 
         [Browsable(false)]
         public string IconLocation { get; set; }
@@ -54,13 +69,30 @@ namespace GPSaveConverter.Library
             }
         }
 
+        private string wgsProfileSuffix;
         [Browsable(false)]
-        public string WGSProfileSuffix { get; set; }
-
+        public string WGSProfileSuffix
+        {
+            get
+            {
+                if (!nonUWPFetched) GameLibrary.FetchNonUWPInformation(this);
+                return wgsProfileSuffix;
+            }
+            set { wgsProfileSuffix = value; }
+        }
+        private IList<FileTranslation> fileTranslations;
         [Browsable(false)]
-        public IList<FileTranslation> FileTranslations { get; set; }
+        public IList<FileTranslation> FileTranslations
+        {
+            get
+            {
+                if (!nonUWPFetched) GameLibrary.FetchNonUWPInformation(this);
+                return fileTranslations;
+            }
+            set { fileTranslations = value; }
+        }
 
-        
+
 
         private Image gameIcon;
 
