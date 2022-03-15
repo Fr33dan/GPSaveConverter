@@ -21,15 +21,17 @@ namespace GPSaveConverter
         {
             this.logLevelComboBox.Items.AddRange(NLog.LogLevel.AllLevels.ToArray());
             this.logLevelComboBox.SelectedIndex = Properties.Settings.Default.FileLogLevel.Ordinal;
+            this.allowNetworkCheckbox.Checked = Properties.Settings.Default.AllowWebDataFetch;
         }
 
         private void saveButton_Click(object sender, EventArgs e)
         {
             Properties.Settings.Default.FileLogLevel = this.logLevelComboBox.SelectedItem as NLog.LogLevel;
+            Properties.Settings.Default.AllowWebDataFetch = this.allowNetworkCheckbox.Checked;
+            Properties.Settings.Default.Save();
 
             NLog.LogManager.Configuration.Variables["fileLogLevel"] = GPSaveConverter.Properties.Settings.Default.FileLogLevel.ToString();
 
-            Properties.Settings.Default.Save();
             this.Hide();
         }
     }
