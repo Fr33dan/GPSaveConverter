@@ -54,9 +54,9 @@ namespace GPSaveConverter.Library
                             string[] appInfo = appInfoLine.Split('|');
                             GameInfo gameInfo = new GameInfo();
                             string name = appInfo[0].Trim();
-                            gameInfo.Name = name == string.Empty? null: name;
                             gameInfo.IconLocation = appInfo[1];
                             gameInfo.PackageName = appInfo[2];
+                            gameInfo.Name = name == string.Empty? gameInfo.PackageName : name;
                             if (!result.ContainsKey(gameInfo.PackageName))
                             {
                                 result.Add(gameInfo.PackageName, gameInfo);
