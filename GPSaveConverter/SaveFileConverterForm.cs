@@ -186,7 +186,11 @@ namespace GPSaveConverter
             Library.GameInfo[] gameInfo = await LoadGameInfo();
 
             // Don't waste time initializing library if no games are found.
-            if(gameInfo.Length >0) await Library.GameLibrary.Initialize();
+            this.exportGameLibraryToolStripMenuItem.Enabled = gameInfo.Length > 0;
+            if (this.exportGameLibraryToolStripMenuItem.Enabled) { 
+                await Library.GameLibrary.Initialize();
+                this.exportGameLibraryToolStripMenuItem.Enabled = false;
+            }
 
             this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
 
@@ -564,5 +568,23 @@ namespace GPSaveConverter
             }
         }
 
+        private void exportGameLibraryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Library.GameLibrary.Initialized)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Game Library JSON (*.json)|*.json";
+                DialogResult result = saveFileDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    JsonSerializerOptions options = new JsonSerializerOptions();
+                    options.WriteIndented = true;
+                    options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+                    options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+                    File.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson());
+                }
+            }
+        }
     }
 }

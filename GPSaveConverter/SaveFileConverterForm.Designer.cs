@@ -73,6 +73,7 @@
             this.removeTranslationButton = new System.Windows.Forms.Button();
             this.addTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
+            this.exportGameLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -483,6 +484,7 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.saveGameProfileToolStripMenuItem,
             this.loadGameProfileToolStripMenuItem,
+            this.exportGameLibraryToolStripMenuItem,
             this.preferencesToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
@@ -490,6 +492,7 @@
             // 
             // saveGameProfileToolStripMenuItem
             // 
+            this.saveGameProfileToolStripMenuItem.Enabled = false;
             this.saveGameProfileToolStripMenuItem.Name = "saveGameProfileToolStripMenuItem";
             this.saveGameProfileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.saveGameProfileToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
@@ -498,6 +501,7 @@
             // 
             // loadGameProfileToolStripMenuItem
             // 
+            this.loadGameProfileToolStripMenuItem.Enabled = false;
             this.loadGameProfileToolStripMenuItem.Name = "loadGameProfileToolStripMenuItem";
             this.loadGameProfileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.loadGameProfileToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
@@ -583,6 +587,14 @@
             this.fileTranslationListBox.Size = new System.Drawing.Size(132, 173);
             this.fileTranslationListBox.TabIndex = 0;
             this.fileTranslationListBox.SelectedIndexChanged += new System.EventHandler(this.fileTranslationListBox_SelectedIndexChanged);
+            // 
+            // exportGameLibraryToolStripMenuItem
+            // 
+            this.exportGameLibraryToolStripMenuItem.Enabled = false;
+            this.exportGameLibraryToolStripMenuItem.Name = "exportGameLibraryToolStripMenuItem";
+            this.exportGameLibraryToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.exportGameLibraryToolStripMenuItem.Text = "Export Game Library";
+            this.exportGameLibraryToolStripMenuItem.Click += new System.EventHandler(this.exportGameLibraryToolStripMenuItem_Click);
             // 
             // SaveFileConverterForm
             // 
@@ -674,6 +686,7 @@
         private System.Windows.Forms.ToolStripMenuItem showFileTranslationsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveGameProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadGameProfileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportGameLibraryToolStripMenuItem;
     }
 }
 
