@@ -15,26 +15,71 @@ namespace GPSaveConverter.Library
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
-        private static Dictionary<string, GameInfo> psvLibrary;
+        private static Dictionary<string, GameInfo> savedGameLibrary;
         private static Dictionary<string, GameInfo> uwpLibrary;
 
         public static string ProfileID;
 
+        internal static bool Initialized { get { return savedGameLibrary == null; } }
+
         static GameLibrary()
         {
-            LoadPSV();
-            uwpLibrary = GetInstalledApps();
-
             DefaultTranslation = new FileTranslation();
+        }
+
+        public static async Task Initialize()
+        {
+            if (GPSaveConverter.Properties.Settings.Default.GameLibrary == string.Empty) await Task.Run(FirstTimeInitializeGameLibrary);
+            await Task.Run(LoadSavedLibrary);
+            await Task.Run(GetInstalledApps);
+        }
+
+        private static void FirstTimeInitializeGameLibrary()
+        {
+            StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
+
+            GPSaveConverter.Properties.Settings.Default.GameLibrary = stream.ReadToEnd();
+            GPSaveConverter.Properties.Settings.Default.Save();
+        }
+
+        private static void LoadDefaultLibrary()
+        {
+            StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
+
+            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(stream.ReadToEnd());
+
+            stream.Close();
+
+            foreach (GameInfo newGame in jsonLibrary)
+            {
+                RegisterSerializedInfo(newGame);
+            }
+        }
+
+        private static void LoadSavedLibrary()
+        {
+            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(GPSaveConverter.Properties.Settings.Default.GameLibrary);
+
+            savedGameLibrary = new Dictionary<string, GameInfo>();
+            foreach (GameInfo newGame in jsonLibrary)
+            {
+                savedGameLibrary.Add(newGame.PackageName, newGame);
+            }
+
+        }
+
+        private static void CheckInitialization()
+        {
+            if (uwpLibrary == null) Initialize();
         }
 
         /// <summary>
         /// Gets a list of installed UWP Apps on the system, containing each app name + AUMID, separated by '|' 
         /// </summary>
         /// <returns>List of installed UWP Apps</returns>
-        public static Dictionary<string, GameInfo> GetInstalledApps()
+        public static void GetInstalledApps()
         {
-            Dictionary<string, GameInfo> result = new Dictionary<string, GameInfo>();
+            uwpLibrary = new Dictionary<string, GameInfo>();
             try
             {
                 using (Stream stream = new MemoryStream(GPSaveConverter.Properties.Resources.GetAUMIDScript))
@@ -42,7 +87,7 @@ namespace GPSaveConverter.Library
                     using (StreamReader reader = new StreamReader(stream))
                     {
                         string scriptText = reader.ReadToEnd();
-                        logger.Debug("Starting Powershell script to retreive UWP package manifests.");
+                        logger.Info("Getting UWP package manifests...");
                         string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
                         logger.Trace("Powershell script results:\n{0}", scriptOutput);
 
@@ -57,13 +102,14 @@ namespace GPSaveConverter.Library
                             gameInfo.IconLocation = appInfo[1];
                             gameInfo.PackageName = appInfo[2];
                             gameInfo.Name = name == string.Empty? gameInfo.PackageName : name;
-                            if (!result.ContainsKey(gameInfo.PackageName))
+                            if (!uwpLibrary.ContainsKey(gameInfo.PackageName))
                             {
-                                result.Add(gameInfo.PackageName, gameInfo);
+                                uwpLibrary.Add(gameInfo.PackageName, gameInfo);
                             }
                         }
 
-                        logger.Debug("Found {0} UWP Packages.", result.Count);
+                        logger.Debug("Found {0} UWP Packages.", uwpLibrary.Count);
+                        logger.Info("UWP manifests successfully loaded.", uwpLibrary.Count);
                     }
                 }
             }
@@ -71,25 +117,6 @@ namespace GPSaveConverter.Library
             {
                 throw new Exception("Error trying to get installed apps on your PC " + Environment.NewLine + e.Message, e.InnerException);
             }
-
-            return result;
-        }
-
-        public static void LoadPSV()
-        {
-            StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
-
-            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(stream.ReadToEnd());
-
-            psvLibrary = new Dictionary<string, GameInfo>();
-            foreach (GameInfo newGame in jsonLibrary)
-            {
-                newGame.nonUWPFetched = true;
-                newGame.BaseNonXboxSaveLocation = newGame.BaseNonXboxSaveLocation;
-                psvLibrary.Add(newGame.PackageName, newGame);
-            }
-
-            stream.Close();
         }
 
         public static string ExpandSaveFileLocation(string unexpanedSaveFileLocation)
@@ -118,12 +145,13 @@ namespace GPSaveConverter.Library
         }
 
 
-        public static async Task FetchNonUWPInformation(GameInfo i)
+        public static async Task PopulateNonUWPInformation(GameInfo i)
         {
+            CheckInitialization();
             GameInfo psvInfo;
-            i.nonUWPFetched = true;
+            i.NonUWPDataPopulated = true;
 
-            if (psvLibrary.TryGetValue(i.PackageName, out psvInfo))
+            if (savedGameLibrary.TryGetValue(i.PackageName, out psvInfo))
             {
                 RegisterSerializedInfo(psvInfo);
             }
@@ -136,6 +164,7 @@ namespace GPSaveConverter.Library
 
         public static void RegisterSerializedInfo(GameInfo deserializedInfo)
         {
+            CheckInitialization();
             GameInfo i = getGameInfo(deserializedInfo.PackageName);
             i.BaseNonXboxSaveLocation = deserializedInfo.BaseNonXboxSaveLocation;
             i.FileTranslations.AddRange(deserializedInfo.FileTranslations);
@@ -150,6 +179,7 @@ namespace GPSaveConverter.Library
 
         public static GameInfo getGameInfo(string packageName)
         {
+            CheckInitialization();
             GameInfo uwpInfo;
 
             if (!uwpLibrary.TryGetValue(packageName, out uwpInfo))

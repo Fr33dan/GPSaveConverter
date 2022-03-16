@@ -13,7 +13,7 @@ namespace GPSaveConverter.Xbox
         private static Library.GameInfo[] internalList;
         static XboxPackageList()
         {
-            logger.Info("Loading UWP Package List...");
+            logger.Info("Loading Xbox Package List...");
             string packageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages");
             List<Library.GameInfo> list = new List<Library.GameInfo>();
             foreach(string package in Directory.GetDirectories(packageFolder))
@@ -26,7 +26,14 @@ namespace GPSaveConverter.Xbox
                 }
             }
             internalList = list.ToArray();
-            logger.Info("UWP Packages loaded!");
+            if (internalList.Length > 0)
+            {
+                logger.Info("Xbox packages loaded!");
+            }
+            else
+            {
+                logger.Info("No Xbox packages found.");
+            }
         }
         internal static string getWGSFolder(string packageName)
         {

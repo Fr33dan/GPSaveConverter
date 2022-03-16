@@ -179,7 +179,15 @@ namespace GPSaveConverter
                 GPSaveConverter.Properties.Settings.Default.FirstRun = false;
                 GPSaveConverter.Properties.Settings.Default.Save();
             }
+        }
+
+        private async void SaveFileConverterForm_Shown(object sender, EventArgs e)
+        {
+
             Library.GameInfo[] gameInfo = await LoadGameInfo();
+
+            // Don't waste time initializing library if no games are found.
+            if(gameInfo.Length >0) await Library.GameLibrary.Initialize();
 
             this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
 
@@ -364,9 +372,9 @@ namespace GPSaveConverter
             ActiveGame = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
             
             // Do this before working with non-UWP data or the fetch won't be awaited.
-            if (!ActiveGame.nonUWPFetched)
+            if (!ActiveGame.NonUWPDataPopulated)
             {
-                await Library.GameLibrary.FetchNonUWPInformation(ActiveGame);
+                await Library.GameLibrary.PopulateNonUWPInformation(ActiveGame);
             }
 
             this.fileTranslationListBox.Items.AddRange(ActiveGame.FileTranslations.ToArray());

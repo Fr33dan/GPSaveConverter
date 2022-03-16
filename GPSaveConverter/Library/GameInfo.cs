@@ -13,7 +13,7 @@ namespace GPSaveConverter.Library
     {
         private static NLog.Logger logger = LogHelper.getClassLogger();
 
-        internal bool nonUWPFetched;
+        internal bool NonUWPDataPopulated = false;
         public string Name { get; set; }
 
         [Browsable(false)]
@@ -35,7 +35,6 @@ namespace GPSaveConverter.Library
         {
             get
             {
-                if (!nonUWPFetched) GameLibrary.FetchNonUWPInformation(this);
                 return baseNonXboxSaveLocation;
             }
             set
@@ -77,7 +76,6 @@ namespace GPSaveConverter.Library
         {
             get
             {
-                if (!nonUWPFetched) GameLibrary.FetchNonUWPInformation(this);
                 return wgsProfileSuffix;
             }
             set { wgsProfileSuffix = value; }
@@ -88,7 +86,6 @@ namespace GPSaveConverter.Library
         {
             get
             {
-                if (!nonUWPFetched) GameLibrary.FetchNonUWPInformation(this);
                 return fileTranslations;
             }
             set { fileTranslations = value; }
@@ -105,30 +102,25 @@ namespace GPSaveConverter.Library
 
         private FileTranslation findTranslation(NonXboxFileInfo file)
         {
-            if (this.FileTranslations != null)
+            foreach (FileTranslation t in this.FileTranslations)
             {
-                foreach (FileTranslation t in this.FileTranslations)
+                if (Regex.Match(file.RelativePath, t.NonXboxFilenameRegex).Success)
                 {
-                    if (Regex.Match(file.RelativePath, t.NonXboxFilenameRegex).Success)
-                    {
-                        return t;
-                    }
+                    return t;
                 }
             }
+            
             return null;
         }
         private FileTranslation findTranslation(Xbox.XboxFileInfo file)
         {
-            if (this.FileTranslations != null)
+            foreach (FileTranslation t in this.FileTranslations)
             {
-                foreach (FileTranslation t in this.FileTranslations)
+                if (Regex.Match(file.ContainerName1, t.ContainerName1Regex).Success
+                    && Regex.Match(file.ContainerName1, t.ContainerName1Regex).Success
+                    && Regex.Match(file.FileID, t.XboxFileIDRegex).Success)
                 {
-                    if (Regex.Match(file.ContainerName1, t.ContainerName1Regex).Success
-                        && Regex.Match(file.ContainerName1, t.ContainerName1Regex).Success
-                        && Regex.Match(file.FileID, t.XboxFileIDRegex).Success)
-                    {
-                        return t;
-                    }
+                    return t;
                 }
             }
             return null;
