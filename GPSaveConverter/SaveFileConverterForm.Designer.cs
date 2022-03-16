@@ -599,6 +599,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "SaveFileConverterForm";
             this.Text = "Xbox Save File Converter";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SaveFileConverterForm_FormClosing);
             this.Load += new System.EventHandler(this.SaveFileConverterForm_Load);
             this.Shown += new System.EventHandler(this.SaveFileConverterForm_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).EndInit();

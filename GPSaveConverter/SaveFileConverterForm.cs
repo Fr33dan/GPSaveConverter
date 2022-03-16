@@ -183,7 +183,6 @@ namespace GPSaveConverter
 
         private async void SaveFileConverterForm_Shown(object sender, EventArgs e)
         {
-
             Library.GameInfo[] gameInfo = await LoadGameInfo();
 
             // Don't waste time initializing library if no games are found.
@@ -192,6 +191,16 @@ namespace GPSaveConverter
             this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
 
             this.packagesDataGridView.DataSource = gameInfo;
+        }
+
+        private void SaveFileConverterForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // No need to save library if it was never initialized.
+            if (Library.GameLibrary.Initialized)
+            {
+                GPSaveConverter.Properties.Settings.Default.GameLibrary = Library.GameLibrary.GetLibraryJson();
+                GPSaveConverter.Properties.Settings.Default.Save();
+            }
         }
 
         private async Task<Library.GameInfo[]> LoadGameInfo()
@@ -554,5 +563,6 @@ namespace GPSaveConverter
                 }
             }
         }
+
     }
 }
