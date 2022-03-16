@@ -65,6 +65,7 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveGameProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadGameProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportGameLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showFileTranslationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,7 +74,7 @@
             this.removeTranslationButton = new System.Windows.Forms.Button();
             this.addTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
-            this.exportGameLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileTranslationsMarkerLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -508,6 +509,14 @@
             this.loadGameProfileToolStripMenuItem.Text = "Load Game Profile";
             this.loadGameProfileToolStripMenuItem.Click += new System.EventHandler(this.loadGameProfileToolStripMenuItem_Click);
             // 
+            // exportGameLibraryToolStripMenuItem
+            // 
+            this.exportGameLibraryToolStripMenuItem.Enabled = false;
+            this.exportGameLibraryToolStripMenuItem.Name = "exportGameLibraryToolStripMenuItem";
+            this.exportGameLibraryToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.exportGameLibraryToolStripMenuItem.Text = "Export Game Library";
+            this.exportGameLibraryToolStripMenuItem.Click += new System.EventHandler(this.exportGameLibraryToolStripMenuItem_Click);
+            // 
             // preferencesToolStripMenuItem
             // 
             this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
@@ -539,6 +548,7 @@
             this.fileTranslationPanel.Controls.Add(this.removeTranslationButton);
             this.fileTranslationPanel.Controls.Add(this.addTranslationButton);
             this.fileTranslationPanel.Controls.Add(this.fileTranslationListBox);
+            this.fileTranslationPanel.Controls.Add(this.fileTranslationsMarkerLabel);
             this.fileTranslationPanel.Location = new System.Drawing.Point(9, 326);
             this.fileTranslationPanel.Name = "fileTranslationPanel";
             this.fileTranslationPanel.Size = new System.Drawing.Size(407, 220);
@@ -582,19 +592,20 @@
             this.fileTranslationListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.fileTranslationListBox.FormattingEnabled = true;
-            this.fileTranslationListBox.Location = new System.Drawing.Point(0, 3);
+            this.fileTranslationListBox.Location = new System.Drawing.Point(0, 20);
             this.fileTranslationListBox.Name = "fileTranslationListBox";
             this.fileTranslationListBox.Size = new System.Drawing.Size(132, 173);
             this.fileTranslationListBox.TabIndex = 0;
             this.fileTranslationListBox.SelectedIndexChanged += new System.EventHandler(this.fileTranslationListBox_SelectedIndexChanged);
             // 
-            // exportGameLibraryToolStripMenuItem
+            // fileTranslationsMarkerLabel
             // 
-            this.exportGameLibraryToolStripMenuItem.Enabled = false;
-            this.exportGameLibraryToolStripMenuItem.Name = "exportGameLibraryToolStripMenuItem";
-            this.exportGameLibraryToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
-            this.exportGameLibraryToolStripMenuItem.Text = "Export Game Library";
-            this.exportGameLibraryToolStripMenuItem.Click += new System.EventHandler(this.exportGameLibraryToolStripMenuItem_Click);
+            this.fileTranslationsMarkerLabel.AutoSize = true;
+            this.fileTranslationsMarkerLabel.Location = new System.Drawing.Point(3, 4);
+            this.fileTranslationsMarkerLabel.Name = "fileTranslationsMarkerLabel";
+            this.fileTranslationsMarkerLabel.Size = new System.Drawing.Size(86, 13);
+            this.fileTranslationsMarkerLabel.TabIndex = 4;
+            this.fileTranslationsMarkerLabel.Text = "File Translations:";
             // 
             // SaveFileConverterForm
             // 
@@ -636,6 +647,7 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.fileTranslationPanel.ResumeLayout(false);
+            this.fileTranslationPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -687,6 +699,7 @@
         private System.Windows.Forms.ToolStripMenuItem saveGameProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadGameProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportGameLibraryToolStripMenuItem;
+        private System.Windows.Forms.Label fileTranslationsMarkerLabel;
     }
 }
 

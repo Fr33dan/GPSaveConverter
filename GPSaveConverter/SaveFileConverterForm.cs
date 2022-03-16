@@ -183,14 +183,11 @@ namespace GPSaveConverter
 
         private async void SaveFileConverterForm_Shown(object sender, EventArgs e)
         {
-            Library.GameInfo[] gameInfo = await LoadGameInfo();
+            await Library.GameLibrary.Initialize();
 
-            // Don't waste time initializing library if no games are found.
-            this.exportGameLibraryToolStripMenuItem.Enabled = gameInfo.Length > 0;
-            if (this.exportGameLibraryToolStripMenuItem.Enabled) { 
-                await Library.GameLibrary.Initialize();
-                this.exportGameLibraryToolStripMenuItem.Enabled = false;
-            }
+            this.exportGameLibraryToolStripMenuItem.Enabled = true;
+
+            Library.GameInfo[] gameInfo = await LoadGameInfo();
 
             this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
 
@@ -582,7 +579,7 @@ namespace GPSaveConverter
                     options.WriteIndented = true;
                     options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                     options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-                    File.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson());
+                    File.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson(options));
                 }
             }
         }
