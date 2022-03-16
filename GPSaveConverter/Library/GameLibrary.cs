@@ -20,7 +20,7 @@ namespace GPSaveConverter.Library
 
         public static string ProfileID;
 
-        internal static bool Initialized { get { return savedGameLibrary == null; } }
+        internal static bool Initialized { get { return savedGameLibrary != null; } }
 
         static GameLibrary()
         {
@@ -117,6 +117,11 @@ namespace GPSaveConverter.Library
             {
                 throw new Exception("Error trying to get installed apps on your PC " + Environment.NewLine + e.Message, e.InnerException);
             }
+        }
+
+        public static string GetLibraryJson(JsonSerializerOptions options = null)
+        {
+            return JsonSerializer.Serialize(savedGameLibrary.Values.ToArray(), options);
         }
 
         public static string ExpandSaveFileLocation(string unexpanedSaveFileLocation)
