@@ -32,6 +32,7 @@
             this.logLevelLabel = new System.Windows.Forms.Label();
             this.saveButton = new System.Windows.Forms.Button();
             this.allowNetworkCheckbox = new System.Windows.Forms.CheckBox();
+            this.reloadLibraryButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // logLevelComboBox
@@ -53,7 +54,7 @@
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(185, 62);
+            this.saveButton.Location = new System.Drawing.Point(185, 99);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(75, 23);
             this.saveButton.TabIndex = 2;
@@ -71,18 +72,29 @@
             this.allowNetworkCheckbox.Text = "Allow Internet Game Info Sources";
             this.allowNetworkCheckbox.UseVisualStyleBackColor = true;
             // 
+            // reloadLibraryButton
+            // 
+            this.reloadLibraryButton.Location = new System.Drawing.Point(76, 62);
+            this.reloadLibraryButton.Name = "reloadLibraryButton";
+            this.reloadLibraryButton.Size = new System.Drawing.Size(184, 23);
+            this.reloadLibraryButton.TabIndex = 4;
+            this.reloadLibraryButton.Text = "Reload Default Game Library Data";
+            this.reloadLibraryButton.UseVisualStyleBackColor = true;
+            this.reloadLibraryButton.Click += new System.EventHandler(this.reloadLibraryButton_Click);
+            // 
             // PreferencesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(272, 98);
+            this.ClientSize = new System.Drawing.Size(272, 134);
+            this.Controls.Add(this.reloadLibraryButton);
             this.Controls.Add(this.allowNetworkCheckbox);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.logLevelLabel);
             this.Controls.Add(this.logLevelComboBox);
+            this.Icon = global::GPSaveConverter.Properties.Resources.Icon;
             this.Name = "PreferencesForm";
             this.Text = "Preferences";
-            this.Icon = GPSaveConverter.Properties.Resources.Icon;
             this.Load += new System.EventHandler(this.PreferencesForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -95,5 +107,6 @@
         private System.Windows.Forms.Label logLevelLabel;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.CheckBox allowNetworkCheckbox;
+        private System.Windows.Forms.Button reloadLibraryButton;
     }
 }

@@ -42,7 +42,7 @@ namespace GPSaveConverter.Library
             GPSaveConverter.Properties.Settings.Default.Save();
         }
 
-        private static void LoadDefaultLibrary()
+        internal static void LoadDefaultLibrary()
         {
             StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
 
@@ -153,12 +153,12 @@ namespace GPSaveConverter.Library
         public static async Task PopulateNonUWPInformation(GameInfo i)
         {
             CheckInitialization();
-            GameInfo psvInfo;
+            GameInfo saveLibraryInfo;
             i.NonUWPDataPopulated = true;
 
-            if (savedGameLibrary.TryGetValue(i.PackageName, out psvInfo))
+            if (savedGameLibrary.TryGetValue(i.PackageName, out saveLibraryInfo))
             {
-                RegisterSerializedInfo(psvInfo);
+                RegisterSerializedInfo(saveLibraryInfo);
             }
 
             if (i.BaseNonXboxSaveLocation == null && GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
