@@ -7,5 +7,4 @@ There is an extremely small (as of now at least) game library that contains the 
 
 It is strongly recommended you back up both save file folders before using this application. 
 
-![Save File Converter v0 3 0 Screenshot](https://user-images.githubusercontent.com/4670572/158036303-72df728a-cc0c-44a8-8c59-f14c614f9488.png)
-
+![Save File Converter v0 4 0 Screenshot](https://user-images.githubusercontent.com/4670572/158639297-fde0c50b-c21d-464c-8443-cf85a0db5658.png)
