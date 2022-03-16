@@ -231,14 +231,24 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreditsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreditsForm.Designer.cs">
+      <DependentUpon>CreditsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Library\FileTranslation.cs" />
     <Compile Include="Library\PCGameWiki.cs" />
     <Compile Include="LogHelper.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="PreferencesForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="PreferencesForm.Designer.cs">
       <DependentUpon>PreferencesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RichTextBoxFixedForFriendlyLinks.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Xbox\XboxContainerIndex.cs" />
     <Compile Include="Xbox\XboxFileContainer.cs" />
@@ -262,6 +272,9 @@
     <Compile Include="Xbox\XboxPackageList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="CreditsForm.resx">
+      <DependentUpon>CreditsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PreferencesForm.resx">
       <DependentUpon>PreferencesForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -275,6 +288,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="GPSaveConverterUnprotected.snk" />
+    <None Include="Resources\Credits.rtf" />
     <None Include="Resources\nlog.config" />
     <None Include="packages.config" />
     <None Include="Resources\GameLibrary.json" />

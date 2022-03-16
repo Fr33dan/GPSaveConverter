@@ -19,7 +19,7 @@ namespace GPSaveConverter
         internal Library.GameInfo ActiveGame { get; set; }
         List<NonXboxFileInfo> nonXboxFiles;
         private PreferencesForm prefsForm;
-
+        private CreditsForm creditsForm;
         public SaveFileConverterForm()
         {
             InitializeComponent();
@@ -582,6 +582,15 @@ namespace GPSaveConverter
                     File.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson(options));
                 }
             }
+        }
+
+        private void creditsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (creditsForm == null)
+            {
+                creditsForm = new CreditsForm();
+            }
+            creditsForm.Show(this);
         }
     }
 }

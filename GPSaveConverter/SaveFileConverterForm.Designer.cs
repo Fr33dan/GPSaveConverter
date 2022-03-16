@@ -75,6 +75,7 @@
             this.addTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
             this.fileTranslationsMarkerLabel = new System.Windows.Forms.Label();
+            this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -527,7 +528,8 @@
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showFileTranslationsToolStripMenuItem});
+            this.showFileTranslationsToolStripMenuItem,
+            this.creditsToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "View";
@@ -606,6 +608,13 @@
             this.fileTranslationsMarkerLabel.Size = new System.Drawing.Size(86, 13);
             this.fileTranslationsMarkerLabel.TabIndex = 4;
             this.fileTranslationsMarkerLabel.Text = "File Translations:";
+            // 
+            // creditsToolStripMenuItem
+            // 
+            this.creditsToolStripMenuItem.Name = "creditsToolStripMenuItem";
+            this.creditsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.creditsToolStripMenuItem.Text = "Credits";
+            this.creditsToolStripMenuItem.Click += new System.EventHandler(this.creditsToolStripMenuItem_Click);
             // 
             // SaveFileConverterForm
             // 
@@ -700,6 +709,7 @@
         private System.Windows.Forms.ToolStripMenuItem loadGameProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportGameLibraryToolStripMenuItem;
         private System.Windows.Forms.Label fileTranslationsMarkerLabel;
+        private System.Windows.Forms.ToolStripMenuItem creditsToolStripMenuItem;
     }
 }
 
