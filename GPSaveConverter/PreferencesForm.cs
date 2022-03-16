@@ -64,5 +64,14 @@ namespace GPSaveConverter
                 Library.GameLibrary.LoadDefaultLibrary();
             }
         }
+
+        private void PreferencesForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+        }
     }
 }

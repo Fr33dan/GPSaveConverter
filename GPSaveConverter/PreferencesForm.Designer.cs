@@ -95,6 +95,7 @@
             this.Icon = global::GPSaveConverter.Properties.Resources.Icon;
             this.Name = "PreferencesForm";
             this.Text = "Preferences";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PreferencesForm_FormClosing);
             this.Load += new System.EventHandler(this.PreferencesForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
