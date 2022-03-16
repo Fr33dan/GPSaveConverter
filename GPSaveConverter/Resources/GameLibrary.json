@@ -42,5 +42,29 @@
         "XboxFileID": "${FileName}"
       }
     ]
+  },
+  {
+    "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
+    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\",
+    "FileTranslations": [
+      {
+        "NonXboxFilename": "${GameProfile}",
+        "XboxFileID": "${GameProfile}",
+        "ContainerName1": "${GameProfile}",
+        "ContainerName2": "${GameProfile}",
+        "NamedRegexGroups": [
+          "(?<GameProfile>game_profile\\.bin)"
+        ]
+      },
+      {
+        "NonXboxFilename": "gotgsavegame${FileNumber}.dat",
+        "XboxFileID": "gotgsavegame${FileNumber}.dat",
+        "ContainerName1": "gotgsavegame${FileNumber}.dat",
+        "ContainerName2": "gotgsavegame${FileNumber}.dat",
+        "NamedRegexGroups": [
+          "(?<FileNumber>[0-9]+)"
+        ]
+      }
+    ]
   }
 ]
