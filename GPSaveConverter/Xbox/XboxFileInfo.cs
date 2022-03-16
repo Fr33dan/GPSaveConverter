@@ -32,7 +32,7 @@ namespace GPSaveConverter.Xbox
 
         [Display(Order = 1), DisplayName("Container Name 1")]
         public string ContainerName1 { get { return parent.ContainerID[0]; } }
-        [Display(Order = 2), DisplayName("Container Name 1")]
+        [Display(Order = 2), DisplayName("Container Name 2")]
         public string ContainerName2 { get { return parent.ContainerID[1]; } }
 
         /// <summary>
