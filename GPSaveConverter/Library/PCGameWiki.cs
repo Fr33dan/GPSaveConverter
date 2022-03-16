@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json.Nodes;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace GPSaveConverter.Library
 {
@@ -14,7 +15,9 @@ namespace GPSaveConverter.Library
         public static readonly string[,] FolderNameSubstitutions = new string[,] { { "{{p|userprofile}}", "	%USERPROFILE%" }
                                                                                  , { "{{p|appdata}}", "	%APPDATA%" }
                                                                                  , { "{{p|localappdata}}", "%LOCALAPPDATA%" }
-                                                                                 , { "{{p|programdata}}", "	%PROGRAMDATA%" }};
+                                                                                 , { "{{p|programdata}}", "	%PROGRAMDATA%" }
+                                                                                 , { "{{p|uid}}", "<user-id>"}
+                                                                                 , { "{{p|steam}}", "<Steam-folder>"} };
         public static async Task FetchSaveLocation(GameInfo i)
         {
             logger.Info("Fetching save data from pcgamingwiki.com");
@@ -68,7 +71,7 @@ namespace GPSaveConverter.Library
             {
                 string foundLocation;
                 Dictionary<string, string> saveLocationTable = parseWikiTable(wikiTable);
-                if (saveLocationTable.TryGetValue("Windows", out foundLocation))
+                if (saveLocationTable.TryGetValue("Windows", out foundLocation) && foundLocation != String.Empty)
                 {
                     i.BaseNonXboxSaveLocation = foundLocation;
                     logger.Info("Save Data location loaded");
@@ -118,7 +121,9 @@ namespace GPSaveConverter.Library
         {
             for (int i = 0; i < FolderNameSubstitutions.GetLength(0); i++)
             {
-                path = path.Replace(FolderNameSubstitutions[i,0], FolderNameSubstitutions[i,1]);
+                path = Regex.Replace(path, Regex.Escape(FolderNameSubstitutions[i, 0]), FolderNameSubstitutions[i, 1].Replace("$", "$$"),RegexOptions.IgnoreCase);
+
+                //path.Replace(FolderNameSubstitutions[i,0], FolderNameSubstitutions[i,1]);
             }
             return path;
         }

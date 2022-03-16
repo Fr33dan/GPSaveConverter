@@ -6,10 +6,9 @@
       {
         "ContainerName1": "TPHCONTAINER",
         "ContainerName2": "TPHCONTAINER",
-        "NonXboxRegex": "([\\w\\-. \\\\])",
-        "NonXboxSubstitution": "$1",
-        "XboxFileIDRegex": "([\\w\\-. \\\\])",
-        "XboxFileIDSubstitution": "$1"
+        "NamedRegexGroups": [ "(?<FileName>[\\w\\-. \\\\]+)" ],
+        "NonXboxFilename": "${FileName}",
+        "XboxFileID": "${FileName}"
       }
     ]
   },
@@ -20,11 +19,9 @@
       {
         "ContainerName1": "SaveGame",
         "ContainerName2": "",
-        "_bkpup0": null,
-        "NonXboxRegex": "saveFile([0-9](_bkup[0-9]|))\\.sav",
-        "NonXboxSubstitution": "SaveSlot$1",
-        "XboxFileIDRegex": "SaveSlot([0-9](_bkup[0-9]|))",
-        "XboxFileIDSubstitution": "saveFile$1.sav"
+        "NamedRegexGroups": [ "(?<FileSlot>[0-9](_bkup[0-9]|))" ],
+        "XboxFileID": "SaveSlot${FileSlot}",
+        "NonXboxFilename": "saveFile${FileSlot}.sav"
       }
     ]
   },
@@ -40,48 +37,9 @@
       {
         "ContainerName1": "Book",
         "ContainerName2": "Book",
-        "NonXboxRegex": "([\\w\\-. \\\\])",
-        "NonXboxSubstitution": "$1",
-        "XboxFileIDRegex": "([\\w\\-. \\\\])",
-        "XboxFileIDSubstitution": "$1"
-      }
-    ]
-  },
-  {
-    "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
-    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\",
-    "FileTranslations": [
-      {
-        "ContainerName1": "game_profile.bin",
-        "ContainerName2": "game_profile.bin",
-        "NonXboxRegex": "(game_profile\\.bin)",
-        "NonXboxSubstitution": "$1",
-        "XboxFileIDRegex": "(game_profile\\.bin)",
-        "XboxFileIDSubstitution": "$1"
-      },
-      {
-        "ContainerName1": "gotgsavegame0002.dat",
-        "ContainerName2": "gotgsavegame0002.dat",
-        "NonXboxRegex": "(gotgsavegame0002\\.dat)",
-        "NonXboxSubstitution": "$1",
-        "XboxFileIDRegex": "(gotgsavegame0002\\.dat)",
-        "XboxFileIDSubstitution": "$1"
-      },
-      {
-        "ContainerName1": "gotgsavegame0001.dat",
-        "ContainerName2": "gotgsavegame0001.dat",
-        "NonXboxRegex": "(gotgsavegame0001\\.dat)",
-        "NonXboxSubstitution": "$1",
-        "XboxFileIDRegex": "(gotgsavegame0001\\.dat)",
-        "XboxFileIDSubstitution": "$1"
-      },
-      {
-        "ContainerName1": "gotgsavegame0000.dat",
-        "ContainerName2": "gotgsavegame0000.dat",
-        "NonXboxRegex": "(gotgsavegame0000\\.dat)",
-        "NonXboxSubstitution": "$1",
-        "XboxFileIDRegex": "(gotgsavegame0000\\.dat)",
-        "XboxFileIDSubstitution": "$1"
+        "NamedRegexGroups": [ "(?<FileName>[\\w\\-. \\\\]+)" ],
+        "NonXboxFilename": "${FileName}",
+        "XboxFileID": "${FileName}"
       }
     ]
   }

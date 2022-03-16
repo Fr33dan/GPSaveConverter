@@ -58,5 +58,17 @@ namespace GPSaveConverter.Properties {
                 this["FirstRun"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowFileTranslations {
+            get {
+                return ((bool)(this["ShowFileTranslations"]));
+            }
+            set {
+                this["ShowFileTranslations"] = value;
+            }
+        }
     }
 }

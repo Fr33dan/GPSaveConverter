@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,19 +16,24 @@ namespace GPSaveConverter
     {
         private static NLog.Logger logger = LogHelper.getClassLogger();
         Xbox.XboxContainerIndex currentContainer;
-        Library.GameInfo gameInfo;
+        internal Library.GameInfo ActiveGame { get; set; }
         List<NonXboxFileInfo> nonXboxFiles;
         private PreferencesForm prefsForm;
 
         public SaveFileConverterForm()
         {
             InitializeComponent();
+
+            if (!Properties.Settings.Default.ShowFileTranslations)
+            {
+                toggleFileTranslationPanel();
+            }
         }
 
         private async Task fetchNonXboxSaveFiles()
         {
             nonXboxFiles = new List<NonXboxFileInfo>();
-            string fetchLocation = gameInfo.NonXboxSaveLocation;
+            string fetchLocation = ActiveGame.NonXboxSaveLocation;
 
             this.foldersToolTip.SetToolTip(this.nonXboxFilesLabel, fetchLocation);
 
@@ -70,7 +76,7 @@ namespace GPSaveConverter
                 res = dialog.ShowDialog();
                 if (res == DialogResult.OK)
                 {
-                    gameInfo.BaseNonXboxSaveLocation = dialog.SelectedPath + "\\";
+                    ActiveGame.BaseNonXboxSaveLocation = dialog.SelectedPath + "\\";
                     await fetchNonXboxSaveFiles();
                     return true;
                 }
@@ -82,7 +88,7 @@ namespace GPSaveConverter
         private async Task fetchXboxProfiles()
         {
             bool failed = false;
-            string wgsFolder = Xbox.XboxPackageList.getWGSFolder(gameInfo.PackageName);
+            string wgsFolder = Xbox.XboxPackageList.getWGSFolder(ActiveGame.PackageName);
             this.xboxProfileListBox.Items.Clear();
             foreach (string dir in Directory.GetDirectories(wgsFolder))
             {
@@ -119,7 +125,7 @@ namespace GPSaveConverter
 
         private async Task fetchNonXboxProfiles()
         {
-            string profilesDir = Library.GameLibrary.GetNonXboxProfileLocation(gameInfo.BaseNonXboxSaveLocation);
+            string profilesDir = Library.GameLibrary.GetNonXboxProfileLocation(ActiveGame.BaseNonXboxSaveLocation);
             bool failed = false;
 
             this.nonXboxProfileListBox.Items.Clear();
@@ -129,7 +135,7 @@ namespace GPSaveConverter
                 {
                     Library.GameLibrary.ProfileID = p.Replace(profilesDir, "");
 
-                    if (Directory.Exists(gameInfo.NonXboxSaveLocation))
+                    if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
                     {
                         this.nonXboxProfileListBox.Items.Add(Library.GameLibrary.ProfileID);
                     }
@@ -190,8 +196,10 @@ namespace GPSaveConverter
         private void ClearForm()
         {
             this.foldersToolTip.RemoveAll();
+            this.fileTranslationListBox.Items.Clear();
 
             this.promptNonXboxLocationButton.Enabled = false;
+            this.fileTranslationListBox.Enabled = false;
             this.viewXboxFilesButton.Enabled = false;
             this.viewNonXboxFileButton.Enabled = false;
             this.nonXboxProfileListBox.Items.Clear();
@@ -211,7 +219,7 @@ namespace GPSaveConverter
 
         private bool CheckReadyToMove()
         {
-            if(gameInfo == null)
+            if(ActiveGame == null)
             {
                 MessageBox.Show(this, "Select a game", "Select a game");
                 return false;
@@ -223,19 +231,19 @@ namespace GPSaveConverter
                 return false;
             }
 
-            if(gameInfo.BaseNonXboxSaveLocation == null || gameInfo.BaseNonXboxSaveLocation == String.Empty)
+            if(ActiveGame.BaseNonXboxSaveLocation == null || ActiveGame.BaseNonXboxSaveLocation == String.Empty)
             {
                 MessageBox.Show(this, "Non-Xbox Save location not configured", "Configure non-Xbox Location");
                 return false;
             }
 
-            if(gameInfo.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker) && Library.GameLibrary.ProfileID == null)
+            if(ActiveGame.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker) && Library.GameLibrary.ProfileID == null)
             {
                 MessageBox.Show(this, "Select non-Xbox Profile (or select save file location manually)", "Configure Profile");
                 return false;
             }
 
-            if (!Directory.Exists(gameInfo.NonXboxSaveLocation))
+            if (!Directory.Exists(ActiveGame.NonXboxSaveLocation))
             {
                 MessageBox.Show(this, "Non-Xbox save location not found. Please check your configuration", "Configure Profile");
                 return false;
@@ -258,7 +266,7 @@ namespace GPSaveConverter
                     {
                         try
                         {
-                            gameInfo.getXboxFileVersion(this.currentContainer, file, true);
+                            ActiveGame.getXboxFileVersion(this.currentContainer, file, true);
                         }
                         catch (Exception e)
                         {
@@ -276,7 +284,7 @@ namespace GPSaveConverter
                 logger.Info("Transfer complete");
 
                 // Reload to refresh UI.
-                currentContainer = new Xbox.XboxContainerIndex(gameInfo, (string)this.xboxProfileListBox.SelectedItem);
+                currentContainer = new Xbox.XboxContainerIndex(ActiveGame, (string)this.xboxProfileListBox.SelectedItem);
                 this.xboxFilesTable.DataSource = currentContainer.getFileList();
             }
             else { logger.Info("Transfer canceled"); }
@@ -296,7 +304,7 @@ namespace GPSaveConverter
                     {
                         try
                         {
-                            gameInfo.getNonXboxFileVersion(file, true);
+                            ActiveGame.getNonXboxFileVersion(file, true);
                         }
                         catch (Exception e)
                         {
@@ -346,31 +354,37 @@ namespace GPSaveConverter
 
         private void viewNonXboxFileButton_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(gameInfo.NonXboxSaveLocation);
+            System.Diagnostics.Process.Start(ActiveGame.NonXboxSaveLocation);
         }
 
         private async void packagesDataGridView_Click(object sender, EventArgs e)
         {
             ClearForm();
 
-            gameInfo = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
-
-            if (!gameInfo.nonUWPFetched)
+            ActiveGame = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
+            
+            // Do this before working with non-UWP data or the fetch won't be awaited.
+            if (!ActiveGame.nonUWPFetched)
             {
-                await Library.GameLibrary.FetchNonUWPInformation(gameInfo);
+                await Library.GameLibrary.FetchNonUWPInformation(ActiveGame);
             }
+
+            this.fileTranslationListBox.Items.AddRange(ActiveGame.FileTranslations.ToArray());
+            this.fileTranslationListBox.Enabled = true;
+
+            
 
             await fetchXboxProfiles();
 
             this.promptNonXboxLocationButton.Enabled = true;
 
-            if (gameInfo.BaseNonXboxSaveLocation == null || gameInfo.BaseNonXboxSaveLocation == string.Empty)
+            if (ActiveGame.BaseNonXboxSaveLocation == null || ActiveGame.BaseNonXboxSaveLocation == string.Empty)
             {
                 await promptForNonXboxSaveLocation("Non-Xbox save location not found in game library.");
             }
             else
             {
-                if (gameInfo.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker))
+                if (ActiveGame.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker))
                 {
                     await fetchNonXboxProfiles();
                 }
@@ -380,7 +394,7 @@ namespace GPSaveConverter
                     this.nonXboxProfileListBox.Enabled = false;
 
 
-                    if (Directory.Exists(gameInfo.NonXboxSaveLocation))
+                    if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
                     {
                         await fetchNonXboxSaveFiles();
                     }
@@ -408,7 +422,7 @@ namespace GPSaveConverter
                 {
                     NonXboxFileInfo i = (NonXboxFileInfo)r.DataBoundItem;
 
-                    matchedFiles.Add(this.gameInfo.getXboxFileVersion(this.currentContainer, i));
+                    matchedFiles.Add(this.ActiveGame.getXboxFileVersion(this.currentContainer, i));
                 }
 
                 suspendCrossMatch = true;
@@ -429,7 +443,7 @@ namespace GPSaveConverter
                 {
                     Xbox.XboxFileInfo i = (Xbox.XboxFileInfo)r.DataBoundItem;
 
-                    matchedFiles.Add(this.gameInfo.getNonXboxFileVersion(i));
+                    matchedFiles.Add(this.ActiveGame.getNonXboxFileVersion(i));
                 }
 
                 suspendCrossMatch = true;
@@ -443,7 +457,7 @@ namespace GPSaveConverter
 
         private void xboxProfileListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentContainer = new Xbox.XboxContainerIndex(gameInfo, (string)this.xboxProfileListBox.SelectedItem);
+            currentContainer = new Xbox.XboxContainerIndex(ActiveGame, (string)this.xboxProfileListBox.SelectedItem);
             this.viewXboxFilesButton.Enabled = true;
             //this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
             this.xboxFilesTable.DataSource = currentContainer.getFileList();
@@ -457,6 +471,80 @@ namespace GPSaveConverter
             }
 
             prefsForm.Show(this);
+        }
+
+        private void fileTranslationListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.fileTranslationPropertyGrid.SelectedObject = this.fileTranslationListBox.SelectedItem;
+        }
+
+        private void showFileTranslationsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.ShowFileTranslations = !Properties.Settings.Default.ShowFileTranslations;
+            Properties.Settings.Default.Save();
+            toggleFileTranslationPanel();
+        }
+
+        private void toggleFileTranslationPanel()
+        {
+            int sizeDelta = Properties.Settings.Default.ShowFileTranslations ? -this.fileTranslationPanel.Height : this.fileTranslationPanel.Height;
+            this.packagesScrollPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            this.packagesScrollPanel.Height = this.packagesScrollPanel.Height + sizeDelta;
+            this.packagesBasePanel.Height = this.packagesBasePanel.Height + sizeDelta;
+            this.packagesScrollPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
+
+            this.fileTranslationPanel.Visible = Properties.Settings.Default.ShowFileTranslations;
+            this.showFileTranslationsToolStripMenuItem.Checked = Properties.Settings.Default.ShowFileTranslations;
+        }
+
+        private void addTranslationButton_Click(object sender, EventArgs e)
+        {
+            Library.FileTranslation newItem = Library.FileTranslation.getDefaultInstance();
+            
+            ActiveGame.FileTranslations.Add(newItem);
+            fileTranslationListBox.Items.Add(newItem);
+        }
+
+        private void removeTranslationButton_Click(object sender, EventArgs e)
+        {
+            Library.FileTranslation newItem = fileTranslationListBox.SelectedItem as Library.FileTranslation;
+
+            ActiveGame.FileTranslations.Remove(newItem);
+            fileTranslationListBox.Items.Remove(newItem);
+        }
+
+        private void saveGameProfileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Game Property JSON (*.json)|*.json";
+            DialogResult result = saveFileDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                JsonSerializerOptions options = new JsonSerializerOptions();
+                options.WriteIndented = true;
+                options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+                options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+                File.WriteAllText(saveFileDialog.FileName,JsonSerializer.Serialize(ActiveGame, typeof(Library.GameInfo),options));
+            }
+        }
+
+        private void loadGameProfileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Game Property JSON (*.json)|*.json";
+            DialogResult result = openFileDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                Library.GameInfo newInfo = JsonSerializer.Deserialize(File.ReadAllText(openFileDialog.FileName), typeof(Library.GameInfo)) as Library.GameInfo;
+                Library.GameLibrary.RegisterSerializedInfo(newInfo);
+
+                if(newInfo.PackageName == ActiveGame.PackageName)
+                {
+                    packagesDataGridView_Click(sender, e);
+                }
+            }
         }
     }
 }

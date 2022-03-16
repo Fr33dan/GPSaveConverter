@@ -125,15 +125,21 @@ namespace GPSaveConverter.Library
 
             if (psvLibrary.TryGetValue(i.PackageName, out psvInfo))
             {
-                i.BaseNonXboxSaveLocation = psvInfo.BaseNonXboxSaveLocation;
-                i.FileTranslations = psvInfo.FileTranslations;
-                i.WGSProfileSuffix = psvInfo.WGSProfileSuffix;
+                RegisterSerializedInfo(psvInfo);
             }
 
             if (i.BaseNonXboxSaveLocation == null && GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
             {
                 await PCGameWiki.FetchSaveLocation(i);
             }
+        }
+
+        public static void RegisterSerializedInfo(GameInfo deserializedInfo)
+        {
+            GameInfo i = getGameInfo(deserializedInfo.PackageName);
+            i.BaseNonXboxSaveLocation = deserializedInfo.BaseNonXboxSaveLocation;
+            i.FileTranslations.AddRange(deserializedInfo.FileTranslations);
+            i.WGSProfileSuffix = deserializedInfo.WGSProfileSuffix;
         }
         
 
@@ -142,11 +148,11 @@ namespace GPSaveConverter.Library
             return ExpandSaveFileLocation(baseSaveFileLocation.Substring(0, baseSaveFileLocation.IndexOf(Library.GameLibrary.NonSteamProfileMarker)));
         }
 
-        public static GameInfo getGameInfo(string gamePassID)
+        public static GameInfo getGameInfo(string packageName)
         {
             GameInfo uwpInfo;
 
-            if (!uwpLibrary.TryGetValue(gamePassID, out uwpInfo))
+            if (!uwpLibrary.TryGetValue(packageName, out uwpInfo))
             {
                 throw new Exception("Game info not found in UWP library");
             }
