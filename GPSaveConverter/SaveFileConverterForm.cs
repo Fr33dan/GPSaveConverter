@@ -18,6 +18,7 @@ namespace GPSaveConverter
         Xbox.XboxContainerIndex currentContainer;
         internal Library.GameInfo ActiveGame { get; set; }
         List<NonXboxFileInfo> nonXboxFiles;
+        BindingList<NonXboxProfile> nonXboxProfiles = new BindingList<NonXboxProfile>();
         private PreferencesForm prefsForm;
         private CreditsForm creditsForm;
         public SaveFileConverterForm()
@@ -28,6 +29,7 @@ namespace GPSaveConverter
             {
                 toggleFileTranslationPanel();
             }
+            this.nonXboxProfileTable.DataSource = nonXboxProfiles;
         }
 
         private async Task fetchNonXboxSaveFiles()
@@ -128,7 +130,7 @@ namespace GPSaveConverter
             string profilesDir = Library.GameLibrary.GetNonXboxProfileLocation(ActiveGame.BaseNonXboxSaveLocation);
             bool failed = false;
 
-            this.nonXboxProfileListBox.Items.Clear();
+            this.nonXboxProfiles.Clear();
             if (Directory.Exists(profilesDir))
             {
                 foreach (string p in Directory.GetDirectories(profilesDir))
@@ -137,20 +139,21 @@ namespace GPSaveConverter
 
                     if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
                     {
-                        this.nonXboxProfileListBox.Items.Add(Library.GameLibrary.ProfileID);
+                        NonXboxProfile newProfile = new NonXboxProfile(Library.GameLibrary.ProfileID, NonXboxProfile.ProfileType.Steam);
+                        await newProfile.FetchProfileInformation();
+                        this.nonXboxProfiles.Add(newProfile);
                     }
                 }
                 Library.GameLibrary.ProfileID = null;
-                if (nonXboxProfileListBox.Items.Count == 0)
+                if (this.nonXboxProfiles.Count == 0)
                 {
                     failed = true;
                 }
                 else
                 {
-                    this.nonXboxProfileListBox.Enabled = true;
-                    if (this.nonXboxProfileListBox.Items.Count == 1)
+                    if (this.nonXboxProfiles.Count == 1)
                     {
-                        this.nonXboxProfileListBox.SelectedItem = this.nonXboxProfileListBox.Items[0];
+                        this.nonXboxProfileTable.Rows[0].Selected = true;
                     }
                 }
             }
@@ -159,9 +162,10 @@ namespace GPSaveConverter
                 failed = true;
             }
 
-            if (failed) 
+            if (failed)
             {
-                this.nonXboxProfileListBox.Items.Add("No profiles found");
+                this.nonXboxProfiles.Add(new NonXboxProfile("No non-Xbox profiles found", NonXboxProfile.ProfileType.DisplayOnly));
+                this.nonXboxProfileTable.Enabled = false;
                 await promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
             }
 
@@ -220,15 +224,16 @@ namespace GPSaveConverter
             this.fileTranslationListBox.Enabled = false;
             this.viewXboxFilesButton.Enabled = false;
             this.viewNonXboxFileButton.Enabled = false;
-            this.nonXboxProfileListBox.Items.Clear();
-            this.nonXboxProfileListBox.Enabled = false;
+            this.nonXboxProfiles.Clear();
+            this.nonXboxProfileTable.Enabled = true;
             this.xboxFilesTable.DataSource = null;
             this.nonXboxFilesTable.DataSource = null;
         }
 
-        private async void profileListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async void nonXboxProfileTable_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Library.GameLibrary.ProfileID = (string)this.nonXboxProfileListBox.SelectedItem;
+            NonXboxProfile profile = this.nonXboxProfileTable.SelectedRows[0].DataBoundItem as NonXboxProfile;
+            Library.GameLibrary.ProfileID = profile.UserIDFolder;
             if (this.currentContainer != null)
             {
                 await fetchNonXboxSaveFiles();
@@ -408,8 +413,8 @@ namespace GPSaveConverter
                 }
                 else
                 {
-                    this.nonXboxProfileListBox.Items.Add("Profiles not defined in game library");
-                    this.nonXboxProfileListBox.Enabled = false;
+                    this.nonXboxProfiles.Add(new NonXboxProfile("Profiles not defined in non-Xbox save location", NonXboxProfile.ProfileType.DisplayOnly));
+                    this.nonXboxProfileTable.Enabled = false;
 
 
                     if (Directory.Exists(ActiveGame.NonXboxSaveLocation))

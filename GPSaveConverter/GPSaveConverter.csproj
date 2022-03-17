@@ -239,8 +239,10 @@
     </Compile>
     <Compile Include="Library\FileTranslation.cs" />
     <Compile Include="Library\PCGameWiki.cs" />
+    <Compile Include="Library\Steam.cs" />
     <Compile Include="LogHelper.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="NonXboxProfile.cs" />
     <Compile Include="PreferencesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -319,6 +321,7 @@
     <Content Include="Resources\Icon-32.png" />
     <Content Include="Resources\Icon-48.png" />
     <Content Include="Resources\Icon.ico" />
+    <Content Include="Resources\SteamAPIKey.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

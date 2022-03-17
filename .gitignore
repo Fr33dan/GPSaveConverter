@@ -11,6 +11,8 @@
 *.sln.docstates
 [Cc]erts/
 
+SteamAPIKey.txt
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

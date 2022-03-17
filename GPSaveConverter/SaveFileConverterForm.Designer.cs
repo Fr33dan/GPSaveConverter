@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.nonXboxProfileListBox = new System.Windows.Forms.ListBox();
             this.packagesLabel = new System.Windows.Forms.Label();
             this.nonXboxProfileLabel = new System.Windows.Forms.Label();
             this.nonXboxFilesLabel = new System.Windows.Forms.Label();
@@ -60,6 +59,7 @@
             this.xboxProfileListBox = new System.Windows.Forms.ListBox();
             this.xboxProfileLabel = new System.Windows.Forms.Label();
             this.nonXboxProfilePanel = new System.Windows.Forms.Panel();
+            this.nonXboxProfileTable = new System.Windows.Forms.DataGridView();
             this.buttonsToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,13 +69,13 @@
             this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showFileTranslationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileTranslationPanel = new System.Windows.Forms.Panel();
             this.fileTranslationPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.removeTranslationButton = new System.Windows.Forms.Button();
             this.addTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
             this.fileTranslationsMarkerLabel = new System.Windows.Forms.Label();
-            this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -89,22 +89,10 @@
             this.profilesBasePanel.SuspendLayout();
             this.panel3.SuspendLayout();
             this.nonXboxProfilePanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nonXboxProfileTable)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.fileTranslationPanel.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // nonXboxProfileListBox
-            // 
-            this.nonXboxProfileListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.nonXboxProfileListBox.Enabled = false;
-            this.nonXboxProfileListBox.FormattingEnabled = true;
-            this.nonXboxProfileListBox.Location = new System.Drawing.Point(0, 19);
-            this.nonXboxProfileListBox.Name = "nonXboxProfileListBox";
-            this.nonXboxProfileListBox.Size = new System.Drawing.Size(204, 95);
-            this.nonXboxProfileListBox.TabIndex = 7;
-            this.nonXboxProfileListBox.SelectedIndexChanged += new System.EventHandler(this.profileListBox_SelectedIndexChanged);
             // 
             // packagesLabel
             // 
@@ -461,7 +449,7 @@
             // 
             // nonXboxProfilePanel
             // 
-            this.nonXboxProfilePanel.Controls.Add(this.nonXboxProfileListBox);
+            this.nonXboxProfilePanel.Controls.Add(this.nonXboxProfileTable);
             this.nonXboxProfilePanel.Controls.Add(this.nonXboxProfileLabel);
             this.nonXboxProfilePanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nonXboxProfilePanel.Location = new System.Drawing.Point(203, 0);
@@ -469,6 +457,19 @@
             this.nonXboxProfilePanel.Name = "nonXboxProfilePanel";
             this.nonXboxProfilePanel.Size = new System.Drawing.Size(204, 120);
             this.nonXboxProfilePanel.TabIndex = 0;
+            // 
+            // nonXboxProfileTable
+            // 
+            this.nonXboxProfileTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.nonXboxProfileTable.ColumnHeadersVisible = false;
+            this.nonXboxProfileTable.Location = new System.Drawing.Point(0, 19);
+            this.nonXboxProfileTable.Name = "nonXboxProfileTable";
+            this.nonXboxProfileTable.ReadOnly = true;
+            this.nonXboxProfileTable.RowHeadersVisible = false;
+            this.nonXboxProfileTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.nonXboxProfileTable.Size = new System.Drawing.Size(204, 95);
+            this.nonXboxProfileTable.TabIndex = 10;
+            this.nonXboxProfileTable.SelectionChanged += new System.EventHandler(this.nonXboxProfileTable_SelectedIndexChanged);
             // 
             // menuStrip1
             // 
@@ -543,6 +544,13 @@
             this.showFileTranslationsToolStripMenuItem.Text = "Show File Translations";
             this.showFileTranslationsToolStripMenuItem.Click += new System.EventHandler(this.showFileTranslationsToolStripMenuItem_Click);
             // 
+            // creditsToolStripMenuItem
+            // 
+            this.creditsToolStripMenuItem.Name = "creditsToolStripMenuItem";
+            this.creditsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.creditsToolStripMenuItem.Text = "Credits";
+            this.creditsToolStripMenuItem.Click += new System.EventHandler(this.creditsToolStripMenuItem_Click);
+            // 
             // fileTranslationPanel
             // 
             this.fileTranslationPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -609,13 +617,6 @@
             this.fileTranslationsMarkerLabel.TabIndex = 4;
             this.fileTranslationsMarkerLabel.Text = "File Translations:";
             // 
-            // creditsToolStripMenuItem
-            // 
-            this.creditsToolStripMenuItem.Name = "creditsToolStripMenuItem";
-            this.creditsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
-            this.creditsToolStripMenuItem.Text = "Credits";
-            this.creditsToolStripMenuItem.Click += new System.EventHandler(this.creditsToolStripMenuItem_Click);
-            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -653,6 +654,7 @@
             this.panel3.PerformLayout();
             this.nonXboxProfilePanel.ResumeLayout(false);
             this.nonXboxProfilePanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nonXboxProfileTable)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.fileTranslationPanel.ResumeLayout(false);
@@ -663,7 +665,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.ListBox nonXboxProfileListBox;
         private System.Windows.Forms.Label packagesLabel;
         private System.Windows.Forms.Label nonXboxProfileLabel;
         private System.Windows.Forms.Label nonXboxFilesLabel;
@@ -710,6 +711,7 @@
         private System.Windows.Forms.ToolStripMenuItem exportGameLibraryToolStripMenuItem;
         private System.Windows.Forms.Label fileTranslationsMarkerLabel;
         private System.Windows.Forms.ToolStripMenuItem creditsToolStripMenuItem;
+        private System.Windows.Forms.DataGridView nonXboxProfileTable;
     }
 }
 
