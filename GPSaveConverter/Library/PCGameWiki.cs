@@ -27,7 +27,7 @@ namespace GPSaveConverter.Library
                 try
                 {
                     string url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=query&prop=revisions&titles={0}&formatversion=2&format=json", i.Name);
-                    string queryJson = await Task.Run(() => wc.DownloadString(url));
+                    string queryJson = await wc.DownloadStringTaskAsync(url);
 
                     JsonNode queryRoot = JsonValue.Parse(queryJson);
 
@@ -39,7 +39,7 @@ namespace GPSaveConverter.Library
 
 
                     url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=parse&pageid={0}&formatversion=2&format=json&prop=sections", pageID);
-                    string sectionsJson = await Task.Run(() => wc.DownloadString(url));
+                    string sectionsJson = await wc.DownloadStringTaskAsync(url);
                     JsonNode sectionsRoot = JsonValue.Parse(sectionsJson);
 
                     if (sectionsRoot == null)
@@ -56,7 +56,7 @@ namespace GPSaveConverter.Library
                     }
 
                     url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=parse&pageid={0}&formatversion=2&format=json&prop=wikitext&section={1}", pageID, sectionIndex);
-                    string saveFileSectionJson = await Task.Run(() => wc.DownloadString(url));
+                    string saveFileSectionJson = await wc.DownloadStringTaskAsync(url);
                     JsonNode saveFileSectionRoot = JsonValue.Parse(saveFileSectionJson);
                     wikiTable = saveFileSectionRoot["parse"]["wikitext"].GetValue<string>();
 
