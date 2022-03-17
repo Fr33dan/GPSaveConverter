@@ -13,7 +13,7 @@ namespace GPSaveConverter
         {
             // Manually load configuration item factory so that extension is loaded.
             NLog.Config.ConfigurationItemFactory.Default = new ConfigurationItemFactory(typeof(NLog.LogFactory).Assembly,typeof(NLog.Windows.Forms.ToolStripItemTarget).Assembly);
-            System.Xml.XmlReader xmlReader = System.Xml.XmlReader.Create(new System.IO.MemoryStream(GPSaveConverter.Properties.Resources.nlog_config));
+            System.Xml.XmlReader xmlReader = System.Xml.XmlReader.Create(new System.IO.StringReader(GPSaveConverter.Properties.Resources.nlog_config));
             NLog.LogManager.Configuration = new XmlLoggingConfiguration(xmlReader, null);
 
             NLog.LogManager.Configuration.Variables["fileLogLevel"] = GPSaveConverter.Properties.Settings.Default.FileLogLevel.ToString();

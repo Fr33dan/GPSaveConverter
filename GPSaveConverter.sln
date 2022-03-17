@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPSaveConverter", "GPSaveConverter\GPSaveConverter.csproj", "{86293AE9-38D4-4B31-8345-DE1E0569684D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Windows.Forms", "..\NLog\NLog.Windows.Forms\NLog.Windows.Forms\NLog.Windows.Forms.csproj", "{A87BC8A1-A035-4C30-AF5E-BE8116CE5506}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Windows.Forms", "..\..\NLog\NLog.Windows.Forms\NLog.Windows.Forms\NLog.Windows.Forms.csproj", "{A87BC8A1-A035-4C30-AF5E-BE8116CE5506}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

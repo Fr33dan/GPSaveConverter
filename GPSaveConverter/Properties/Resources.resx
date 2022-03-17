@@ -122,18 +122,19 @@
     <value>..\resources\credits.rtf;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="GameLibrary" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\gamelibrary.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\resources\gamelibrary.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="GetAUMIDScript" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\getaumidscript.ps1;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\resources\getaumidscript.ps1;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="Icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="nlog_config" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\nlog.config;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\resources\nlog.config;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="SteamAPIKey" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\steamapikey.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <comment>Steam API Key</comment>
   </data>
 </root>

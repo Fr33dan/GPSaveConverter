@@ -310,7 +310,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\NLog\NLog.Windows.Forms\NLog.Windows.Forms\NLog.Windows.Forms.csproj">
+    <ProjectReference Include="..\..\..\NLog\NLog.Windows.Forms\NLog.Windows.Forms\NLog.Windows.Forms.csproj">
       <Project>{a87bc8a1-a035-4c30-af5e-be8116ce5506}</Project>
       <Name>NLog.Windows.Forms</Name>
     </ProjectReference>

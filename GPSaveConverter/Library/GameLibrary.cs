@@ -36,19 +36,14 @@ namespace GPSaveConverter.Library
 
         private static void FirstTimeInitializeGameLibrary()
         {
-            StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
 
-            GPSaveConverter.Properties.Settings.Default.GameLibrary = stream.ReadToEnd();
+            GPSaveConverter.Properties.Settings.Default.GameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
             GPSaveConverter.Properties.Settings.Default.Save();
         }
 
         internal static void LoadDefaultLibrary()
         {
-            StreamReader stream = new StreamReader(new MemoryStream(GPSaveConverter.Properties.Resources.GameLibrary));
-
-            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(stream.ReadToEnd());
-
-            stream.Close();
+            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(GPSaveConverter.Properties.Resources.GameLibrary);
 
             foreach (GameInfo newGame in jsonLibrary)
             {
@@ -82,36 +77,31 @@ namespace GPSaveConverter.Library
             uwpLibrary = new Dictionary<string, GameInfo>();
             try
             {
-                using (Stream stream = new MemoryStream(GPSaveConverter.Properties.Resources.GetAUMIDScript))
+                string scriptText = GPSaveConverter.Properties.Resources.GetAUMIDScript;
+                logger.Info("Getting UWP package manifests...");
+                string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
+                logger.Trace("Powershell script results:\n{0}", scriptOutput);
+
+                StringReader sr = new StringReader(scriptOutput);
+
+                string appInfoLine = null;
+                while ((appInfoLine = sr.ReadLine()) != null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    string[] appInfo = appInfoLine.Split('|');
+                    GameInfo gameInfo = new GameInfo();
+                    string name = appInfo[0].Trim();
+                    gameInfo.IconLocation = appInfo[1];
+                    gameInfo.PackageName = appInfo[2];
+                    gameInfo.Name = name == string.Empty ? gameInfo.PackageName : name;
+                    if (!uwpLibrary.ContainsKey(gameInfo.PackageName))
                     {
-                        string scriptText = reader.ReadToEnd();
-                        logger.Info("Getting UWP package manifests...");
-                        string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
-                        logger.Trace("Powershell script results:\n{0}", scriptOutput);
-
-                        StringReader sr = new StringReader(scriptOutput);
-
-                        string appInfoLine = null;
-                        while ((appInfoLine = sr.ReadLine()) != null)
-                        {
-                            string[] appInfo = appInfoLine.Split('|');
-                            GameInfo gameInfo = new GameInfo();
-                            string name = appInfo[0].Trim();
-                            gameInfo.IconLocation = appInfo[1];
-                            gameInfo.PackageName = appInfo[2];
-                            gameInfo.Name = name == string.Empty? gameInfo.PackageName : name;
-                            if (!uwpLibrary.ContainsKey(gameInfo.PackageName))
-                            {
-                                uwpLibrary.Add(gameInfo.PackageName, gameInfo);
-                            }
-                        }
-
-                        logger.Debug("Found {0} UWP Packages.", uwpLibrary.Count);
-                        logger.Info("UWP manifests successfully loaded.", uwpLibrary.Count);
+                        uwpLibrary.Add(gameInfo.PackageName, gameInfo);
                     }
                 }
+
+                logger.Debug("Found {0} UWP Packages.", uwpLibrary.Count);
+                logger.Info("UWP manifests successfully loaded.", uwpLibrary.Count);
+
             }
             catch (Exception e)
             {

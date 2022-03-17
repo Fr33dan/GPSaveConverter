@@ -71,22 +71,47 @@ namespace GPSaveConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to [
+        ///  {
+        ///    &quot;PackageName&quot;: &quot;7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c&quot;,
+        ///    &quot;BaseNonXboxSaveLocation&quot;: &quot;%HOMEDRIVE%%HOMEPATH%\\AppData\\LocalLow\\Two Point Studios\\Two Point Hospital\\Cloud\\&lt;user-id&gt;\\&quot;,
+        ///    &quot;FileTranslations&quot;: [
+        ///      {
+        ///        &quot;ContainerName1&quot;: &quot;TPHCONTAINER&quot;,
+        ///        &quot;ContainerName2&quot;: &quot;TPHCONTAINER&quot;,
+        ///        &quot;NamedRegexGroups&quot;: [ &quot;(?&lt;FileName&gt;[\\w\\-. \\\\]+)&quot; ],
+        ///        &quot;NonXboxFilename&quot;: &quot;${FileName}&quot;,
+        ///        &quot;XboxFileID&quot;: &quot;${FileName}&quot;
+        ///      }
+        ///    ]
+        ///  },        /// [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] GameLibrary {
+        internal static string GameLibrary {
             get {
-                object obj = ResourceManager.GetObject("GameLibrary", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("GameLibrary", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to &lt;#	
+        ///	.NOTES
+        ///	===========================================================================
+        ///	 Created on:    December 20, 2020
+        ///	 Created by:   	Brian Lima, Joseph Tignor
+        ///	 Filename:     	GetAUMIDScript.ps1
+        ///	===========================================================================
+        ///	.DESCRIPTION
+        ///		Load package name, family name, and logo for all installed UWP packages.
+        ///#&gt;
+        ///$installedapps = get-AppxPackage
+        ///$invalidNames = &apos;*ms-resource*&apos;, &apos;*DisplayName*&apos;
+        ///$aumidList = @()
+        ///
+        ///foreach ($app in $installe [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] GetAUMIDScript {
+        internal static string GetAUMIDScript {
             get {
-                object obj = ResourceManager.GetObject("GetAUMIDScript", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("GetAUMIDScript", resourceCulture);
             }
         }
         
@@ -101,15 +126,25 @@ namespace GPSaveConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;nlog xmlns=&quot;http://www.nlog-project.org/schemas/NLog.xsd&quot;
+        ///	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;
+        ///
+        ///	&lt;targets&gt;
+        ///		&lt;target name=&quot;toolstrip&quot; xsi:type=&quot;ToolStripItem&quot; toolStripName=&quot;statusStrip1&quot; itemName =&quot;infoStatusLabel&quot; formName=&quot;SaveFileConverterForm&quot; layout=&quot;${message}&quot;/&gt;
+        ///		&lt;target name=&quot;file&quot; xsi:type=&quot;File&quot; fileName=&quot;${processname}.log&quot; /&gt;
+        ///	&lt;/targets&gt;
+        ///
+        ///	&lt;rules&gt;
+        ///		&lt;logger name=&quot;*&quot; minlevel=&quot;Info&quot; writeTo=&quot;toolstrip&quot; /&gt;
+        ///		&lt;logger name=&quot;*&quot; m [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] nlog_config {
+        internal static string nlog_config {
             get {
-                object obj = ResourceManager.GetObject("nlog_config", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("nlog_config", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up the Steam API Key.
         /// </summary>
