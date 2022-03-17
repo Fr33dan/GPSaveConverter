@@ -133,6 +133,7 @@ namespace GPSaveConverter
             this.nonXboxProfiles.Clear();
             if (Directory.Exists(profilesDir))
             {
+                logger.Info("Fetching non-Xbox profile information...");
                 foreach (string p in Directory.GetDirectories(profilesDir))
                 {
                     Library.GameLibrary.ProfileID = p.Replace(profilesDir, "");
@@ -144,13 +145,16 @@ namespace GPSaveConverter
                         this.nonXboxProfiles.Add(newProfile);
                     }
                 }
+
                 Library.GameLibrary.ProfileID = null;
                 if (this.nonXboxProfiles.Count == 0)
                 {
                     failed = true;
+                    logger.Info("No Non-Xbox profiles found.");
                 }
                 else
                 {
+                    logger.Info("Non-Xbox profiles obtained!");
                     if (this.nonXboxProfiles.Count == 1)
                     {
                         this.nonXboxProfileTable.Rows[0].Selected = true;
@@ -232,11 +236,14 @@ namespace GPSaveConverter
 
         private async void nonXboxProfileTable_SelectedIndexChanged(object sender, EventArgs e)
         {
-            NonXboxProfile profile = this.nonXboxProfileTable.SelectedRows[0].DataBoundItem as NonXboxProfile;
-            Library.GameLibrary.ProfileID = profile.UserIDFolder;
-            if (this.currentContainer != null)
+            if (this.nonXboxProfiles.Count > 0)
             {
-                await fetchNonXboxSaveFiles();
+                NonXboxProfile profile = this.nonXboxProfileTable.SelectedRows[0].DataBoundItem as NonXboxProfile;
+                Library.GameLibrary.ProfileID = profile.UserIDFolder;
+                if (this.currentContainer != null)
+                {
+                    await fetchNonXboxSaveFiles();
+                }
             }
         }
 

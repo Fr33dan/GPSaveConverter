@@ -76,6 +76,8 @@
             this.addTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
             this.fileTranslationsMarkerLabel = new System.Windows.Forms.Label();
+            this.UserIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            this.UserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -460,12 +462,17 @@
             // 
             // nonXboxProfileTable
             // 
+            this.nonXboxProfileTable.BackgroundColor = System.Drawing.SystemColors.Window;
             this.nonXboxProfileTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.nonXboxProfileTable.ColumnHeadersVisible = false;
+            this.nonXboxProfileTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.UserIcon,
+            this.UserName});
             this.nonXboxProfileTable.Location = new System.Drawing.Point(0, 19);
             this.nonXboxProfileTable.Name = "nonXboxProfileTable";
             this.nonXboxProfileTable.ReadOnly = true;
             this.nonXboxProfileTable.RowHeadersVisible = false;
+            this.nonXboxProfileTable.RowTemplate.Height = 32;
             this.nonXboxProfileTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.nonXboxProfileTable.Size = new System.Drawing.Size(204, 95);
             this.nonXboxProfileTable.TabIndex = 10;
@@ -617,6 +624,25 @@
             this.fileTranslationsMarkerLabel.TabIndex = 4;
             this.fileTranslationsMarkerLabel.Text = "File Translations:";
             // 
+            // UserIcon
+            // 
+            this.UserIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.UserIcon.DataPropertyName = "UserIcon";
+            this.UserIcon.HeaderText = "User Icon";
+            this.UserIcon.Name = "UserIcon";
+            this.UserIcon.ReadOnly = true;
+            this.UserIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.UserIcon.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.UserIcon.Width = 32;
+            // 
+            // UserName
+            // 
+            this.UserName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.UserName.DataPropertyName = "UserName";
+            this.UserName.HeaderText = "User Name";
+            this.UserName.Name = "UserName";
+            this.UserName.ReadOnly = true;
+            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -712,6 +738,8 @@
         private System.Windows.Forms.Label fileTranslationsMarkerLabel;
         private System.Windows.Forms.ToolStripMenuItem creditsToolStripMenuItem;
         private System.Windows.Forms.DataGridView nonXboxProfileTable;
+        private System.Windows.Forms.DataGridViewImageColumn UserIcon;
+        private System.Windows.Forms.DataGridViewTextBoxColumn UserName;
     }
 }
 
