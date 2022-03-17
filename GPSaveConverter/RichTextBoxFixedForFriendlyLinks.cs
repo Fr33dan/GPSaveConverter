@@ -7,6 +7,9 @@ namespace GPSaveConverter
 {
     public partial class RichTextBoxFixedForFriendlyLinks : RichTextBox
     {
+        [DllImport("user32.dll")]
+        static extern bool HideCaret(IntPtr hWnd);
+
         internal ENLINK ConvertFromENLINK64(ENLINK64 es64)
         {
             // Note: the RichTextBox.ConvertFromENLINK64 method is written using C# unsafe code
@@ -71,6 +74,7 @@ namespace GPSaveConverter
                 }
             }
 
+            HideCaret(this.Handle);
             base.WndProc(ref m);
         }
 
