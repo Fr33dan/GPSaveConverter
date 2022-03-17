@@ -51,7 +51,8 @@ namespace GPSaveConverter
                 if (profileType == ProfileType.Steam)
                 {
                     await Library.Steam.GetUserInformation(this);
-                    await Task.Run(() => userIcon = new System.Drawing.Bitmap(UserIconLocation));
+
+                    this.userIcon = await Library.Steam.LoadIcon(this);
                 }
             }
         }
