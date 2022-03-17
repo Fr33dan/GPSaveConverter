@@ -392,6 +392,9 @@ namespace GPSaveConverter
                 await Library.GameLibrary.PopulateNonUWPInformation(ActiveGame);
             }
 
+            this.saveGameProfileToolStripMenuItem.Enabled = true;
+            this.loadGameProfileToolStripMenuItem.Enabled = true;
+
             this.fileTranslationListBox.Items.AddRange(ActiveGame.FileTranslations.ToArray());
             this.fileTranslationListBox.Enabled = true;
 
