@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -17,6 +18,12 @@ namespace GPSaveConverter.Library
         internal const string SteamInstallMarker = "<Steam-folder>";
         private static Dictionary<string, GameInfo> savedGameLibrary;
         private static Dictionary<string, GameInfo> uwpLibrary;
+
+
+        internal static BindingList<NonXboxFileInfo> nonXboxFiles = new BindingList<NonXboxFileInfo>();
+        internal static BindingList<NonXboxProfile> nonXboxProfiles = new BindingList<NonXboxProfile>();
+
+        internal static BindingList<Xbox.XboxFileInfo> xboxFiles = new BindingList<Xbox.XboxFileInfo>();
 
         public static string ProfileID;
 

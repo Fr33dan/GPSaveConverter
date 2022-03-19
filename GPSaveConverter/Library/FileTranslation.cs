@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace GPSaveConverter.Library
@@ -52,14 +53,22 @@ namespace GPSaveConverter.Library
             , DisplayName("Named Regex Groups")
             , Description("Regex groups with names for use in substitutions.")
             , Display(Order = 5)]
-        public List<string> NamedRegexGroups { get; set; }
+        public string[] NamedRegexGroups { get; set; }
 
+        [Browsable(false), JsonIgnore]
+        public NonXboxFileInfo NonXboxFileInfo { get; set; }
+
+        [Browsable(false),JsonIgnore]
+        public Xbox.XboxFileInfo XboxFileInfo { get; set; }
+        
         public FileTranslation() { }
+
+
 
         public static FileTranslation getDefaultInstance()
         {
             FileTranslation instance = new FileTranslation();
-            instance.NamedRegexGroups = new List<string>(new string[] { "(?<FileName>[\\w\\-. \\\\]+)" });
+            instance.NamedRegexGroups = (new string[] { "(?<FileName>[\\w\\-. \\\\]+)" });
             instance.NonXboxFilename = "${FileName}";
             instance.XboxFileID = "${FileName}";
             instance.ContainerName1 = "${FileName}";
@@ -67,17 +76,36 @@ namespace GPSaveConverter.Library
             return instance;
         }
 
-        private string replaceRegex(string value)
+        internal string replaceRegex(string value)
         {
             string returnVal = value;
-            for (int j = 0; j < this.NamedRegexGroups.Count; j++)
+
+            if (returnVal.Contains("${XboxProfileID}"))
             {
-                System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(NamedRegexGroups[j]);
+                returnVal = returnVal.Replace("${XboxProfileID}", XboxFileInfo.Parent.Parent.XboxProfileID.TrimStart('0'));
+            }
+
+            foreach(string groupPattern in NamedRegexGroups)
+            {
+                System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(groupPattern);
 
                 string groupName = ex.GetGroupNames().Last();
-                returnVal = returnVal.Replace("${" + groupName + "}", this.NamedRegexGroups[j]);
+                returnVal = returnVal.Replace("${" + groupName + "}", groupPattern);
             }
+
+
             return returnVal;
+        }
+
+        internal bool CheckMatch(Xbox.XboxFileInfo file)
+        {
+            if (Regex.Match(file.ContainerName1, ContainerName1Regex).Success
+                    && Regex.Match(file.ContainerName2, ContainerName2Regex).Success
+                    && Regex.Match(file.FileID, XboxFileIDRegex).Success)
+            {
+                return true;
+            }
+            return false;
         }
 
         public override string ToString()

@@ -10,6 +10,8 @@ namespace GPSaveConverter.Xbox
     internal class XboxFileContainer
     {
         private XboxContainerIndex parent;
+
+        internal XboxContainerIndex Parent { get { return parent; } }
         internal string[] ContainerID { get; private set; }
         internal Guid ContainerGuid { get; private set; }
         public byte ContainerVersion { get => containerVersion; }

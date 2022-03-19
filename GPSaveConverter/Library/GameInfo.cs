@@ -6,12 +6,15 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace GPSaveConverter.Library
 {
     internal class GameInfo
     {
+
         private static NLog.Logger logger = LogHelper.getClassLogger();
+
 
         internal bool NonUWPDataPopulated = false;
         public string Name { get; set; }
@@ -104,6 +107,7 @@ namespace GPSaveConverter.Library
         {
             foreach (FileTranslation t in this.FileTranslations)
             {
+                t.NonXboxFileInfo = file;
                 if (Regex.Match(file.RelativePath, t.NonXboxFilenameRegex).Success)
                 {
                     return t;
@@ -116,14 +120,83 @@ namespace GPSaveConverter.Library
         {
             foreach (FileTranslation t in this.FileTranslations)
             {
+                t.XboxFileInfo = file;
                 if (Regex.Match(file.ContainerName1, t.ContainerName1Regex).Success
-                    && Regex.Match(file.ContainerName1, t.ContainerName1Regex).Success
+                    && Regex.Match(file.ContainerName2, t.ContainerName2Regex).Success
                     && Regex.Match(file.FileID, t.XboxFileIDRegex).Success)
                 {
                     return t;
                 }
             }
             return null;
+        }
+
+        internal async Task fetchNonXboxSaveFiles()
+        {
+            string fetchLocation = this.NonXboxSaveLocation;
+
+            if (Directory.Exists(fetchLocation)) await fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
+
+        }
+        private async Task fetchNonXboxSaveFiles(string folder, string root)
+        {
+            foreach (string file in Directory.GetFiles(folder))
+            {
+                NonXboxFileInfo newInfo = await Task.Run(() => {
+                    NonXboxFileInfo ni = new NonXboxFileInfo();
+                    ni.FilePath = file;
+                    ni.RelativePath = file.Replace(root, "");
+                    ni.Timestamp = System.IO.File.GetLastWriteTime(file);
+                    return ni;
+                });
+                GameLibrary.nonXboxFiles.Add(newInfo);
+            }
+
+            foreach (string dir in Directory.GetDirectories(folder))
+            {
+                await fetchNonXboxSaveFiles(dir, root);
+            }
+        }
+
+        internal async Task<bool> fetchNonXboxProfiles()
+        {
+            string profilesDir = GameLibrary.GetNonXboxProfileLocation(this.BaseNonXboxSaveLocation);
+            bool failed = false;
+
+            GameLibrary.nonXboxProfiles.Clear();
+            if (Directory.Exists(profilesDir))
+            {
+                logger.Info("Fetching non-Xbox profile information...");
+                foreach (string p in Directory.GetDirectories(profilesDir))
+                {
+                    Library.GameLibrary.ProfileID = p.Replace(profilesDir, "");
+
+                    if (Directory.Exists(this.NonXboxSaveLocation))
+                    {
+                        NonXboxProfile newProfile = new NonXboxProfile(Library.GameLibrary.ProfileID, NonXboxProfile.ProfileType.Steam);
+                        await newProfile.FetchProfileInformation();
+                        GameLibrary.nonXboxProfiles.Add(newProfile);
+                    }
+                }
+
+                Library.GameLibrary.ProfileID = null;
+                if (GameLibrary.nonXboxProfiles.Count == 0)
+                {
+                    failed = true;
+                    logger.Info("No Non-Xbox profiles found.");
+                }
+                else
+                {
+                    logger.Info("Non-Xbox profiles obtained!");
+                }
+            }
+            else
+            {
+                failed = true;
+            }
+
+            return !failed;
+
         }
 
         internal NonXboxFileInfo getNonXboxFileVersion(Xbox.XboxFileInfo file, bool createOrUpdate = false)
@@ -139,15 +212,33 @@ namespace GPSaveConverter.Library
                 returnVal.RelativePath = Regex.Replace(file.ContainerName1, t.ContainerName1Regex, returnVal.RelativePath);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName2, t.ContainerName2Regex, returnVal.RelativePath);
 
-                returnVal.FilePath = Path.Combine(this.NonXboxSaveLocation, returnVal.RelativePath);
-
-                if (!File.Exists(returnVal.FilePath) && !createOrUpdate)
+                NonXboxFileInfo match = null;
+                foreach (NonXboxFileInfo fi in GameLibrary.nonXboxFiles)
                 {
-                    return null;
+                    if (Regex.Match(fi.RelativePath, t.replaceRegex(returnVal.RelativePath)).Success)
+                    {
+                        match = fi;
+                        break;
+                    }
+                }
+                if(match != null)
+                {
+                    returnVal = match;
                 }
                 else
                 {
-                    returnVal.Timestamp = File.GetLastWriteTime(returnVal.FilePath);
+                    if (createOrUpdate)
+                    {
+                        Regex r = new Regex(t.replaceRegex(returnVal.RelativePath));
+                        if(r.GetGroupNames().Length > 1)
+                        {
+                            throw new Exception("No substitution data found.");
+                        }
+                    }
+                    else
+                    {
+                        returnVal = null;
+                    }
                 }
 
                 if (createOrUpdate)
@@ -173,7 +264,7 @@ namespace GPSaveConverter.Library
             {
                 string container1Name = Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName1);
                 string container2Name = Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName2);
-                IEnumerable<Xbox.XboxFileContainer> containers = index.Children.Where(c => c.ContainerID[0] == container1Name && c.ContainerID[1] == container2Name);
+                IEnumerable<Xbox.XboxFileContainer> containers = index.Children.Where(c => Regex.Match(c.ContainerID[0],t.replaceRegex(container1Name)).Success && Regex.Match(c.ContainerID[1], t.replaceRegex(container2Name)).Success);
 
                 if (containers.Count() > 1)
                 {
@@ -185,7 +276,7 @@ namespace GPSaveConverter.Library
 
                     string xboxFileID = Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.XboxFileID);
 
-                    matchedFile = xboxFileContainer.getFileList().Where(f => f.FileID == xboxFileID).FirstOrDefault();
+                    matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, t.replaceRegex(xboxFileID)).Success).FirstOrDefault();
 
                     if (createOrUpdate)
                     {

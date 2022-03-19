@@ -17,10 +17,6 @@ namespace GPSaveConverter
         private static NLog.Logger logger = LogHelper.getClassLogger();
         Xbox.XboxContainerIndex currentContainer;
         internal Library.GameInfo ActiveGame { get; set; }
-        BindingList<NonXboxFileInfo> nonXboxFiles = new BindingList<NonXboxFileInfo>();
-        BindingList<NonXboxProfile> nonXboxProfiles = new BindingList<NonXboxProfile>();
-
-        BindingList<Xbox.XboxFileInfo> xboxFiles = new BindingList<Xbox.XboxFileInfo>();
         private PreferencesForm prefsForm;
         private CreditsForm creditsForm;
         public SaveFileConverterForm()
@@ -31,40 +27,17 @@ namespace GPSaveConverter
             {
                 toggleFileTranslationPanel();
             }
-            this.nonXboxProfileTable.DataSource = nonXboxProfiles;
-            this.nonXboxFilesTable.DataSource = nonXboxFiles;
-            this.xboxFilesTable.DataSource = xboxFiles;
+            this.nonXboxProfileTable.DataSource = GPSaveConverter.Library.GameLibrary.nonXboxProfiles;
+            this.nonXboxFilesTable.DataSource = GPSaveConverter.Library.GameLibrary.nonXboxFiles;
+            this.xboxFilesTable.DataSource = GPSaveConverter.Library.GameLibrary.xboxFiles;
         }
 
         private async Task fetchNonXboxSaveFiles()
         {
-            string fetchLocation = ActiveGame.NonXboxSaveLocation;
-
-            this.foldersToolTip.SetToolTip(this.nonXboxFilesLabel, fetchLocation);
+            this.foldersToolTip.SetToolTip(this.nonXboxFilesLabel, ActiveGame.NonXboxSaveLocation);
 
             this.viewNonXboxFileButton.Enabled = true;
-
-            if (Directory.Exists(fetchLocation)) await fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
-
-        }
-        private async Task fetchNonXboxSaveFiles(string folder,string root)
-        {
-            foreach(string file in Directory.GetFiles(folder))
-            {
-                NonXboxFileInfo newInfo = await Task.Run(() => {
-                    NonXboxFileInfo ni = new NonXboxFileInfo();
-                    ni.FilePath = file;
-                    ni.RelativePath = file.Replace(root, "");
-                    ni.Timestamp = System.IO.File.GetLastWriteTime(file);
-                    return ni;
-                });
-                this.nonXboxFiles.Add(newInfo);
-            }
-
-            foreach(string dir in Directory.GetDirectories(folder))
-            {
-                await fetchNonXboxSaveFiles(dir,root);
-            }
+            await ActiveGame.fetchNonXboxSaveFiles();
         }
 
         private async Task<bool> promptForNonXboxSaveLocation(string reason)
@@ -131,56 +104,7 @@ namespace GPSaveConverter
             }
         }
 
-        private async Task fetchNonXboxProfiles()
-        {
-            string profilesDir = Library.GameLibrary.GetNonXboxProfileLocation(ActiveGame.BaseNonXboxSaveLocation);
-            bool failed = false;
-
-            this.nonXboxProfiles.Clear();
-            if (Directory.Exists(profilesDir))
-            {
-                logger.Info("Fetching non-Xbox profile information...");
-                foreach (string p in Directory.GetDirectories(profilesDir))
-                {
-                    Library.GameLibrary.ProfileID = p.Replace(profilesDir, "");
-
-                    if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
-                    {
-                        NonXboxProfile newProfile = new NonXboxProfile(Library.GameLibrary.ProfileID, NonXboxProfile.ProfileType.Steam);
-                        await newProfile.FetchProfileInformation();
-                        this.nonXboxProfiles.Add(newProfile);
-                    }
-                }
-
-                Library.GameLibrary.ProfileID = null;
-                if (this.nonXboxProfiles.Count == 0)
-                {
-                    failed = true;
-                    logger.Info("No Non-Xbox profiles found.");
-                }
-                else
-                {
-                    logger.Info("Non-Xbox profiles obtained!");
-                    if (this.nonXboxProfiles.Count == 1)
-                    {
-                        this.nonXboxProfileTable.Rows[0].Selected = true;
-                        nonXboxProfileTable_CellClicked(this, null);
-                    }
-                }
-            }
-            else
-            {
-                failed = true;
-            }
-
-            if (failed)
-            {
-                this.nonXboxProfiles.Add(new NonXboxProfile("No non-Xbox profiles found", NonXboxProfile.ProfileType.DisplayOnly));
-                this.nonXboxProfileTable.Enabled = false;
-                await promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
-            }
-
-        }
+        
 
         private async void SaveFileConverterForm_Load(object sender, EventArgs e)
         {
@@ -235,15 +159,15 @@ namespace GPSaveConverter
             this.fileTranslationListBox.Enabled = false;
             this.viewXboxFilesButton.Enabled = false;
             this.viewNonXboxFileButton.Enabled = false;
-            this.nonXboxProfiles.Clear();
+            GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Clear();
             this.nonXboxProfileTable.Enabled = true;
-            this.xboxFiles.Clear();
-            this.nonXboxFiles.Clear();
+            GPSaveConverter.Library.GameLibrary.xboxFiles.Clear();
+            GPSaveConverter.Library.GameLibrary.nonXboxFiles.Clear();
         }
 
         private async void nonXboxProfileTable_CellClicked(object sender, DataGridViewCellEventArgs e)
         {
-            if (this.nonXboxProfiles.Count > 0)
+            if (GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Count > 0)
             {
                 NonXboxProfile profile = this.nonXboxProfileTable.SelectedRows[0].DataBoundItem as NonXboxProfile;
                 Library.GameLibrary.ProfileID = profile.UserIDFolder;
@@ -428,11 +352,24 @@ namespace GPSaveConverter
             {
                 if (ActiveGame.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker))
                 {
-                    await fetchNonXboxProfiles();
+                    if(await ActiveGame.fetchNonXboxProfiles())
+                    {
+                        if (Library.GameLibrary.nonXboxProfiles.Count == 1)
+                        {
+                            this.nonXboxProfileTable.Rows[0].Selected = true;
+                            nonXboxProfileTable_CellClicked(this, null);
+                        }
+                    }
+                    else
+                    {
+                        Library.GameLibrary.nonXboxProfiles.Add(new NonXboxProfile("No non-Xbox profiles found", NonXboxProfile.ProfileType.DisplayOnly));
+                        this.nonXboxProfileTable.Enabled = false;
+                        await promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
+                    }
                 }
                 else
                 {
-                    this.nonXboxProfiles.Add(new NonXboxProfile("Profiles not defined in non-Xbox save location", NonXboxProfile.ProfileType.DisplayOnly));
+                    GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Add(new NonXboxProfile("Profiles not defined in non-Xbox save location", NonXboxProfile.ProfileType.DisplayOnly));
                     this.nonXboxProfileTable.Enabled = false;
 
 

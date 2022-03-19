@@ -15,6 +15,9 @@ namespace GPSaveConverter.Xbox
         internal string xboxProfileFolder;
         string indexPath;
         string containerPackageID;
+        private string xboxProfileID;
+
+        internal string XboxProfileID { get { return xboxProfileID; } }
 
         private uint unknown1;
         private uint unknown2;
@@ -23,9 +26,10 @@ namespace GPSaveConverter.Xbox
         private Guid containerGuid;
 
         internal XboxFileContainer[] Children { get; private set; }
-        internal XboxContainerIndex(GameInfo info, string xboxProfileID)
+        internal XboxContainerIndex(GameInfo info, string id)
         {
             this.packageName = info.PackageName;
+            this.xboxProfileID = id;
 
             wgsFolder = XboxPackageList.getWGSFolder(packageName);
             xboxProfileFolder = Directory.GetDirectories(wgsFolder, xboxProfileID + "_*" + (info.WGSProfileSuffix != null ? info.WGSProfileSuffix : "")).First();
