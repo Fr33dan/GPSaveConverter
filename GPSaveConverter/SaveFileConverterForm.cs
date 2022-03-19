@@ -495,6 +495,7 @@ namespace GPSaveConverter
         private void saveGameProfileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = this.ActiveGame.Name + ".json";
             saveFileDialog.Filter = "Game Property JSON (*.json)|*.json";
             DialogResult result = saveFileDialog.ShowDialog();
 
@@ -511,6 +512,7 @@ namespace GPSaveConverter
         private void loadGameProfileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.FileName = this.ActiveGame.Name + ".json";
             openFileDialog.Filter = "Game Property JSON (*.json)|*.json";
             DialogResult result = openFileDialog.ShowDialog();
 
