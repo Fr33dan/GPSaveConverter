@@ -60,6 +60,8 @@
             this.xboxProfileLabel = new System.Windows.Forms.Label();
             this.nonXboxProfilePanel = new System.Windows.Forms.Panel();
             this.nonXboxProfileTable = new System.Windows.Forms.DataGridView();
+            this.UserIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            this.UserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.buttonsToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -76,8 +78,6 @@
             this.addTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
             this.fileTranslationsMarkerLabel = new System.Windows.Forms.Label();
-            this.UserIcon = new System.Windows.Forms.DataGridViewImageColumn();
-            this.UserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -476,7 +476,26 @@
             this.nonXboxProfileTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.nonXboxProfileTable.Size = new System.Drawing.Size(204, 95);
             this.nonXboxProfileTable.TabIndex = 10;
-            this.nonXboxProfileTable.SelectionChanged += new System.EventHandler(this.nonXboxProfileTable_SelectedIndexChanged);
+            this.nonXboxProfileTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.nonXboxProfileTable_CellClicked);
+            // 
+            // UserIcon
+            // 
+            this.UserIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.UserIcon.DataPropertyName = "UserIcon";
+            this.UserIcon.HeaderText = "User Icon";
+            this.UserIcon.Name = "UserIcon";
+            this.UserIcon.ReadOnly = true;
+            this.UserIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.UserIcon.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.UserIcon.Width = 32;
+            // 
+            // UserName
+            // 
+            this.UserName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.UserName.DataPropertyName = "UserName";
+            this.UserName.HeaderText = "User Name";
+            this.UserName.Name = "UserName";
+            this.UserName.ReadOnly = true;
             // 
             // menuStrip1
             // 
@@ -623,25 +642,6 @@
             this.fileTranslationsMarkerLabel.Size = new System.Drawing.Size(86, 13);
             this.fileTranslationsMarkerLabel.TabIndex = 4;
             this.fileTranslationsMarkerLabel.Text = "File Translations:";
-            // 
-            // UserIcon
-            // 
-            this.UserIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.UserIcon.DataPropertyName = "UserIcon";
-            this.UserIcon.HeaderText = "User Icon";
-            this.UserIcon.Name = "UserIcon";
-            this.UserIcon.ReadOnly = true;
-            this.UserIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.UserIcon.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.UserIcon.Width = 32;
-            // 
-            // UserName
-            // 
-            this.UserName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.UserName.DataPropertyName = "UserName";
-            this.UserName.HeaderText = "User Name";
-            this.UserName.Name = "UserName";
-            this.UserName.ReadOnly = true;
             // 
             // SaveFileConverterForm
             // 

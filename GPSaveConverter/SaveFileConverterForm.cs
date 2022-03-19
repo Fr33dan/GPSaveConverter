@@ -158,6 +158,7 @@ namespace GPSaveConverter
                     if (this.nonXboxProfiles.Count == 1)
                     {
                         this.nonXboxProfileTable.Rows[0].Selected = true;
+                        nonXboxProfileTable_CellClicked(this, null);
                     }
                 }
             }
@@ -234,7 +235,7 @@ namespace GPSaveConverter
             this.nonXboxFilesTable.DataSource = null;
         }
 
-        private async void nonXboxProfileTable_SelectedIndexChanged(object sender, EventArgs e)
+        private async void nonXboxProfileTable_CellClicked(object sender, DataGridViewCellEventArgs e)
         {
             if (this.nonXboxProfiles.Count > 0)
             {
