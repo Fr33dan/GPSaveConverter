@@ -17,8 +17,10 @@ namespace GPSaveConverter
         private static NLog.Logger logger = LogHelper.getClassLogger();
         Xbox.XboxContainerIndex currentContainer;
         internal Library.GameInfo ActiveGame { get; set; }
-        List<NonXboxFileInfo> nonXboxFiles;
+        BindingList<NonXboxFileInfo> nonXboxFiles = new BindingList<NonXboxFileInfo>();
         BindingList<NonXboxProfile> nonXboxProfiles = new BindingList<NonXboxProfile>();
+
+        BindingList<Xbox.XboxFileInfo> xboxFiles = new BindingList<Xbox.XboxFileInfo>();
         private PreferencesForm prefsForm;
         private CreditsForm creditsForm;
         public SaveFileConverterForm()
@@ -30,34 +32,38 @@ namespace GPSaveConverter
                 toggleFileTranslationPanel();
             }
             this.nonXboxProfileTable.DataSource = nonXboxProfiles;
+            this.nonXboxFilesTable.DataSource = nonXboxFiles;
+            this.xboxFilesTable.DataSource = xboxFiles;
         }
 
         private async Task fetchNonXboxSaveFiles()
         {
-            nonXboxFiles = new List<NonXboxFileInfo>();
             string fetchLocation = ActiveGame.NonXboxSaveLocation;
 
             this.foldersToolTip.SetToolTip(this.nonXboxFilesLabel, fetchLocation);
 
-            if(Directory.Exists(fetchLocation)) fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
-
-            this.nonXboxFilesTable.DataSource = nonXboxFiles;
             this.viewNonXboxFileButton.Enabled = true;
+
+            if (Directory.Exists(fetchLocation)) await fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
+
         }
-        private void fetchNonXboxSaveFiles(string folder,string root)
+        private async Task fetchNonXboxSaveFiles(string folder,string root)
         {
             foreach(string file in Directory.GetFiles(folder))
             {
-                NonXboxFileInfo newInfo = new NonXboxFileInfo();
-                newInfo.FilePath = file;
-                newInfo.RelativePath = file.Replace(root, "");
-                newInfo.Timestamp = System.IO.File.GetLastWriteTime(file);
+                NonXboxFileInfo newInfo = await Task.Run(() => {
+                    NonXboxFileInfo ni = new NonXboxFileInfo();
+                    ni.FilePath = file;
+                    ni.RelativePath = file.Replace(root, "");
+                    ni.Timestamp = System.IO.File.GetLastWriteTime(file);
+                    return ni;
+                });
                 this.nonXboxFiles.Add(newInfo);
             }
 
             foreach(string dir in Directory.GetDirectories(folder))
             {
-                fetchNonXboxSaveFiles(dir,root);
+                await fetchNonXboxSaveFiles(dir,root);
             }
         }
 
@@ -231,8 +237,8 @@ namespace GPSaveConverter
             this.viewNonXboxFileButton.Enabled = false;
             this.nonXboxProfiles.Clear();
             this.nonXboxProfileTable.Enabled = true;
-            this.xboxFilesTable.DataSource = null;
-            this.nonXboxFilesTable.DataSource = null;
+            this.xboxFiles.Clear();
+            this.nonXboxFiles.Clear();
         }
 
         private async void nonXboxProfileTable_CellClicked(object sender, DataGridViewCellEventArgs e)

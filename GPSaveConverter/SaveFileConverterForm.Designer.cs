@@ -78,6 +78,12 @@
             this.addTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
             this.fileTranslationsMarkerLabel = new System.Windows.Forms.Label();
+            this.RelativePath = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Timestamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.XboxContainerName1Column = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.XboxContainerName2Column = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.XboxFileIDColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.XboxTimestampColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -139,7 +145,11 @@
             this.xboxFilesTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.xboxFilesTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.xboxFilesTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.XboxContainerName1Column,
+            this.XboxContainerName2Column,
+            this.XboxFileIDColumn,
+            this.XboxTimestampColumn});
             this.xboxFilesTable.Location = new System.Drawing.Point(3, 31);
             this.xboxFilesTable.Name = "xboxFilesTable";
             this.xboxFilesTable.ReadOnly = true;
@@ -156,7 +166,9 @@
             this.nonXboxFilesTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.nonXboxFilesTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.nonXboxFilesTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.RelativePath,
+            this.Timestamp});
             this.nonXboxFilesTable.Location = new System.Drawing.Point(0, 31);
             this.nonXboxFilesTable.Margin = new System.Windows.Forms.Padding(0);
             this.nonXboxFilesTable.Name = "nonXboxFilesTable";
@@ -643,6 +655,58 @@
             this.fileTranslationsMarkerLabel.TabIndex = 4;
             this.fileTranslationsMarkerLabel.Text = "File Translations:";
             // 
+            // RelativePath
+            // 
+            this.RelativePath.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.RelativePath.DataPropertyName = "RelativePath";
+            this.RelativePath.HeaderText = "File Path";
+            this.RelativePath.Name = "RelativePath";
+            this.RelativePath.ReadOnly = true;
+            // 
+            // Timestamp
+            // 
+            this.Timestamp.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Timestamp.DataPropertyName = "Timestamp";
+            this.Timestamp.HeaderText = "Last Modified";
+            this.Timestamp.Name = "Timestamp";
+            this.Timestamp.ReadOnly = true;
+            this.Timestamp.Width = 95;
+            // 
+            // XboxContainerName1Column
+            // 
+            this.XboxContainerName1Column.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.XboxContainerName1Column.DataPropertyName = "ContainerName1";
+            this.XboxContainerName1Column.HeaderText = "Container Name 1";
+            this.XboxContainerName1Column.Name = "XboxContainerName1Column";
+            this.XboxContainerName1Column.ReadOnly = true;
+            this.XboxContainerName1Column.Width = 117;
+            // 
+            // XboxContainerName2Column
+            // 
+            this.XboxContainerName2Column.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.XboxContainerName2Column.DataPropertyName = "ContainerName2";
+            this.XboxContainerName2Column.HeaderText = "Container Name 2";
+            this.XboxContainerName2Column.Name = "XboxContainerName2Column";
+            this.XboxContainerName2Column.ReadOnly = true;
+            this.XboxContainerName2Column.Width = 117;
+            // 
+            // XboxFileIDColumn
+            // 
+            this.XboxFileIDColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.XboxFileIDColumn.DataPropertyName = "FileID";
+            this.XboxFileIDColumn.HeaderText = "Blob Name";
+            this.XboxFileIDColumn.Name = "XboxFileIDColumn";
+            this.XboxFileIDColumn.ReadOnly = true;
+            // 
+            // XboxTimestampColumn
+            // 
+            this.XboxTimestampColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.XboxTimestampColumn.DataPropertyName = "Timestamp";
+            this.XboxTimestampColumn.HeaderText = "Last Modified";
+            this.XboxTimestampColumn.Name = "XboxTimestampColumn";
+            this.XboxTimestampColumn.ReadOnly = true;
+            this.XboxTimestampColumn.Width = 95;
+            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -740,6 +804,12 @@
         private System.Windows.Forms.DataGridView nonXboxProfileTable;
         private System.Windows.Forms.DataGridViewImageColumn UserIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn UserName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn RelativePath;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Timestamp;
+        private System.Windows.Forms.DataGridViewTextBoxColumn XboxContainerName1Column;
+        private System.Windows.Forms.DataGridViewTextBoxColumn XboxContainerName2Column;
+        private System.Windows.Forms.DataGridViewTextBoxColumn XboxFileIDColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn XboxTimestampColumn;
     }
 }
 
