@@ -118,7 +118,8 @@ namespace GPSaveConverter.Library
 
         public static string GetLibraryJson(JsonSerializerOptions options = null)
         {
-            return JsonSerializer.Serialize(savedGameLibrary.Values.ToArray(), options);
+            GameInfo[] saveValues = uwpLibrary.Where(g => savedGameLibrary.ContainsKey(g.Key)).Select(g => g.Value).ToArray();
+            return JsonSerializer.Serialize(saveValues, options);
         }
 
         public static string ExpandSaveFileLocation(string unexpanedSaveFileLocation)
