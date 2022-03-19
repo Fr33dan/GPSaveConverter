@@ -12,17 +12,50 @@ namespace GPSaveConverter.Xbox
         private XboxContainerIndex parent;
         internal string[] ContainerID { get; private set; }
         internal Guid ContainerGuid { get; private set; }
+        public byte ContainerVersion { get => containerVersion; }
+
         string saveFilePath;
         const int ContainerHeaderLength = 8;
-        string containerPath;
-        byte[] containerData;
+        private string containerPath;
+        private byte[] containerData;
         private List<XboxFileInfo> fileList;
-        public XboxFileContainer(XboxContainerIndex parent, Guid containerGuid, string[] containerID,DateTime timestamp)
+        private byte containerVersion;
+        internal uint unknown1;
+        internal ulong unknown2;
+        public XboxFileContainer(XboxContainerIndex parent
+                               , Guid containerGuid
+                               , byte containerVer
+                               , string[] containerID
+                               , uint u1
+                               , ulong u2)
         {
             this.parent = parent;
             this.ContainerGuid = containerGuid;
             this.ContainerID = containerID;
+            this.containerVersion = containerVer;
+
+            this.unknown1 = u1;
+            this.unknown2 = u2;
+
+
             initPaths();
+        }
+
+        internal DateTime getModifiedTime()
+        {
+            FileInfo fileInfo = new FileInfo(saveFilePath);
+            return fileInfo.LastWriteTime;
+        }
+
+        internal long getSize()
+        {
+            long returnVal = 0;
+            foreach(XboxFileInfo f in fileList)
+            {
+                FileInfo fi = new FileInfo(f.getFilePath());
+                returnVal += fi.Length;
+            }
+            return returnVal;
         }
 
         internal string getSaveFilePath()
@@ -42,7 +75,7 @@ namespace GPSaveConverter.Xbox
         private void initPaths()
         {
             saveFilePath = Path.Combine(parent.xboxProfileFolder, this.ContainerGuid.ToString().ToUpper().Replace("-",""));
-            containerPath = Directory.GetFiles(saveFilePath, "container.*").First();
+            containerPath = Path.Combine(saveFilePath, String.Format("container.{0}", this.containerVersion));
         }
 
         private void parseContainer()

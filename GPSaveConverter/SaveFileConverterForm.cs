@@ -311,6 +311,8 @@ namespace GPSaveConverter
                     } while (res == DialogResult.Retry);
                 }
 
+                currentContainer.UpdateIndex();
+
                 logger.Info("Transfer complete");
 
                 // Reload to refresh UI.
