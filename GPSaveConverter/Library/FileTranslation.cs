@@ -85,7 +85,13 @@ namespace GPSaveConverter.Library
                 returnVal = returnVal.Replace("${XboxProfileID}", XboxFileInfo.Parent.Parent.XboxProfileID.TrimStart('0'));
             }
 
-            foreach(string groupPattern in NamedRegexGroups)
+            if (returnVal.Contains("${XboxProfileID_Int}"))
+            {
+                long profileIDLong = Convert.ToInt64(XboxFileInfo.Parent.Parent.XboxProfileID, 16);
+                returnVal = returnVal.Replace("${XboxProfileID_Int}", profileIDLong.ToString());
+            }
+
+            foreach (string groupPattern in NamedRegexGroups)
             {
                 System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(groupPattern);
 
