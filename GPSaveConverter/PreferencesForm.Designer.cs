@@ -33,10 +33,12 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.allowNetworkCheckbox = new System.Windows.Forms.CheckBox();
             this.reloadLibraryButton = new System.Windows.Forms.Button();
+            this.resetAllButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // logLevelComboBox
             // 
+            this.logLevelComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.logLevelComboBox.FormattingEnabled = true;
             this.logLevelComboBox.Location = new System.Drawing.Point(139, 12);
             this.logLevelComboBox.Name = "logLevelComboBox";
@@ -45,6 +47,7 @@
             // 
             // logLevelLabel
             // 
+            this.logLevelLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.logLevelLabel.AutoSize = true;
             this.logLevelLabel.Location = new System.Drawing.Point(76, 15);
             this.logLevelLabel.Name = "logLevelLabel";
@@ -54,6 +57,7 @@
             // 
             // saveButton
             // 
+            this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.saveButton.Location = new System.Drawing.Point(185, 99);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(75, 23);
@@ -64,6 +68,7 @@
             // 
             // allowNetworkCheckbox
             // 
+            this.allowNetworkCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.allowNetworkCheckbox.AutoSize = true;
             this.allowNetworkCheckbox.Location = new System.Drawing.Point(76, 39);
             this.allowNetworkCheckbox.Name = "allowNetworkCheckbox";
@@ -74,6 +79,7 @@
             // 
             // reloadLibraryButton
             // 
+            this.reloadLibraryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.reloadLibraryButton.Location = new System.Drawing.Point(76, 62);
             this.reloadLibraryButton.Name = "reloadLibraryButton";
             this.reloadLibraryButton.Size = new System.Drawing.Size(184, 23);
@@ -82,11 +88,23 @@
             this.reloadLibraryButton.UseVisualStyleBackColor = true;
             this.reloadLibraryButton.Click += new System.EventHandler(this.reloadLibraryButton_Click);
             // 
+            // resetAllButton
+            // 
+            this.resetAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.resetAllButton.Location = new System.Drawing.Point(12, 99);
+            this.resetAllButton.Name = "resetAllButton";
+            this.resetAllButton.Size = new System.Drawing.Size(75, 23);
+            this.resetAllButton.TabIndex = 5;
+            this.resetAllButton.Text = "Reset All";
+            this.resetAllButton.UseVisualStyleBackColor = true;
+            this.resetAllButton.Click += new System.EventHandler(this.resetAllButton_Click);
+            // 
             // PreferencesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(272, 134);
+            this.Controls.Add(this.resetAllButton);
             this.Controls.Add(this.reloadLibraryButton);
             this.Controls.Add(this.allowNetworkCheckbox);
             this.Controls.Add(this.saveButton);
@@ -109,5 +127,6 @@
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.CheckBox allowNetworkCheckbox;
         private System.Windows.Forms.Button reloadLibraryButton;
+        private System.Windows.Forms.Button resetAllButton;
     }
 }

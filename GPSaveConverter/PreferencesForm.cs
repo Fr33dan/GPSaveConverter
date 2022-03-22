@@ -22,13 +22,13 @@ namespace GPSaveConverter
         {
             if (keyData == (Keys.Control | Keys.R))
             {
-                this.BeginInvoke((Action)ResetKeycode_Pressed);
+                this.BeginInvoke((Action)ResetSettings);
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        private void ResetKeycode_Pressed()
+        private void ResetSettings()
         {
             DialogResult res = MessageBox.Show(this, "Remove all local configurations? (Software will then exit)", "Are you sure?", MessageBoxButtons.YesNoCancel);
             if(res == DialogResult.Yes)
@@ -75,6 +75,11 @@ namespace GPSaveConverter
                 e.Cancel = true;
                 Hide();
             }
+        }
+
+        private void resetAllButton_Click(object sender, EventArgs e)
+        {
+            ResetSettings();
         }
     }
 }
