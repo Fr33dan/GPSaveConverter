@@ -19,7 +19,7 @@ namespace GPSaveConverter.Library
                 {
                     string url = String.Format(@"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={0}&steamids={1}"
                                                 , GPSaveConverter.Properties.Resources.SteamAPIKey
-                                                , GetSteamID(profile.UserIDFolder));
+                                                , GetSteamID(profile.UserID));
                     string queryJson = await wc.DownloadStringTaskAsync(url);
                     JsonNode queryRoot = JsonValue.Parse(queryJson);
 

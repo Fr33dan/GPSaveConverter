@@ -2,6 +2,7 @@
   {
     "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
     "BaseNonXboxSaveLocation": "%HOMEDRIVE%%HOMEPATH%\\AppData\\LocalLow\\Two Point Studios\\Two Point Hospital\\Cloud\\<user-id>\\",
+    "TargetProfileTypes": [ "Steam" ],
     "FileTranslations": [
       {
         "ContainerName1": "TPHCONTAINER",
@@ -27,11 +28,25 @@
   },
   {
     "PackageName": "Microsoft.624F8B84B80_8wekyb3d8bbwe",
-    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id>\\"
+    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id2_XboxInt>\\",
+    "TargetProfileTypes": [ "Steam", "Xbox" ],
+    "FileTranslations": [
+      {
+        "NonXboxFilename": "${XboxProfileNumericID}\\\\User_${UserNum}\\.${FileExtension}",
+        "XboxFileID": "${FileExtension}",
+        "ContainerName1": "User_${XboxProfileID}",
+        "ContainerName2": "User_${XboxProfileID}",
+        "NamedRegexGroups": [
+          "(?<UserNum>[\\w]+)",
+          "(?<FileExtension>[\\w]+)"
+        ]
+      }
+    ]
   },
   {
     "PackageName": "39EA002F.DQXISWW_n746a19ndrrjg",
     "WGSProfileSuffix": "746B3305",
+    "TargetProfileTypes": [ "Steam" ],
     "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\DRAGON QUEST XI S\\Steam\\<user-id>\\Saved\\SaveGames\\Book\\",
     "FileTranslations": [
       {
@@ -46,6 +61,7 @@
   {
     "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
     "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\",
+    "TargetProfileTypes": [ "Steam" ],
     "FileTranslations": [
       {
         "NonXboxFilename": "${GameProfile}",

@@ -27,9 +27,15 @@ namespace GPSaveConverter.Library
         {
             get
             {
-                return GameLibrary.ExpandSaveFileLocation(BaseNonXboxSaveLocation);
+                return this.expandSaveFileLocation();
             }
         }
+
+        [Browsable(false)]
+        public NonXboxProfile.ProfileType[] TargetProfileTypes { get; set; }
+
+        [Browsable(false), JsonIgnore]
+        internal NonXboxProfile[] TargetProfiles { get; set; }
 
         private string baseNonXboxSaveLocation;
 
@@ -94,13 +100,53 @@ namespace GPSaveConverter.Library
             set { fileTranslations = value; }
         }
 
+        private string expandSaveFileLocation()
+        {
+            string returnVal = GameLibrary.ExpandSaveFileLocation(BaseNonXboxSaveLocation);
 
+
+            if (this.TargetProfiles != null) foreach (NonXboxProfile p in this.TargetProfiles)
+            {
+                returnVal = p.ExpandSaveLocation(returnVal);
+            }
+
+            return returnVal;
+        }
 
         private Image gameIcon;
 
         public GameInfo()
         {
             this.fileTranslations = new List<FileTranslation>();
+        }
+
+        internal async Task<NonXboxProfile[]> getProfileOptions(int index)
+        {
+            string baseLocation = GameLibrary.ExpandSaveFileLocation(BaseNonXboxSaveLocation);
+            for(int j = 0; j < index; j++)
+            {
+                baseLocation = this.TargetProfiles[j].ExpandSaveLocation(baseLocation);
+            }
+            return await this.TargetProfiles[index].getProfileOptions(baseLocation);
+        }
+
+        internal void ApplyDeserializedInfo(GameInfo deserializedInfo)
+        {
+            this.BaseNonXboxSaveLocation = deserializedInfo.BaseNonXboxSaveLocation;
+            this.FileTranslations.AddRange(deserializedInfo.FileTranslations);
+            this.WGSProfileSuffix = deserializedInfo.WGSProfileSuffix;
+
+            if (deserializedInfo.TargetProfileTypes != null)
+            {
+                this.TargetProfileTypes = deserializedInfo.TargetProfileTypes;
+
+                this.TargetProfiles = new NonXboxProfile[TargetProfileTypes.Length];
+
+                for (int j = 0; j < TargetProfileTypes.Length; j++)
+                {
+                    TargetProfiles[j] = new NonXboxProfile(j, deserializedInfo.TargetProfileTypes[j]);
+                }
+            }
         }
 
         private FileTranslation findTranslation(NonXboxFileInfo file)
@@ -156,47 +202,6 @@ namespace GPSaveConverter.Library
             {
                 await fetchNonXboxSaveFiles(dir, root);
             }
-        }
-
-        internal async Task<bool> fetchNonXboxProfiles()
-        {
-            string profilesDir = GameLibrary.GetNonXboxProfileLocation(this.BaseNonXboxSaveLocation);
-            bool failed = false;
-
-            GameLibrary.nonXboxProfiles.Clear();
-            if (Directory.Exists(profilesDir))
-            {
-                logger.Info("Fetching non-Xbox profile information...");
-                foreach (string p in Directory.GetDirectories(profilesDir))
-                {
-                    Library.GameLibrary.ProfileID = p.Replace(profilesDir, "");
-
-                    if (Directory.Exists(this.NonXboxSaveLocation))
-                    {
-                        NonXboxProfile newProfile = new NonXboxProfile(Library.GameLibrary.ProfileID, NonXboxProfile.ProfileType.Steam);
-                        await newProfile.FetchProfileInformation();
-                        GameLibrary.nonXboxProfiles.Add(newProfile);
-                    }
-                }
-
-                Library.GameLibrary.ProfileID = null;
-                if (GameLibrary.nonXboxProfiles.Count == 0)
-                {
-                    failed = true;
-                    logger.Info("No Non-Xbox profiles found.");
-                }
-                else
-                {
-                    logger.Info("Non-Xbox profiles obtained!");
-                }
-            }
-            else
-            {
-                failed = true;
-            }
-
-            return !failed;
-
         }
 
         internal NonXboxFileInfo getNonXboxFileVersion(Xbox.XboxFileInfo file, bool createOrUpdate = false)

@@ -19,6 +19,10 @@ namespace GPSaveConverter
         internal Library.GameInfo ActiveGame { get; set; }
         private PreferencesForm prefsForm;
         private CreditsForm creditsForm;
+
+        private List<TabPage> profileTabs;
+
+
         public SaveFileConverterForm()
         {
             InitializeComponent();
@@ -27,7 +31,6 @@ namespace GPSaveConverter
             {
                 toggleFileTranslationPanel();
             }
-            this.nonXboxProfileTable.DataSource = GPSaveConverter.Library.GameLibrary.nonXboxProfiles;
             this.nonXboxFilesTable.DataSource = GPSaveConverter.Library.GameLibrary.nonXboxFiles;
             this.xboxFilesTable.DataSource = GPSaveConverter.Library.GameLibrary.xboxFiles;
         }
@@ -104,6 +107,100 @@ namespace GPSaveConverter
             }
         }
 
+        private async Task fetchNonXboxProfiles(int index)
+        {
+            if(profileTabs == null)
+            {
+                this.profileTabs = new List<TabPage>();
+            }
+            DataGridView profileDataGrid;
+            TabPage targetTab;
+            if (profileTabs.Count <= index)
+            {
+                targetTab = new TabPage();
+                targetTab.Text = "Profile " + (index + 1).ToString();
+
+
+                DataGridViewColumn userIconColumn = new System.Windows.Forms.DataGridViewImageColumn();
+                DataGridViewColumn userNameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+                // 
+                // UserIcon
+                // 
+                    userIconColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+                userIconColumn.DataPropertyName = "UserIcon";
+                userIconColumn.HeaderText = "User Icon";
+                userIconColumn.Name = "UserIcon";
+                userIconColumn.ReadOnly = true;
+                userIconColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+                userIconColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+                userIconColumn.Width = 32;
+                // 
+                // UserName
+                // 
+                userNameColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+                userNameColumn.DataPropertyName = "UserName";
+                userNameColumn.HeaderText = "User Name";
+                userNameColumn.Name = "UserName";
+                userNameColumn.ReadOnly = true;
+
+                profileDataGrid = new DataGridView();
+
+                profileDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+                profileDataGrid.ColumnHeadersVisible = false;
+                profileDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { userIconColumn,
+                                                                                                 userNameColumn});
+                profileDataGrid.Location = new System.Drawing.Point(183, 78);
+                profileDataGrid.Name = "nonXboxProfileTable" + index;
+                profileDataGrid.ReadOnly = true;
+                profileDataGrid.RowHeadersVisible = false;
+                profileDataGrid.RowTemplate.Height = 32;
+                profileDataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+                profileDataGrid.Size = new System.Drawing.Size(204, 95);
+                profileDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+                profileDataGrid.TabIndex = 10;
+                profileDataGrid.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.nonXboxProfileTable_CellClicked);
+                profileDataGrid.DataSource = new BindingList<NonXboxProfile>();
+
+                targetTab.Controls.Add(profileDataGrid);
+                this.tabControl1.Controls.Add(targetTab);
+                profileTabs.Add(targetTab);
+            }
+            else
+            {
+                targetTab = profileTabs[index];
+
+                if (!tabControl1.Controls.Contains(targetTab))
+                {
+                    this.tabControl1.Controls.Add(targetTab);
+                }
+                for (int j = index + 1;j < profileTabs.Count; j++)
+                {
+                    this.tabControl1.Controls.Remove(profileTabs[j]);
+                }
+            }
+
+
+            profileDataGrid = targetTab.Controls[0] as DataGridView;
+            BindingList<NonXboxProfile> profileList = profileDataGrid.DataSource as BindingList<NonXboxProfile>;
+            profileList.Clear();
+            foreach(NonXboxProfile p in await ActiveGame.getProfileOptions(index))
+            {
+                profileList.Add(p);
+            }
+
+            if (profileList.Count == 1)
+            {
+                profileDataGrid.Rows[0].Selected = true;
+                nonXboxProfileTable_CellClicked(profileDataGrid, null);
+            }
+            else if(profileList.Count == 0)
+            {
+                profileList.Add(new NonXboxProfile("No non-Xbox profiles found", index, NonXboxProfile.ProfileType.DisplayOnly));
+                profileDataGrid.Enabled = false;
+                await promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
+            }
+        }
+
         
 
         private async void SaveFileConverterForm_Load(object sender, EventArgs e)
@@ -160,21 +257,28 @@ namespace GPSaveConverter
             this.viewXboxFilesButton.Enabled = false;
             this.viewNonXboxFileButton.Enabled = false;
             GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Clear();
-            this.nonXboxProfileTable.Enabled = true;
             GPSaveConverter.Library.GameLibrary.xboxFiles.Clear();
             GPSaveConverter.Library.GameLibrary.nonXboxFiles.Clear();
         }
 
         private async void nonXboxProfileTable_CellClicked(object sender, DataGridViewCellEventArgs e)
         {
-            if (GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Count > 0)
+            TabPage sourceTab = this.profileTabs.Where(t => t.Controls[0] == sender).First();
+            int sourceIndex = this.profileTabs.IndexOf(sourceTab);
+            NonXboxProfile targetProfile = (sourceTab.Controls[0] as DataGridView).SelectedRows[0].DataBoundItem as NonXboxProfile;
+
+            this.ActiveGame.TargetProfiles[sourceIndex] = targetProfile;
+
+            if(sourceIndex == ActiveGame.TargetProfiles.Length - 1 )
             {
-                NonXboxProfile profile = this.nonXboxProfileTable.SelectedRows[0].DataBoundItem as NonXboxProfile;
-                Library.GameLibrary.ProfileID = profile.UserIDFolder;
                 if (this.currentContainer != null)
                 {
                     await fetchNonXboxSaveFiles();
                 }
+            }
+            else
+            {
+                await fetchNonXboxProfiles(sourceIndex + 1);
             }
         }
 
@@ -198,10 +302,16 @@ namespace GPSaveConverter
                 return false;
             }
 
-            if(ActiveGame.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker) && Library.GameLibrary.ProfileID == null)
+            if (ActiveGame.TargetProfiles != null) 
             {
-                MessageBox.Show(this, "Select non-Xbox Profile (or select save file location manually)", "Configure Profile");
-                return false;
+                foreach (NonXboxProfile p in ActiveGame.TargetProfiles)
+                {
+                    if (p.UserID == null)
+                    {
+                        MessageBox.Show(this, "Select non-Xbox Profile(s) (or select save file location manually)", "Configure Profile");
+                        return false;
+                    }
+                }
             }
 
             if (!Directory.Exists(ActiveGame.NonXboxSaveLocation))
@@ -352,25 +462,14 @@ namespace GPSaveConverter
             {
                 if (ActiveGame.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker))
                 {
-                    if(await ActiveGame.fetchNonXboxProfiles())
-                    {
-                        if (Library.GameLibrary.nonXboxProfiles.Count == 1)
-                        {
-                            this.nonXboxProfileTable.Rows[0].Selected = true;
-                            nonXboxProfileTable_CellClicked(this, null);
-                        }
-                    }
-                    else
-                    {
-                        Library.GameLibrary.nonXboxProfiles.Add(new NonXboxProfile("No non-Xbox profiles found", NonXboxProfile.ProfileType.DisplayOnly));
-                        this.nonXboxProfileTable.Enabled = false;
-                        await promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
-                    }
+                    await this.fetchNonXboxProfiles(0);
                 }
                 else
                 {
-                    GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Add(new NonXboxProfile("Profiles not defined in non-Xbox save location", NonXboxProfile.ProfileType.DisplayOnly));
-                    this.nonXboxProfileTable.Enabled = false;
+                    foreach(TabPage p in this.profileTabs)
+                    {
+                        this.tabControl1.Controls.Remove(p);
+                    }
 
 
                     if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
