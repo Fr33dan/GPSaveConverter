@@ -279,7 +279,7 @@ namespace GPSaveConverter.Library
                 {
                     Xbox.XboxFileContainer xboxFileContainer = containers.First();
 
-                    string xboxFileID = Regex.Replace(Regex.Escape(file.RelativePath), t.NonXboxFilenameRegex, t.XboxFileID);
+                    string xboxFileID = Regex.Escape(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.XboxFileID));
 
                     matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, t.replaceRegex(xboxFileID)).Success).FirstOrDefault();
 
