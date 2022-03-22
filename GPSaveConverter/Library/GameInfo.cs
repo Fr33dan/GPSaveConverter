@@ -213,7 +213,7 @@ namespace GPSaveConverter.Library
             {
                 returnVal = new NonXboxFileInfo();
 
-                returnVal.RelativePath = Regex.Replace(file.FileID, t.XboxFileIDRegex, t.NonXboxFilename);
+                returnVal.RelativePath = Regex.Replace(Regex.Escape(file.FileID), t.XboxFileIDRegex, t.NonXboxFilename);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName1, t.ContainerName1Regex, returnVal.RelativePath);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName2, t.ContainerName2Regex, returnVal.RelativePath);
 
@@ -279,7 +279,7 @@ namespace GPSaveConverter.Library
                 {
                     Xbox.XboxFileContainer xboxFileContainer = containers.First();
 
-                    string xboxFileID = Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.XboxFileID);
+                    string xboxFileID = Regex.Replace(Regex.Escape(file.RelativePath), t.NonXboxFilenameRegex, t.XboxFileID);
 
                     matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, t.replaceRegex(xboxFileID)).Success).FirstOrDefault();
 
