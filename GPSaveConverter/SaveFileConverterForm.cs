@@ -136,7 +136,7 @@ namespace GPSaveConverter
         private void SaveFileConverterForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             // No need to save library if it was never initialized.
-            if (Library.GameLibrary.Initialized)
+            if (Library.GameLibrary.Initialized && (this.prefsForm == null || !this.prefsForm.SkipSave))
             {
                 GPSaveConverter.Properties.Settings.Default.GameLibrary = Library.GameLibrary.GetLibraryJson();
                 GPSaveConverter.Properties.Settings.Default.Save();

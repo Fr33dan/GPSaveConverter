@@ -12,6 +12,7 @@ namespace GPSaveConverter
 {
     public partial class PreferencesForm : Form
     {
+        internal bool SkipSave = false;
         public PreferencesForm()
         {
             InitializeComponent();
@@ -33,6 +34,8 @@ namespace GPSaveConverter
             if(res == DialogResult.Yes)
             {
                 Properties.Settings.Default.Reset();
+                Properties.Settings.Default.Save();
+                SkipSave = true;
                 Application.Exit();
             }
 
