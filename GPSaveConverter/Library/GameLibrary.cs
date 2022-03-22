@@ -52,7 +52,15 @@ namespace GPSaveConverter.Library
 
             foreach (GameInfo newGame in jsonLibrary)
             {
-                RegisterSerializedInfo(newGame);
+                GameInfo existingInfo;
+                if(savedGameLibrary.TryGetValue(newGame.PackageName,out existingInfo))
+                {
+                    existingInfo.ApplyDeserializedInfo(newGame);
+                }
+                else
+                {
+                    savedGameLibrary.Add(newGame.PackageName, newGame);
+                }
             }
         }
 
