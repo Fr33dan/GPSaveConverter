@@ -32,7 +32,24 @@
     "TargetProfileTypes": [ "Steam", "Xbox" ],
     "FileTranslations": [
       {
-        "NonXboxFilename": "${XboxProfileNumericID}\\\\User_${UserNum}\\.${FileExtension}",
+        "NonXboxFilename": "User_${UserNum}\\.${FileExtension}",
+        "XboxFileID": "${FileExtension}",
+        "ContainerName1": "User_${XboxProfileID}",
+        "ContainerName2": "User_${XboxProfileID}",
+        "NamedRegexGroups": [
+          "(?<UserNum>[\\w]+)",
+          "(?<FileExtension>[\\w]+)"
+        ]
+      }
+    ]
+  },
+  {
+    "PackageName": "Microsoft.SunriseBaseGame_8wekyb3d8bbwe",
+    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1293830\\remote\\<user-id2_XboxInt>\\",
+    "TargetProfileTypes": [ "Steam", "Xbox" ],
+    "FileTranslations": [
+      {
+        "NonXboxFilename": "User_${UserNum}\\.${FileExtension}",
         "XboxFileID": "${FileExtension}",
         "ContainerName1": "User_${XboxProfileID}",
         "ContainerName2": "User_${XboxProfileID}",
