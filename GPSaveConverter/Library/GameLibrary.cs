@@ -25,7 +25,6 @@ namespace GPSaveConverter.Library
 
         internal static BindingList<Xbox.XboxFileInfo> xboxFiles = new BindingList<Xbox.XboxFileInfo>();
 
-        public static string ProfileID;
 
         internal static bool Initialized { get { return savedGameLibrary != null; } }
 
@@ -43,7 +42,6 @@ namespace GPSaveConverter.Library
 
         private static void FirstTimeInitializeGameLibrary()
         {
-
             GPSaveConverter.Properties.Settings.Default.GameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
             GPSaveConverter.Properties.Settings.Default.Save();
         }
@@ -119,7 +117,21 @@ namespace GPSaveConverter.Library
         public static string GetLibraryJson(JsonSerializerOptions options = null)
         {
             List<GameInfo> loadedLibrary = savedGameLibrary.Values.ToList();
-            return JsonSerializer.Serialize(saveValues, options);
+
+            foreach(GameInfo uwpGame in uwpLibrary.Values)
+            {
+                if (uwpGame.NonUWPDataPopulated)
+                {
+                    GameInfo saveGameVersion;
+                    if (savedGameLibrary.TryGetValue(uwpGame.PackageName,out saveGameVersion))
+                    {
+                        loadedLibrary.Remove(saveGameVersion);
+                    }
+                    loadedLibrary.Add(uwpGame);
+                }
+            }
+
+            return JsonSerializer.Serialize(loadedLibrary, options);
         }
 
         public static string ExpandSaveFileLocation(string unexpanedSaveFileLocation)
@@ -138,11 +150,6 @@ namespace GPSaveConverter.Library
                     returnVal = returnVal.Replace(SteamInstallMarker, steamLocation);
                 }
             }
-            if (returnVal.Contains(NonSteamProfileMarker))
-            {
-                returnVal = returnVal.Replace(NonSteamProfileMarker, ProfileID);
-            }
-
 
             return returnVal;
         }
@@ -169,9 +176,7 @@ namespace GPSaveConverter.Library
         {
             CheckInitialization();
             GameInfo i = getGameInfo(deserializedInfo.PackageName);
-            i.BaseNonXboxSaveLocation = deserializedInfo.BaseNonXboxSaveLocation;
-            i.FileTranslations.AddRange(deserializedInfo.FileTranslations);
-            i.WGSProfileSuffix = deserializedInfo.WGSProfileSuffix;
+            i.ApplyDeserializedInfo(deserializedInfo);
         }
         
 
