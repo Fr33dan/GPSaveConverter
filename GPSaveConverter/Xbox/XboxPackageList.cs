@@ -21,8 +21,15 @@ namespace GPSaveConverter.Xbox
                 string wgsFolder = Path.Combine(package, "SystemAppData", "wgs");
                 if(Directory.Exists(wgsFolder) && Directory.GetDirectories(wgsFolder).Length >= 2)
                 {
-                    Library.GameInfo info = Library.GameLibrary.getGameInfo(Path.GetFileName(package));
-                    list.Add(info);
+                    try
+                    {
+                        Library.GameInfo info = Library.GameLibrary.getGameInfo(Path.GetFileName(package));
+                        list.Add(info);
+                    }
+                    catch(Exception ex)
+                    {
+                        logger.Info(String.Format("Could not load Xbox package {0}: {1}", Path.GetFileName(package), ex.Message));
+                    }
                 }
             }
             internalList = list.ToArray();
