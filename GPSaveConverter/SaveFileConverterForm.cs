@@ -466,9 +466,12 @@ namespace GPSaveConverter
                 }
                 else
                 {
-                    foreach(TabPage p in this.profileTabs)
+                    if (profileTabs != null)
                     {
-                        this.tabControl1.Controls.Remove(p);
+                        foreach (TabPage p in this.profileTabs)
+                        {
+                            this.tabControl1.Controls.Remove(p);
+                        }
                     }
 
 
