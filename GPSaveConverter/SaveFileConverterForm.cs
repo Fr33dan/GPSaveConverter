@@ -444,6 +444,7 @@ namespace GPSaveConverter
 
             this.saveGameProfileToolStripMenuItem.Enabled = true;
             this.loadGameProfileToolStripMenuItem.Enabled = true;
+            this.editNonXboxLocationToolStripMenuItem.Enabled = true;
 
             this.fileTranslationListBox.Items.AddRange(ActiveGame.FileTranslations.ToArray());
             this.fileTranslationListBox.Enabled = true;
@@ -656,6 +657,18 @@ namespace GPSaveConverter
                 creditsForm = new CreditsForm();
             }
             creditsForm.Show(this);
+        }
+
+        private void editNonXboxLocationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EditBaseLocationForm editBaseLocationForm = new EditBaseLocationForm();
+            editBaseLocationForm.BaseLocation = ActiveGame.BaseNonXboxSaveLocation;
+
+            DialogResult res = editBaseLocationForm.ShowDialog(this);
+            if(res == DialogResult.OK)
+            {
+                ActiveGame.BaseNonXboxSaveLocation = editBaseLocationForm.BaseLocation;
+            }
         }
     }
 }

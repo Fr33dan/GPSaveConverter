@@ -237,6 +237,12 @@
     <Compile Include="CreditsForm.Designer.cs">
       <DependentUpon>CreditsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="EditBaseLocationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditBaseLocationForm.Designer.cs">
+      <DependentUpon>EditBaseLocationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Library\FileTranslation.cs" />
     <Compile Include="Library\PCGameWiki.cs" />
     <Compile Include="Library\Steam.cs" />
@@ -276,6 +282,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="CreditsForm.resx">
       <DependentUpon>CreditsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditBaseLocationForm.resx">
+      <DependentUpon>EditBaseLocationForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PreferencesForm.resx">
       <DependentUpon>PreferencesForm.cs</DependentUpon>
