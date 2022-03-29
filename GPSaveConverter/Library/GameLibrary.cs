@@ -200,7 +200,10 @@ namespace GPSaveConverter.Library
 
             if (!uwpLibrary.TryGetValue(packageName, out uwpInfo))
             {
-                throw new Exception("Game info not found in UWP library");
+                logger.Warn("Game information for package {0} not found in UWP library. Game installation may be corrupt.", packageName);
+                uwpInfo = new GameInfo();
+                uwpInfo.PackageName = packageName;
+                uwpLibrary.Add(packageName, uwpInfo);
             }
             return uwpInfo;
         }
