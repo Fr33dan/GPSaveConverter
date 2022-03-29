@@ -251,6 +251,7 @@ namespace GPSaveConverter
         {
             this.foldersToolTip.RemoveAll();
             this.fileTranslationListBox.Items.Clear();
+            this.fileTranslationPropertyGrid.SelectedObject = null;
 
             this.promptNonXboxLocationButton.Enabled = false;
             this.fileTranslationListBox.Enabled = false;
