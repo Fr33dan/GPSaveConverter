@@ -22,7 +22,7 @@ namespace GPSaveConverter.Library
         public string NonXboxFilenameRegex { get { return replaceRegex(NonXboxFilename); } }
 
         [Category("File Info")
-            , DisplayName("Xbox file ID")
+            , DisplayName("Xbox Blob ID")
             , Description("Descriptive name within Xbox container file. Substitutions are resolved from non-Xbox file name.")
             , Display(Order = 2)]
         public string XboxFileID { get; set; }
