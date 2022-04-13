@@ -92,6 +92,7 @@ namespace GPSaveConverter.Library
             {
                 string scriptText = GPSaveConverter.Properties.Resources.GetAUMIDScript;
                 logger.Info("Getting UWP package manifests...");
+                
                 string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
                 logger.Trace("Powershell script results:\n{0}", scriptOutput);
 
@@ -102,13 +103,20 @@ namespace GPSaveConverter.Library
                 {
                     string[] appInfo = appInfoLine.Split('|');
                     GameInfo gameInfo = new GameInfo();
-                    string name = appInfo[0].Trim();
-                    gameInfo.IconLocation = appInfo[1];
-                    gameInfo.PackageName = appInfo[2];
-                    gameInfo.Name = name == string.Empty ? gameInfo.PackageName : name;
-                    if (!uwpLibrary.ContainsKey(gameInfo.PackageName))
+                    if (appInfo.Length != 3)
                     {
-                        uwpLibrary.Add(gameInfo.PackageName, gameInfo);
+                        logger.Warn("Malformed result line from UWP package script: {0}", appInfoLine);
+                    }
+                    else
+                    {
+                        string name = appInfo[0].Trim();
+                        gameInfo.IconLocation = appInfo[1];
+                        gameInfo.PackageName = appInfo[2];
+                        gameInfo.Name = name == string.Empty ? gameInfo.PackageName : name;
+                        if (!uwpLibrary.ContainsKey(gameInfo.PackageName))
+                        {
+                            uwpLibrary.Add(gameInfo.PackageName, gameInfo);
+                        }
                     }
                 }
 
