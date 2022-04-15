@@ -61,6 +61,10 @@ namespace GPSaveConverter
                 if (res == DialogResult.OK)
                 {
                     ActiveGame.BaseNonXboxSaveLocation = dialog.SelectedPath + "\\";
+
+                    // Clear profiles when manual save file location is used.
+                    ActiveGame.TargetProfiles = null;
+
                     await fetchNonXboxSaveFiles();
                     return true;
                 }
