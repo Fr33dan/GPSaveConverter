@@ -45,8 +45,8 @@
   },
   {
     "PackageName": "Microsoft.SunriseBaseGame_8wekyb3d8bbwe",
-    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1293830\\remote\\<user-id2_XboxInt>\\",
-    "TargetProfileTypes": [ "Steam", "Xbox" ],
+    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1293830\\remote\\",
+    "TargetProfileTypes": [ "Steam" ],
     "FileTranslations": [
       {
         "NonXboxFilename": "User_${UserNum}\\.${FileExtension}",
