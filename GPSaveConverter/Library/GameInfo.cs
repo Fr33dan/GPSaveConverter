@@ -235,6 +235,7 @@ namespace GPSaveConverter.Library
                     if (createOrUpdate)
                     {
                         Regex r = new Regex(t.replaceRegex(returnVal.RelativePath));
+                        returnVal.FilePath = Path.Combine(this.NonXboxSaveLocation, returnVal.RelativePath);
                         if(r.GetGroupNames().Length > 1)
                         {
                             throw new Exception("No substitution data found.");
