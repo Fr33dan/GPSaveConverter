@@ -32,13 +32,22 @@
     "TargetProfileTypes": [ "Steam", "Xbox" ],
     "FileTranslations": [
       {
-        "NonXboxFilename": "User_${UserNum}\\.${FileExtension}",
+        "NonXboxFilename": "User_${XboxProfileID}.${FileExtension}",
         "XboxFileID": "${FileExtension}",
         "ContainerName1": "User_${XboxProfileID}",
         "ContainerName2": "User_${XboxProfileID}",
         "NamedRegexGroups": [
-          "(?<UserNum>[\\w]+)",
           "(?<FileExtension>[\\w]+)"
+        ]
+      },
+      {
+        "NonXboxFilename": "${Group}.${FileExtension}",
+        "XboxFileID": "${FileExtension}",
+        "ContainerName1": "${Group}",
+        "ContainerName2": "${Group}",
+        "NamedRegexGroups": [
+          "(?<Group>[\\w_]+)",
+          "(?<FileExtension>[\\w_.]+)"
         ]
       }
     ]
@@ -49,13 +58,22 @@
     "TargetProfileTypes": [ "Steam" ],
     "FileTranslations": [
       {
-        "NonXboxFilename": "User_${UserNum}\\.${FileExtension}",
+        "NonXboxFilename": "User_${XboxProfileID}.${FileExtension}",
         "XboxFileID": "${FileExtension}",
         "ContainerName1": "User_${XboxProfileID}",
         "ContainerName2": "User_${XboxProfileID}",
         "NamedRegexGroups": [
-          "(?<UserNum>[\\w]+)",
           "(?<FileExtension>[\\w]+)"
+        ]
+      },
+      {
+        "NonXboxFilename": "${Group}.${FileExtension}",
+        "XboxFileID": "${FileExtension}",
+        "ContainerName1": "${Group}",
+        "ContainerName2": "${Group}",
+        "NamedRegexGroups": [
+          "(?<Group>[\\w_]+)",
+          "(?<FileExtension>[\\w_.]+)"
         ]
       }
     ]
