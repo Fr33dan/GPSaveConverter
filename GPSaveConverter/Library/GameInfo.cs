@@ -213,14 +213,14 @@ namespace GPSaveConverter.Library
             {
                 returnVal = new NonXboxFileInfo();
 
-                returnVal.RelativePath = Regex.Replace(Regex.Escape(file.FileID), t.XboxFileIDRegex, t.NonXboxFilename);
+                returnVal.RelativePath = Regex.Replace(file.FileID, t.XboxFileIDRegex, t.NonXboxFilename);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName1, t.ContainerName1Regex, returnVal.RelativePath);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName2, t.ContainerName2Regex, returnVal.RelativePath);
 
                 NonXboxFileInfo match = null;
                 foreach (NonXboxFileInfo fi in GameLibrary.nonXboxFiles)
                 {
-                    if (Regex.Match(fi.RelativePath, t.replaceRegex(returnVal.RelativePath)).Success)
+                    if (Regex.Match(fi.RelativePath, Regex.Escape(t.replaceRegex(returnVal.RelativePath))).Success)
                     {
                         match = fi;
                         break;
