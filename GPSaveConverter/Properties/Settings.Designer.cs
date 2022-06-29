@@ -74,12 +74,24 @@ namespace GPSaveConverter.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string GameLibrary {
+        public string UserGameLibrary {
             get {
-                return ((string)(this["GameLibrary"]));
+                return ((string)(this["UserGameLibrary"]));
             }
             set {
-                this["GameLibrary"] = value;
+                this["UserGameLibrary"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DefaultGameLibrary {
+            get {
+                return ((string)(this["DefaultGameLibrary"]));
+            }
+            set {
+                this["DefaultGameLibrary"] = value;
             }
         }
     }

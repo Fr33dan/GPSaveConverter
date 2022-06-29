@@ -35,22 +35,23 @@ namespace GPSaveConverter.Library
 
         public static async Task Initialize()
         {
-            if (GPSaveConverter.Properties.Settings.Default.GameLibrary == string.Empty) await Task.Run(FirstTimeInitializeGameLibrary);
+            if (GPSaveConverter.Properties.Settings.Default.UserGameLibrary == string.Empty) await Task.Run(FirstTimeInitializeGameLibrary);
             await Task.Run(LoadSavedLibrary);
             await Task.Run(GetInstalledApps);
         }
 
         private static void FirstTimeInitializeGameLibrary()
         {
-            GPSaveConverter.Properties.Settings.Default.GameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
+            GPSaveConverter.Properties.Settings.Default.UserGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
+            GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
             GPSaveConverter.Properties.Settings.Default.Save();
         }
 
         internal static void LoadDefaultLibrary()
         {
-            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(GPSaveConverter.Properties.Resources.GameLibrary);
+            StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Resources.GameLibrary);
 
-            foreach (GameInfo newGame in jsonLibrary)
+            foreach (GameInfo newGame in jsonLibrary.GameInfo)
             {
                 GameInfo existingInfo;
                 if(savedGameLibrary.TryGetValue(newGame.PackageName,out existingInfo))
@@ -66,10 +67,10 @@ namespace GPSaveConverter.Library
 
         private static void LoadSavedLibrary()
         {
-            IList<GameInfo> jsonLibrary = JsonSerializer.Deserialize<IList<GameInfo>>(GPSaveConverter.Properties.Settings.Default.GameLibrary);
-
+            StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
+            
             savedGameLibrary = new Dictionary<string, GameInfo>();
-            foreach (GameInfo newGame in jsonLibrary)
+            foreach (GameInfo newGame in jsonLibrary.GameInfo)
             {
                 savedGameLibrary.Add(newGame.PackageName, newGame);
             }

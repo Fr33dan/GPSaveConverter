@@ -14,7 +14,10 @@
     <Setting Name="ShowFileTranslations" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="GameLibrary" Type="System.String" Scope="User">
+    <Setting Name="UserGameLibrary" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="DefaultGameLibrary" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

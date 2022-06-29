@@ -1,121 +1,124 @@
-﻿[
-  {
-    "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
-    "BaseNonXboxSaveLocation": "%HOMEDRIVE%%HOMEPATH%\\AppData\\LocalLow\\Two Point Studios\\Two Point Hospital\\Cloud\\<user-id>\\",
-    "TargetProfileTypes": [ "Steam" ],
-    "FileTranslations": [
-      {
-        "ContainerName1": "TPHCONTAINER",
-        "ContainerName2": "TPHCONTAINER",
-        "NamedRegexGroups": [ "(?<FileName>[\\w\\-. \\\\]+)" ],
-        "NonXboxFilename": "${FileName}",
-        "XboxFileID": "${FileName}"
-      }
-    ]
-  },
-  {
-    "PackageName": "Microsoft.OriandtheBlindForestDefinitiveEdition_8wekyb3d8bbwe",
-    "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Ori and the Blind Forest DE\\",
-    "FileTranslations": [
-      {
-        "ContainerName1": "SaveGame",
-        "ContainerName2": "",
-        "NamedRegexGroups": [ "(?<FileSlot>[0-9](_bkup[0-9]|))" ],
-        "XboxFileID": "SaveSlot${FileSlot}",
-        "NonXboxFilename": "saveFile${FileSlot}.sav"
-      }
-    ]
-  },
-  {
-    "PackageName": "Microsoft.624F8B84B80_8wekyb3d8bbwe",
-    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id2_XboxInt>\\",
-    "TargetProfileTypes": [ "Steam", "Xbox" ],
-    "FileTranslations": [
-      {
-        "NonXboxFilename": "User_${XboxProfileID}.${FileExtension}",
-        "XboxFileID": "${FileExtension}",
-        "ContainerName1": "User_${XboxProfileID}",
-        "ContainerName2": "User_${XboxProfileID}",
-        "NamedRegexGroups": [
-          "(?<FileExtension>[\\w]+)"
-        ]
-      },
-      {
-        "NonXboxFilename": "${Group}.${FileExtension}",
-        "XboxFileID": "${FileExtension}",
-        "ContainerName1": "${Group}",
-        "ContainerName2": "${Group}",
-        "NamedRegexGroups": [
-          "(?<Group>[\\w_]+)",
-          "(?<FileExtension>[\\w_.]+)"
-        ]
-      }
-    ]
-  },
-  {
-    "PackageName": "Microsoft.SunriseBaseGame_8wekyb3d8bbwe",
-    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1293830\\remote\\",
-    "TargetProfileTypes": [ "Steam" ],
-    "FileTranslations": [
-      {
-        "NonXboxFilename": "User_${XboxProfileID}.${FileExtension}",
-        "XboxFileID": "${FileExtension}",
-        "ContainerName1": "User_${XboxProfileID}",
-        "ContainerName2": "User_${XboxProfileID}",
-        "NamedRegexGroups": [
-          "(?<FileExtension>[\\w]+)"
-        ]
-      },
-      {
-        "NonXboxFilename": "${Group}.${FileExtension}",
-        "XboxFileID": "${FileExtension}",
-        "ContainerName1": "${Group}",
-        "ContainerName2": "${Group}",
-        "NamedRegexGroups": [
-          "(?<Group>[\\w_]+)",
-          "(?<FileExtension>[\\w_.]+)"
-        ]
-      }
-    ]
-  },
-  {
-    "PackageName": "39EA002F.DQXISWW_n746a19ndrrjg",
-    "WGSProfileSuffix": "746B3305",
-    "TargetProfileTypes": [ "Steam" ],
-    "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\DRAGON QUEST XI S\\Steam\\<user-id>\\Saved\\SaveGames\\Book\\",
-    "FileTranslations": [
-      {
-        "ContainerName1": "Book",
-        "ContainerName2": "Book",
-        "NamedRegexGroups": [ "(?<FileName>[\\w\\-. \\\\]+)" ],
-        "NonXboxFilename": "${FileName}",
-        "XboxFileID": "${FileName}"
-      }
-    ]
-  },
-  {
-    "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
-    "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\",
-    "TargetProfileTypes": [ "Steam" ],
-    "FileTranslations": [
-      {
-        "NonXboxFilename": "${GameProfile}",
-        "XboxFileID": "${GameProfile}",
-        "ContainerName1": "${GameProfile}",
-        "ContainerName2": "${GameProfile}",
-        "NamedRegexGroups": [
-          "(?<GameProfile>game_profile\\.bin)"
-        ]
-      },
-      {
-        "NonXboxFilename": "gotgsavegame${FileNumber}.dat",
-        "XboxFileID": "gotgsavegame${FileNumber}.dat",
-        "ContainerName1": "gotgsavegame${FileNumber}.dat",
-        "ContainerName2": "gotgsavegame${FileNumber}.dat",
-        "NamedRegexGroups": [
-          "(?<FileNumber>[0-9]+)"
-        ]
-      }
-    ]
-  }
-]
+﻿{
+  "Version": "2022-06-29",
+  "GameInfo": [
+    {
+      "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
+      "BaseNonXboxSaveLocation": "%HOMEDRIVE%%HOMEPATH%\\AppData\\LocalLow\\Two Point Studios\\Two Point Hospital\\Cloud\\<user-id>\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "FileTranslations": [
+        {
+          "ContainerName1": "TPHCONTAINER",
+          "ContainerName2": "TPHCONTAINER",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. \\\\]+)" ],
+          "NonXboxFilename": "${FileName}",
+          "XboxFileID": "${FileName}"
+        }
+      ]
+    },
+    {
+      "PackageName": "Microsoft.OriandtheBlindForestDefinitiveEdition_8wekyb3d8bbwe",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Ori and the Blind Forest DE\\",
+      "FileTranslations": [
+        {
+          "ContainerName1": "SaveGame",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileSlot>[0-9](_bkup[0-9]|))" ],
+          "XboxFileID": "SaveSlot${FileSlot}",
+          "NonXboxFilename": "saveFile${FileSlot}.sav"
+        }
+      ]
+    },
+    {
+      "PackageName": "Microsoft.624F8B84B80_8wekyb3d8bbwe",
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id2_XboxInt>\\",
+      "TargetProfileTypes": [ "Steam", "Xbox" ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "User_${XboxProfileID}.${FileExtension}",
+          "XboxFileID": "${FileExtension}",
+          "ContainerName1": "User_${XboxProfileID}",
+          "ContainerName2": "User_${XboxProfileID}",
+          "NamedRegexGroups": [
+            "(?<FileExtension>[\\w]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "${Group}.${FileExtension}",
+          "XboxFileID": "${FileExtension}",
+          "ContainerName1": "${Group}",
+          "ContainerName2": "${Group}",
+          "NamedRegexGroups": [
+            "(?<Group>[\\w_]+)",
+            "(?<FileExtension>[\\w_.]+)"
+          ]
+        }
+      ]
+    },
+    {
+      "PackageName": "Microsoft.SunriseBaseGame_8wekyb3d8bbwe",
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1293830\\remote\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "User_${XboxProfileID}.${FileExtension}",
+          "XboxFileID": "${FileExtension}",
+          "ContainerName1": "User_${XboxProfileID}",
+          "ContainerName2": "User_${XboxProfileID}",
+          "NamedRegexGroups": [
+            "(?<FileExtension>[\\w]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "${Group}.${FileExtension}",
+          "XboxFileID": "${FileExtension}",
+          "ContainerName1": "${Group}",
+          "ContainerName2": "${Group}",
+          "NamedRegexGroups": [
+            "(?<Group>[\\w_]+)",
+            "(?<FileExtension>[\\w_.]+)"
+          ]
+        }
+      ]
+    },
+    {
+      "PackageName": "39EA002F.DQXISWW_n746a19ndrrjg",
+      "WGSProfileSuffix": "746B3305",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\DRAGON QUEST XI S\\Steam\\<user-id>\\Saved\\SaveGames\\Book\\",
+      "FileTranslations": [
+        {
+          "ContainerName1": "Book",
+          "ContainerName2": "Book",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. \\\\]+)" ],
+          "NonXboxFilename": "${FileName}",
+          "XboxFileID": "${FileName}"
+        }
+      ]
+    },
+    {
+      "PackageName": "39C668CD.DXM-EidosMontreal_r7bfsmp40f67j",
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1088850\\remote\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${GameProfile}",
+          "XboxFileID": "${GameProfile}",
+          "ContainerName1": "${GameProfile}",
+          "ContainerName2": "${GameProfile}",
+          "NamedRegexGroups": [
+            "(?<GameProfile>game_profile\\.bin)"
+          ]
+        },
+        {
+          "NonXboxFilename": "gotgsavegame${FileNumber}.dat",
+          "XboxFileID": "gotgsavegame${FileNumber}.dat",
+          "ContainerName1": "gotgsavegame${FileNumber}.dat",
+          "ContainerName2": "gotgsavegame${FileNumber}.dat",
+          "NamedRegexGroups": [
+            "(?<FileNumber>[0-9]+)"
+          ]
+        }
+      ]
+    }
+  ]
+}

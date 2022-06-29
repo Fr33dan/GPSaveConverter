@@ -239,7 +239,7 @@ namespace GPSaveConverter
             // No need to save library if it was never initialized.
             if (Library.GameLibrary.Initialized && (this.prefsForm == null || !this.prefsForm.SkipSave))
             {
-                GPSaveConverter.Properties.Settings.Default.GameLibrary = Library.GameLibrary.GetLibraryJson();
+                GPSaveConverter.Properties.Settings.Default.UserGameLibrary = Library.GameLibrary.GetLibraryJson();
                 GPSaveConverter.Properties.Settings.Default.Save();
             }
         }

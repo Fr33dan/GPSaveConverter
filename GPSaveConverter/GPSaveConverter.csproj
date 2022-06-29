@@ -81,6 +81,7 @@
     <Compile Include="Library\FileTranslation.cs" />
     <Compile Include="Library\PCGameWiki.cs" />
     <Compile Include="Library\Steam.cs" />
+    <Compile Include="Library\StoredGameLibrary.cs" />
     <Compile Include="LogHelper.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="NonXboxProfile.cs" />
