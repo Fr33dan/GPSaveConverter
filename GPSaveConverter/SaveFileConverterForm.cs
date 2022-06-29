@@ -225,6 +225,17 @@ namespace GPSaveConverter
         {
             await Library.GameLibrary.Initialize();
 
+            if (Library.GameLibrary.Default.Version.CompareTo(Library.GameLibrary.UserLibraryVersion) > 0)
+            {
+                DialogResult res = MessageBox.Show("The default game library has been update. Do you want to merge these updates?" + Environment.NewLine + Environment.NewLine + GPSaveConverter.Resources.Dialogs.ReloadDefaults, "Update library?", MessageBoxButtons.YesNo);
+
+                if(res == DialogResult.Yes)
+                {
+                    Library.GameLibrary.LoadDefaultLibrary();
+                }
+            }
+
+
             this.exportGameLibraryToolStripMenuItem.Enabled = true;
 
             Library.GameInfo[] gameInfo = await LoadGameInfo();

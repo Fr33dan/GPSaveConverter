@@ -91,6 +91,11 @@
     <Compile Include="PreferencesForm.Designer.cs">
       <DependentUpon>PreferencesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Resources\Dialogs.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Dialogs.resx</DependentUpon>
+    </Compile>
     <Compile Include="RichTextBoxFixedForFriendlyLinks.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -124,6 +129,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PreferencesForm.resx">
       <DependentUpon>PreferencesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Dialogs.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Dialogs.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="SaveFileConverterForm.resx">
       <DependentUpon>SaveFileConverterForm.cs</DependentUpon>

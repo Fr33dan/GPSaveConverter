@@ -61,7 +61,7 @@ namespace GPSaveConverter
 
         private void reloadLibraryButton_Click(object sender, EventArgs e)
         {
-            DialogResult res = MessageBox.Show(this, "This will reload your game library with data from the default game library. This will overwrite non-Xbox save file location and WGS Profile Suffix, but file translations will be merged. Do you wish to continue?", "Are you sure", MessageBoxButtons.YesNo);
+            DialogResult res = MessageBox.Show(this, GPSaveConverter.Resources.Dialogs.ReloadDefaults + "Do you wish to continue?", "Are you sure", MessageBoxButtons.YesNo);
             if(res == DialogResult.Yes)
             {
                 Library.GameLibrary.LoadDefaultLibrary();

@@ -16,7 +16,11 @@ namespace GPSaveConverter.Library
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
+
+        internal static string UserLibraryVersion = null;
         private static Dictionary<string, GameInfo> savedGameLibrary;
+        
+        
         private static Dictionary<string, GameInfo> uwpLibrary;
 
 
@@ -25,6 +29,19 @@ namespace GPSaveConverter.Library
 
         internal static BindingList<Xbox.XboxFileInfo> xboxFiles = new BindingList<Xbox.XboxFileInfo>();
 
+
+        private static StoredGameLibrary currentDefault = null;
+        internal static StoredGameLibrary Default
+        {
+            get
+            {
+                if(currentDefault == null)
+                {
+                    currentDefault = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary);
+                }
+                return currentDefault;
+            }
+        }
 
         internal static bool Initialized { get { return savedGameLibrary != null; } }
 
@@ -35,23 +52,69 @@ namespace GPSaveConverter.Library
 
         public static async Task Initialize()
         {
-            if (GPSaveConverter.Properties.Settings.Default.UserGameLibrary == string.Empty) await Task.Run(FirstTimeInitializeGameLibrary);
+            if (GPSaveConverter.Properties.Settings.Default.UserGameLibrary == string.Empty)
+            {
+                await Task.Run(FirstTimeInitializeGameLibrary);
+            }
+            else
+            {
+                if (GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+                {
+                    UpdateDefaultLibrary();
+                }
+            }
             await Task.Run(LoadSavedLibrary);
             await Task.Run(GetInstalledApps);
         }
 
         private static void FirstTimeInitializeGameLibrary()
         {
-            GPSaveConverter.Properties.Settings.Default.UserGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
             GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
+
+            if (GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+            {
+                UpdateDefaultLibrary();
+            }
+
+            GPSaveConverter.Properties.Settings.Default.UserGameLibrary = GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary;
             GPSaveConverter.Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Checks Github for the latest version of the game library.
+        /// </summary>
+        /// <returns>True if the default library was updated.</returns>
+        internal static bool UpdateDefaultLibrary()
+        {
+            string sourceURL = @"https://raw.githubusercontent.com/Fr33dan/GPSaveConverter/master/GPSaveConverter/Resources/GameLibrary.json";
+            bool returnVal = false;
+            using (WebClient wc = new WebClient())
+            {
+                string githubLibraryJson = wc.DownloadString(sourceURL);
+
+                StoredGameLibrary githubLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(githubLibraryJson);
+
+                if(githubLibrary.Version.CompareTo(Default.Version) > 0)
+                {
+                    currentDefault = githubLibrary;
+                    GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = githubLibraryJson;
+                    GPSaveConverter.Properties.Settings.Default.Save();
+                    returnVal = true;
+                    logger.Info("Default game library updated");
+                }
+                else
+                {
+                    logger.Info("Default game library up to date");
+                }
+            }
+
+            return returnVal;
         }
 
         internal static void LoadDefaultLibrary()
         {
-            StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Resources.GameLibrary);
-
-            foreach (GameInfo newGame in jsonLibrary.GameInfo)
+            UserLibraryVersion = Default.Version;
+            foreach (GameInfo newGame in Default.GameInfo)
             {
                 GameInfo existingInfo;
                 if(savedGameLibrary.TryGetValue(newGame.PackageName,out existingInfo))
@@ -68,13 +131,14 @@ namespace GPSaveConverter.Library
         private static void LoadSavedLibrary()
         {
             StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
-            
+
+            UserLibraryVersion = jsonLibrary.Version;
             savedGameLibrary = new Dictionary<string, GameInfo>();
             foreach (GameInfo newGame in jsonLibrary.GameInfo)
             {
                 savedGameLibrary.Add(newGame.PackageName, newGame);
             }
-
+            
         }
 
         private static void CheckInitialization()
@@ -133,7 +197,10 @@ namespace GPSaveConverter.Library
 
         public static string GetLibraryJson(JsonSerializerOptions options = null)
         {
-            List<GameInfo> loadedLibrary = savedGameLibrary.Values.ToList();
+            StoredGameLibrary returnVal = new StoredGameLibrary();
+
+            returnVal.Version = UserLibraryVersion;
+            returnVal.GameInfo = savedGameLibrary.Values.ToList();
 
             foreach(GameInfo uwpGame in uwpLibrary.Values)
             {
@@ -142,13 +209,14 @@ namespace GPSaveConverter.Library
                     GameInfo saveGameVersion;
                     if (savedGameLibrary.TryGetValue(uwpGame.PackageName,out saveGameVersion))
                     {
-                        loadedLibrary.Remove(saveGameVersion);
+                        returnVal.GameInfo.Remove(saveGameVersion);
                     }
-                    loadedLibrary.Add(uwpGame);
+                    returnVal.GameInfo.Add(uwpGame);
                 }
             }
 
-            return JsonSerializer.Serialize(loadedLibrary, options);
+
+            return JsonSerializer.Serialize(returnVal, options);
         }
 
         public static string ExpandSaveFileLocation(string unexpanedSaveFileLocation)
