@@ -130,11 +130,26 @@ namespace GPSaveConverter.Library
 
         private static void LoadSavedLibrary()
         {
-            StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
+            IList<GameInfo> infoSource = null;
+            try
+            {
+                StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
 
-            UserLibraryVersion = jsonLibrary.Version;
-            savedGameLibrary = new Dictionary<string, GameInfo>();
-            foreach (GameInfo newGame in jsonLibrary.GameInfo)
+                UserLibraryVersion = jsonLibrary.Version;
+                savedGameLibrary = new Dictionary<string, GameInfo>();
+                infoSource = jsonLibrary.GameInfo;
+            } catch(Exception e)
+            {
+                logger.Error(e);
+            }
+            if(infoSource == null)
+            {
+                infoSource = JsonSerializer.Deserialize<IList<GameInfo>>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
+
+                UserLibraryVersion = DateTime.Parse(Default.Version).AddDays(-1).ToString("yyyy-MM-dd");
+                savedGameLibrary = new Dictionary<string, GameInfo>();
+            }
+            foreach (GameInfo newGame in infoSource)
             {
                 savedGameLibrary.Add(newGame.PackageName, newGame);
             }
