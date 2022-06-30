@@ -133,7 +133,14 @@ namespace GPSaveConverter.Library
         internal void ApplyDeserializedInfo(GameInfo deserializedInfo)
         {
             this.BaseNonXboxSaveLocation = deserializedInfo.BaseNonXboxSaveLocation;
-            this.FileTranslations.AddRange(deserializedInfo.FileTranslations);
+
+            foreach(FileTranslation t in deserializedInfo.fileTranslations)
+            {
+                if (!this.FileTranslations.Contains(t))
+                {
+                    this.FileTranslations.Add(t);
+                }
+            }
             this.WGSProfileSuffix = deserializedInfo.WGSProfileSuffix;
 
             if (deserializedInfo.TargetProfileTypes != null)

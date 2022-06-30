@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace GPSaveConverter.Library
 {
@@ -117,6 +118,47 @@ namespace GPSaveConverter.Library
         public override string ToString()
         {
             return this.NonXboxFilename;
+        }
+
+        public override bool Equals(object obj)
+        {
+            FileTranslation t = obj as FileTranslation;
+
+            if(t == null) return false;
+
+            bool regexMatches = true;
+            for(int j = 0;regexMatches && j < this.NamedRegexGroups.Length; j++)
+            {
+                if(j >= t.NamedRegexGroups.Length)
+                {
+                    regexMatches = false;
+                }
+                else
+                {
+                    regexMatches = this.NamedRegexGroups[j].Equals(t.NamedRegexGroups[j]);
+                }
+            }
+
+            return regexMatches
+                && this.NonXboxFilename == t.NonXboxFilename
+                && this.XboxFileID == t.XboxFileID
+                && this.ContainerName1 == t.ContainerName1
+                && this.ContainerName2 == t.ContainerName2;
+        }
+
+        public override int GetHashCode()
+        {
+            int returnVal = 0;
+            returnVal = (returnVal * 17) + this.NonXboxFilename.GetHashCode();
+            returnVal = (returnVal * 17) + this.XboxFileID.GetHashCode();
+            returnVal = (returnVal * 17) + this.ContainerName1.GetHashCode();
+            returnVal = (returnVal * 17) + this.ContainerName2.GetHashCode();
+
+            foreach(string regex in NamedRegexGroups.OrderBy(x=> x))
+            {
+                returnVal = (returnVal * 17) + regex.GetHashCode();
+            }
+            return returnVal;
         }
     }
 }
