@@ -16,6 +16,19 @@
       ]
     },
     {
+      "PackageName": "39C668CD.ProjectSiren_r7bfsmp40f67j",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\LifeIsStrange3\\Steam\\<user-id_SteamID64>",
+      "FileTranslations": [
+        {
+          "ContainerName1": "SaveSlot_${FileSlot}",
+          "ContainerName2": "SaveSlot_${FileSlot}",
+          "NamedRegexGroups": [ "(?<FileSlot>[0-9](_backup|_header|))" ],
+          "XboxFileID": "Data",
+          "NonXboxFilename": "SaveSlot_${FileSlot}.sav"
+        }
+      ]
+    },
+    {
       "PackageName": "Microsoft.OriandtheBlindForestDefinitiveEdition_8wekyb3d8bbwe",
       "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Ori and the Blind Forest DE\\",
       "FileTranslations": [
