@@ -17,9 +17,10 @@ namespace GPSaveConverter.Library
             {
                 try
                 {
+                    ulong steamID64 = profile.IDType == NonXboxProfile.UserIDType.steamID3 ? GetSteamID64(profile.UserID) : ulong.Parse(profile.UserID);
                     string url = String.Format(@"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={0}&steamids={1}"
                                                 , GPSaveConverter.Properties.Resources.SteamAPIKey
-                                                , GetSteamID(profile.UserID));
+                                                , steamID64);
                     string queryJson = await wc.DownloadStringTaskAsync(url);
                     JsonNode queryRoot = JsonValue.Parse(queryJson);
 
@@ -52,7 +53,7 @@ namespace GPSaveConverter.Library
         /// <param name="steam3ID"></param>
         /// <param name="accoundIDY"></param>
         /// <returns></returns>
-        internal static ulong GetSteamID(string steam3ID)
+        internal static ulong GetSteamID64(string steam3ID)
         {
             ulong steam3IDValue = ulong.Parse(steam3ID);
 

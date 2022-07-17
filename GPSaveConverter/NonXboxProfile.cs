@@ -46,6 +46,14 @@ namespace GPSaveConverter
         [Browsable(false)]
         public string UserIconLocation { get; set; }
 
+        public enum UserIDType
+        {
+            steamID3,
+            steamID64
+        }
+
+        public UserIDType IDType { get; set; } = UserIDType.steamID3;
+
         internal NonXboxProfile(string folderName, int index, ProfileType type)
         {
             this.profileType = type;
@@ -117,7 +125,16 @@ namespace GPSaveConverter
 
                     if (Directory.Exists(expandedPath))
                     {
+                        
                         NonXboxProfile newProfile = new NonXboxProfile(newUserID, this.ProfileIndex,this.profileType);
+
+                        if (this.profileType == ProfileType.Steam)
+                        {
+                            if (profileDirMarker.EndsWith("_SteamID64>"))
+                            {
+                                newProfile.IDType = UserIDType.steamID64;
+                            }
+                        }
                         await newProfile.FetchProfileInformation();
                         returnVal.Add(newProfile);
                     }
