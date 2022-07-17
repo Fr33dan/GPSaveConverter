@@ -227,7 +227,7 @@ namespace GPSaveConverter
 
             if (Library.GameLibrary.Default.Version.CompareTo(Library.GameLibrary.UserLibraryVersion) > 0)
             {
-                DialogResult res = MessageBox.Show("The default game library has been update. Do you want to merge these updates?" + Environment.NewLine + Environment.NewLine + GPSaveConverter.Resources.Dialogs.ReloadDefaults, "Update library?", MessageBoxButtons.YesNo);
+                DialogResult res = MessageBox.Show("The default game library has been updated. Do you want to merge these updates?" + Environment.NewLine + Environment.NewLine + GPSaveConverter.Resources.Dialogs.ReloadDefaults, "Update library?", MessageBoxButtons.YesNo);
 
                 if(res == DialogResult.Yes)
                 {
