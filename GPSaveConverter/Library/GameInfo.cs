@@ -275,9 +275,10 @@ namespace GPSaveConverter.Library
             Xbox.XboxFileInfo matchedFile = null;
             if (t != null)
             {
-                string container1Name = Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName1);
-                string container2Name = Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName2);
-                IEnumerable<Xbox.XboxFileContainer> containers = index.Children.Where(c => Regex.Match(c.ContainerID[0],t.replaceRegex(container1Name)).Success && Regex.Match(c.ContainerID[1], t.replaceRegex(container2Name)).Success);
+                string container1Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName1));
+                string container2Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName2));
+                
+                IEnumerable<Xbox.XboxFileContainer> containers = index.Children.Where(c => Regex.Match(c.ContainerID[0], container1Name).Success && Regex.Match(c.ContainerID[1], container2Name).Success);
 
                 if (containers.Count() > 1)
                 {
@@ -289,7 +290,7 @@ namespace GPSaveConverter.Library
 
                     string xboxFileID = Regex.Escape(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.XboxFileID));
 
-                    matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, t.replaceRegex(xboxFileID)).Success).FirstOrDefault();
+                    matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, FileTranslation.ExactRegex(t.replaceRegex(xboxFileID))).Success).FirstOrDefault();
 
                     if (createOrUpdate)
                     {

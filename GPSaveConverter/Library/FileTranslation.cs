@@ -100,8 +100,13 @@ namespace GPSaveConverter.Library
                 returnVal = returnVal.Replace("${" + groupName + "}", groupPattern);
             }
 
+            return ExactRegex(returnVal);
+        }
 
-            return returnVal;
+        public static string ExactRegex(string regexInput)
+        {
+            // Add string start and end markers for exact match.
+            return "^" + regexInput + "$";
         }
 
         internal bool CheckMatch(Xbox.XboxFileInfo file)
