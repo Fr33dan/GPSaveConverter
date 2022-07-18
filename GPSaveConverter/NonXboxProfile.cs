@@ -46,6 +46,8 @@ namespace GPSaveConverter
         [Browsable(false)]
         public string UserIconLocation { get; set; }
 
+
+        [Browsable(false)]
         public enum UserIDType
         {
             steamID3,
