@@ -81,6 +81,8 @@ namespace GPSaveConverter.Library
                     if (saveLocationTable.TryGetValue("Steam", out foundLocation))
                     {
                         i.BaseNonXboxSaveLocation = foundLocation;
+                        i.TargetProfileTypes = new NonXboxProfile.ProfileType[] { NonXboxProfile.ProfileType.Steam };
+                        i.TargetProfiles = new NonXboxProfile[] { new NonXboxProfile(0, NonXboxProfile.ProfileType.Steam) };
                         logger.Info("Save Data location loaded");
                     }
                 }
