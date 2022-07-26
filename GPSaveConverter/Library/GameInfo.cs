@@ -17,7 +17,18 @@ namespace GPSaveConverter.Library
 
 
         internal bool NonUWPDataPopulated = false;
-        public string Name { get; set; }
+        private string name;
+
+        public string Name { 
+            get 
+            {
+                return this.name != null ? this.name : this.PackageName; 
+            }
+            set
+            {
+                this.name = value;
+            }
+        }
 
         [Browsable(false)]
         public string PackageName { get; set; }
@@ -65,7 +76,7 @@ namespace GPSaveConverter.Library
                     if (File.Exists(IconLocation))
                     {
                         gameIcon = Image.FromFile(IconLocation);
-                    } else if (File.Exists(IconLocation.Replace(".png", ".scale-200.png")))
+                    } else if (IconLocation != null && File.Exists(IconLocation.Replace(".png", ".scale-200.png")))
                     {
                         gameIcon = Image.FromFile(IconLocation.Replace(".png", ".scale-200.png"));
 
