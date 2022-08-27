@@ -238,7 +238,7 @@ namespace GPSaveConverter.Library
                 NonXboxFileInfo match = null;
                 foreach (NonXboxFileInfo fi in GameLibrary.nonXboxFiles)
                 {
-                    if (Regex.Match(fi.RelativePath, Regex.Escape(t.replaceRegex(returnVal.RelativePath))).Success)
+                    if (Regex.Match(fi.RelativePath, t.replaceRegex(Regex.Escape(returnVal.RelativePath))).Success)
                     {
                         match = fi;
                         break;
@@ -252,7 +252,7 @@ namespace GPSaveConverter.Library
                 {
                     if (createOrUpdate)
                     {
-                        Regex r = new Regex(t.replaceRegex(returnVal.RelativePath));
+                        Regex r = new Regex(t.replaceRegex(Regex.Escape(returnVal.RelativePath)));
                         returnVal.FilePath = Path.Combine(this.NonXboxSaveLocation, returnVal.RelativePath);
                         if(r.GetGroupNames().Length > 1)
                         {
