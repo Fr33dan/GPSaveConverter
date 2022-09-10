@@ -77,7 +77,7 @@ namespace GPSaveConverter.Library
             return instance;
         }
 
-        internal string replaceRegex(string value)
+        internal string replaceRegex(string value, bool escape = false)
         {
             string returnVal = value;
 
@@ -98,6 +98,11 @@ namespace GPSaveConverter.Library
 
                 string groupName = ex.GetGroupNames().Last();
                 returnVal = returnVal.Replace("${" + groupName + "}", groupPattern);
+            }
+
+            if (escape)
+            {
+                returnVal = Regex.Escape(returnVal);
             }
 
             return ExactRegex(returnVal);

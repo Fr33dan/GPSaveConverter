@@ -234,11 +234,12 @@ namespace GPSaveConverter.Library
                 returnVal.RelativePath = Regex.Replace(file.FileID, t.XboxFileIDRegex, t.NonXboxFilename);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName1, t.ContainerName1Regex, returnVal.RelativePath);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName2, t.ContainerName2Regex, returnVal.RelativePath);
+                returnVal.RelativePath = t.replaceRegex(returnVal.RelativePath, true);
 
                 NonXboxFileInfo match = null;
                 foreach (NonXboxFileInfo fi in GameLibrary.nonXboxFiles)
                 {
-                    if (Regex.Match(fi.RelativePath, t.replaceRegex(Regex.Escape(returnVal.RelativePath))).Success)
+                    if (Regex.Match(fi.RelativePath, returnVal.RelativePath).Success)
                     {
                         match = fi;
                         break;
@@ -252,7 +253,7 @@ namespace GPSaveConverter.Library
                 {
                     if (createOrUpdate)
                     {
-                        Regex r = new Regex(t.replaceRegex(Regex.Escape(returnVal.RelativePath)));
+                        Regex r = new Regex(t.replaceRegex(returnVal.RelativePath));
                         returnVal.FilePath = Path.Combine(this.NonXboxSaveLocation, returnVal.RelativePath);
                         if(r.GetGroupNames().Length > 1)
                         {
@@ -286,8 +287,8 @@ namespace GPSaveConverter.Library
             Xbox.XboxFileInfo matchedFile = null;
             if (t != null)
             {
-                string container1Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName1));
-                string container2Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName2));
+                string container1Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName1Regex));
+                string container2Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName2Regex));
                 
                 IEnumerable<Xbox.XboxFileContainer> containers = index.Children.Where(c => Regex.Match(c.ContainerID[0], container1Name).Success && Regex.Match(c.ContainerID[1], container2Name).Success);
 
