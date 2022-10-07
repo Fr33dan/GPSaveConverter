@@ -272,6 +272,7 @@ namespace GPSaveConverter
             this.fileTranslationListBox.Enabled = false;
             this.viewXboxFilesButton.Enabled = false;
             this.viewNonXboxFileButton.Enabled = false;
+            this.copySaveFileTablesToolStripMenuItem.Enabled = false;
             GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Clear();
             GPSaveConverter.Library.GameLibrary.xboxFiles.Clear();
             GPSaveConverter.Library.GameLibrary.nonXboxFiles.Clear();
@@ -461,6 +462,7 @@ namespace GPSaveConverter
             this.saveGameProfileToolStripMenuItem.Enabled = true;
             this.loadGameProfileToolStripMenuItem.Enabled = true;
             this.editNonXboxLocationToolStripMenuItem1.Enabled = true;
+            this.copySaveFileTablesToolStripMenuItem.Enabled = true;
             this.editNonXboxLocationToolStripMenuItem2.Enabled = true;
             this.copyPackageIDToolStripMenuItem.Enabled = true;
 
@@ -689,9 +691,56 @@ namespace GPSaveConverter
             }
         }
 
-        private void copyPackageIDToolStripMenuItem_Click(object sender, EventArgs e)
+        private void copySaveFileTablesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(this.ActiveGame.PackageName);
+        }
+        private void copyPackageIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Game Name:");
+            sb.AppendLine(ActiveGame.Name);
+
+            sb.Append("Game Package ID:");
+            sb.AppendLine(this.ActiveGame.PackageName);
+            sb.AppendLine();
+
+            if (this.xboxFilesTable.DataSource != null)
+            {
+                sb.AppendLine("## Xbox Files:");
+                sb.AppendLine("| Container Name 1 | Container Name 2 | Blob ID |");
+                sb.AppendLine("| ---------------- | ---------------- | ------- |");
+                List<Xbox.XboxFileInfo> xboxFileList = (List<Xbox.XboxFileInfo>)this.xboxFilesTable.DataSource;
+                foreach(Xbox.XboxFileInfo xboxFileInfo in xboxFileList)
+                {
+                    sb.Append("| ");
+                    sb.Append(xboxFileInfo.ContainerName1);
+                    sb.Append(" | ");
+                    sb.Append(xboxFileInfo.ContainerName2);
+                    sb.Append(" | ");
+                    sb.Append(xboxFileInfo.FileID);
+                    sb.AppendLine(" |");
+                }
+            }
+
+            if(this.nonXboxFilesTable.DataSource != null)
+            {
+                sb.AppendLine("## Non-Xbox Files:");
+                sb.Append("Non-Xbox save location: ");
+                sb.AppendLine(ActiveGame.BaseNonXboxSaveLocation);
+                sb.AppendLine("| File Path |");
+                sb.AppendLine("| --------  |");
+                List<NonXboxFileInfo> nonXboxFileList = (List<NonXboxFileInfo>)this.xboxFilesTable.DataSource;
+                foreach (NonXboxFileInfo xboxFileInfo in nonXboxFileList)
+                {
+                    sb.Append("| ");
+                    sb.Append(xboxFileInfo.RelativePath);
+                    sb.AppendLine(" |");
+                }
+            }
+
+            Clipboard.SetText(sb.ToString());
         }
     }
 }

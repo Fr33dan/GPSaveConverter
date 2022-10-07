@@ -74,6 +74,7 @@
             this.editNonXboxLocationToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.exportGameLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copySaveFileTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showFileTranslationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,6 +88,10 @@
             this.editNonXboxLocationToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.gameListContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyPackageIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editNonXboxLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.XboxContainerName1Column = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.XboxContainerName2Column = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.XboxFileIDColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -555,6 +560,7 @@
             this.saveGameProfileToolStripMenuItem,
             this.loadGameProfileToolStripMenuItem,
             this.editNonXboxLocationToolStripMenuItem1,
+            this.copySaveFileTablesToolStripMenuItem,
             this.exportGameLibraryToolStripMenuItem,
             this.preferencesToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -601,6 +607,15 @@
             this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
             this.preferencesToolStripMenuItem.Text = "Preferences";
             this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
+            // 
+            // copySaveFileTablesToolStripMenuItem
+            // 
+            this.copySaveFileTablesToolStripMenuItem.Enabled = false;
+            this.copySaveFileTablesToolStripMenuItem.Name = "copySaveFileTablesToolStripMenuItem";
+            this.copySaveFileTablesToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.copySaveFileTablesToolStripMenuItem.Text = "Copy Save File Table(s)";
+            this.copySaveFileTablesToolStripMenuItem.ToolTipText = "Copy save file tables for file translation request on GitHub.";
+            this.copySaveFileTablesToolStripMenuItem.Click += new System.EventHandler(this.copySaveFileTablesToolStripMenuItem_Click);
             // 
             // viewToolStripMenuItem
             // 
@@ -694,35 +709,27 @@
             this.fileTranslationsMarkerLabel.Text = "File Translations:";
             // 
             // nonXboxMenuStrip
-            // 
             this.nonXboxMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editNonXboxLocationToolStripMenuItem2});
             this.nonXboxMenuStrip.Name = "nonXboxMenuStrip";
             this.nonXboxMenuStrip.Size = new System.Drawing.Size(264, 26);
-            // 
             // editNonXboxLocationToolStripMenuItem2
-            // 
             this.editNonXboxLocationToolStripMenuItem2.Enabled = false;
             this.editNonXboxLocationToolStripMenuItem2.Name = "editNonXboxLocationToolStripMenuItem2";
             this.editNonXboxLocationToolStripMenuItem2.Size = new System.Drawing.Size(263, 22);
             this.editNonXboxLocationToolStripMenuItem2.Text = "Edit non-Xbox Location (Advanced)";
             this.editNonXboxLocationToolStripMenuItem2.Click += new System.EventHandler(this.editNonXboxLocationToolStripMenuItem_Click);
-            // 
             // gameListContextMenu
-            // 
             this.gameListContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.copyPackageIDToolStripMenuItem});
             this.gameListContextMenu.Name = "gameListContextMenu";
             this.gameListContextMenu.Size = new System.Drawing.Size(216, 48);
-            // 
             // copyPackageIDToolStripMenuItem
-            // 
             this.copyPackageIDToolStripMenuItem.Enabled = false;
             this.copyPackageIDToolStripMenuItem.Name = "copyPackageIDToolStripMenuItem";
             this.copyPackageIDToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
             this.copyPackageIDToolStripMenuItem.Text = "Copy game package name";
             this.copyPackageIDToolStripMenuItem.Click += new System.EventHandler(this.copyPackageIDToolStripMenuItem_Click);
-            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -806,6 +813,8 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copySaveFileTablesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editNonXboxLocationToolStripMenuItem;
         private System.Windows.Forms.Panel fileTranslationPanel;
         private System.Windows.Forms.PropertyGrid fileTranslationPropertyGrid;
         private System.Windows.Forms.Button removeTranslationButton;
