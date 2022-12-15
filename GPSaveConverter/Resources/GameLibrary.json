@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2022-07-17",
+  "Version": "2022-12-15",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -73,15 +73,6 @@
       "TargetProfileTypes": [ "Steam" ],
       "FileTranslations": [
         {
-          "NonXboxFilename": "User_${XboxProfileID}.${FileExtension}",
-          "XboxFileID": "${FileExtension}",
-          "ContainerName1": "User_${XboxProfileID}",
-          "ContainerName2": "User_${XboxProfileID}",
-          "NamedRegexGroups": [
-            "(?<FileExtension>[\\w]+)"
-          ]
-        },
-        {
           "NonXboxFilename": "${Group}.${FileExtension}",
           "XboxFileID": "${FileExtension}",
           "ContainerName1": "${Group}",
@@ -129,6 +120,24 @@
           "ContainerName2": "gotgsavegame${FileNumber}.dat",
           "NamedRegexGroups": [
             "(?<FileNumber>[0-9]+)"
+          ]
+        },
+        {
+          "PackageName": "SEGAofAmericaInc.F0cb6b3aer_s751p9cej88mt",
+          "TargetProfileTypes": [
+            "Steam"
+          ],
+          "BaseNonXboxSaveLocation": "%APPDATA%\\SEGA\\P5R\\Steam\\<user-id>\\savedata\\",
+          "FileTranslations": [
+            {
+              "NonXboxFilename": "DATA${FileNum}\\\\DATA.DAT",
+              "XboxFileID": "DATA.DAT",
+              "ContainerName1": "DATA${FileNum}",
+              "ContainerName2": "DATA${FileNum}",
+              "NamedRegexGroups": [
+                "(?<FileNum>[0-9]+)"
+              ]
+            }
           ]
         }
       ]
