@@ -234,7 +234,7 @@ namespace GPSaveConverter.Library
                 returnVal.RelativePath = Regex.Replace(file.FileID, t.XboxFileIDRegex, t.NonXboxFilename);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName1, t.ContainerName1Regex, returnVal.RelativePath);
                 returnVal.RelativePath = Regex.Replace(file.ContainerName2, t.ContainerName2Regex, returnVal.RelativePath);
-                returnVal.RelativePath = t.replaceRegex(returnVal.RelativePath, true);
+                //returnVal.RelativePath = t.replaceRegex(returnVal.RelativePath, true);
 
                 NonXboxFileInfo match = null;
                 foreach (NonXboxFileInfo fi in GameLibrary.nonXboxFiles)
@@ -287,8 +287,9 @@ namespace GPSaveConverter.Library
             Xbox.XboxFileInfo matchedFile = null;
             if (t != null)
             {
-                string container1Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName1Regex));
-                string container2Name = FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName2Regex));
+                string container1Name = t.replaceRegex(FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName1)));
+                string container2Name = t.replaceRegex(FileTranslation.ExactRegex(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.ContainerName2)));
+                
                 
                 IEnumerable<Xbox.XboxFileContainer> containers = index.Children.Where(c => Regex.Match(c.ContainerID[0], container1Name).Success && Regex.Match(c.ContainerID[1], container2Name).Success);
 
