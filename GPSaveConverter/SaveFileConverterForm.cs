@@ -691,11 +691,11 @@ namespace GPSaveConverter
             }
         }
 
-        private void copySaveFileTablesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void copyPackageIDToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(this.ActiveGame.PackageName);
         }
-        private void copyPackageIDToolStripMenuItem_Click(object sender, EventArgs e)
+        private void copySaveFileTablesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -711,7 +711,7 @@ namespace GPSaveConverter
                 sb.AppendLine("## Xbox Files:");
                 sb.AppendLine("| Container Name 1 | Container Name 2 | Blob ID |");
                 sb.AppendLine("| ---------------- | ---------------- | ------- |");
-                List<Xbox.XboxFileInfo> xboxFileList = (List<Xbox.XboxFileInfo>)this.xboxFilesTable.DataSource;
+                IEnumerable<Xbox.XboxFileInfo> xboxFileList = (IEnumerable<Xbox.XboxFileInfo>)this.xboxFilesTable.DataSource;
                 foreach(Xbox.XboxFileInfo xboxFileInfo in xboxFileList)
                 {
                     sb.Append("| ");
@@ -731,7 +731,7 @@ namespace GPSaveConverter
                 sb.AppendLine(ActiveGame.BaseNonXboxSaveLocation);
                 sb.AppendLine("| File Path |");
                 sb.AppendLine("| --------  |");
-                List<NonXboxFileInfo> nonXboxFileList = (List<NonXboxFileInfo>)this.xboxFilesTable.DataSource;
+                IEnumerable<NonXboxFileInfo> nonXboxFileList = (IEnumerable<NonXboxFileInfo>)this.nonXboxFilesTable.DataSource;
                 foreach (NonXboxFileInfo xboxFileInfo in nonXboxFileList)
                 {
                     sb.Append("| ");
