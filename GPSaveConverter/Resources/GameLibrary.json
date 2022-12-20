@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2022-12-15",
+  "Version": "2022-12-20",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -143,7 +143,6 @@
       ]
     },
     {
-      "Name": "High on Life",
       "PackageName": "2637SquanchGamesInc.HighonLife_mh7dg3tfmz2cj",
       "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Oregon\\Saved\\SaveGames\\",
       "FileTranslations": [
