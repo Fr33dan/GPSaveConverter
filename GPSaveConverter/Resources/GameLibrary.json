@@ -141,6 +141,40 @@
           ]
         }
       ]
+    },
+    {
+      "Name": "High on Life",
+      "PackageName": "2637SquanchGamesInc.HighonLife_mh7dg3tfmz2cj",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Oregon\\Saved\\SaveGames\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "Profile.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "Profile",
+          "ContainerName2": "Profile",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "Slot${SlotNumber}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "Slot${SlotNumber}",
+          "ContainerName2": "Slot${SlotNumber}",
+          "NamedRegexGroups": [
+            "(?<SlotNumber>[0-9]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "Slot${SlotNum}_Swap.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "Slot${SlotNum}_Swap",
+          "ContainerName2": "Slot${SlotNum}_Swap",
+          "NamedRegexGroups": [
+            "(?<SlotNum>[0-9]+)"
+          ]
+        }
+      ]
     }
   ]
 }
