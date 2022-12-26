@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2022-12-20",
+  "Version": "2022-12-26",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -121,23 +121,23 @@
           "NamedRegexGroups": [
             "(?<FileNumber>[0-9]+)"
           ]
-        },
+        }
+      ]
+    },
+    {
+      "PackageName": "SEGAofAmericaInc.F0cb6b3aer_s751p9cej88mt",
+      "TargetProfileTypes": [
+        "Steam"
+      ],
+      "BaseNonXboxSaveLocation": "%APPDATA%\\SEGA\\P5R\\Steam\\<user-id>\\savedata\\",
+      "FileTranslations": [
         {
-          "PackageName": "SEGAofAmericaInc.F0cb6b3aer_s751p9cej88mt",
-          "TargetProfileTypes": [
-            "Steam"
-          ],
-          "BaseNonXboxSaveLocation": "%APPDATA%\\SEGA\\P5R\\Steam\\<user-id>\\savedata\\",
-          "FileTranslations": [
-            {
-              "NonXboxFilename": "DATA${FileNum}\\\\DATA.DAT",
-              "XboxFileID": "DATA.DAT",
-              "ContainerName1": "DATA${FileNum}",
-              "ContainerName2": "DATA${FileNum}",
-              "NamedRegexGroups": [
-                "(?<FileNum>[0-9]+)"
-              ]
-            }
+          "NonXboxFilename": "DATA${FileNum}\\\\DATA.DAT",
+          "XboxFileID": "DATA.DAT",
+          "ContainerName1": "DATA${FileNum}",
+          "ContainerName2": "DATA${FileNum}",
+          "NamedRegexGroups": [
+            "(?<FileNum>[0-9]+)"
           ]
         }
       ]
