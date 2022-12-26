@@ -269,6 +269,7 @@ namespace GPSaveConverter.Library
                 if (createOrUpdate)
                 {
                     logger.Info("Extracting Xbox save file: {0} -> {1}", file.FileID, returnVal.FilePath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(returnVal.FilePath));
                     File.Copy(file.getFilePath(), returnVal.FilePath, true);
                     returnVal.Timestamp = File.GetLastWriteTime(returnVal.FilePath);
                 }
