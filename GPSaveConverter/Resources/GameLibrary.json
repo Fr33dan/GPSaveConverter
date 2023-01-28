@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2023-01-28A",
+  "Version": "2023-01-28B",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -233,7 +233,24 @@
           "ContainerName2": "${SaveSlot}",
           "NamedRegexGroups": [
             "(?<SaveSlot>slot[0-9]+)",
-            "(?<FileName>\\w+)"
+            "(?<FileName>[\\w,-.]+)"
+          ]
+        }
+      ]
+    },
+    {
+      "PackageName": "WarnerBros.Interactive.LEGOStarWarsTheSkywalkerSag_ktmk1xygcecda",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "%APPDATA%\\Warner Bros. Interactive Entertainment\\LEGO Star Wars - The Skywalker Saga\\SAVEDGAMES\\STEAM\\<user-id>",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FolderName}\\\\${FileName}",
+          "XboxFileID": "${FileName}",
+          "ContainerName1": "${FolderName}",
+          "ContainerName2": "${FolderName}",
+          "NamedRegexGroups": [
+            "(?<FolderName>[\\w]+)",
+            "(?<FileName>[\\w,.]+)"
           ]
         }
       ]
