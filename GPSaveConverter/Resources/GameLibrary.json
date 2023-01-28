@@ -201,6 +201,29 @@
           ]
         }
       ]
+    },
+    {
+      "PackageName": "BethesdaSoftworks.Hibiki_3275kfvn8vcwc",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\Saved Games\\TangoGameworks\\Hi-Fi RUSH (STEAM)\\Saved\\SaveGames\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "SaveGameSlot${FileSlot}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "SaveGameSlot${FileSlot}",
+          "ContainerName2": "SaveGameSlot${FileSlot}",
+          "NamedRegexGroups": [
+            "(?<FileSlot>[0-9]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "Profile.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "Profile",
+          "ContainerName2": "Profile",
+          "NamedRegexGroups": []
+        }
+      ]
     }
   ]
 }
