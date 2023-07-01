@@ -449,6 +449,11 @@ namespace GPSaveConverter
 
         private async void packagesDataGridView_Click(object sender, EventArgs e)
         {
+            // Do nothing if no rows are selected.
+            if (this.packagesDataGridView.SelectedRows.Count == 0) {
+                return;
+            }
+
             ClearForm();
 
             ActiveGame = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
