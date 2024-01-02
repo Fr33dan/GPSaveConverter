@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2023-01-28C",
+  "Version": "2024-01-02",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -251,6 +251,42 @@
           "NamedRegexGroups": [
             "(?<FolderName>[\\w]+)",
             "(?<FileName>[\\w,.]+)"
+          ]
+        }
+      ]
+    },
+    {
+      "PackageName": "39C668CD.PowerWashSimulator_r7bfsmp40f67j",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\FuturLab\\PowerWash Simulator\\SaveData\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${UserId}\\\\${FileName}\\\\${FileName}_${Index}.sav",
+          "XboxFileID": "${FileName}_${Index}.sav.${UserId}",
+          "ContainerName1": "${UserId}/${FileName}",
+          "ContainerName2": "${UserId}/${FileName}",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)",
+            "(?<UserId>[0-9]+)",
+            "(?<Index>[0-9]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "Preferences\\\\FuturPlayerPrefs.sav",
+          "XboxFileID": "FuturPlayerPrefs.sav.0",
+          "ContainerName1": "Preferences",
+          "ContainerName2": "Preferences",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "${UserId}\\\\${FileName}",
+          "XboxFileID": "${FileName}.${UserId}",
+          "ContainerName1": "${UserId}",
+          "ContainerName2": "${UserId}",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)",
+            "(?<UserId>[0-9]+)"
           ]
         }
       ]
