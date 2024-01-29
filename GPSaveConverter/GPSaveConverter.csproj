@@ -86,9 +86,11 @@
     <Compile Include="Interfaces\DefaultHttpClient.cs" />
     <Compile Include="Interfaces\DefaultRegistry.cs" />
     <Compile Include="Interfaces\DefaultScriptRunner.cs" />
+    <Compile Include="Interfaces\DefaultSettingsProvider.cs" />
     <Compile Include="Interfaces\IHttpClient.cs" />
     <Compile Include="Interfaces\IRegistry.cs" />
     <Compile Include="Interfaces\IScriptRunner.cs" />
+    <Compile Include="Interfaces\ISettingsProvider.cs" />
     <Compile Include="Interfaces\IEnvironment.cs" />
     <Compile Include="Interfaces\IFileSystem.cs" />
     <Compile Include="Library\FileTranslation.cs" />

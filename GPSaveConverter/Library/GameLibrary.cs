@@ -14,6 +14,7 @@ namespace GPSaveConverter.Library
     {
         private static readonly NLog.Logger logger = LogHelper.getClassLogger();
 
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
         internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
         internal static IRegistry Registry { get; set; } = new DefaultRegistry();
         internal static IScriptRunner ScriptRunner { get; set; } = new DefaultScriptRunner();
@@ -42,7 +43,7 @@ namespace GPSaveConverter.Library
             {
                 if(currentDefault == null)
                 {
-                    currentDefault = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary);
+                    currentDefault = JsonSerializer.Deserialize<StoredGameLibrary>(Settings.DefaultGameLibrary);
                 }
                 return currentDefault;
             }
@@ -57,13 +58,13 @@ namespace GPSaveConverter.Library
 
         public static async Task Initialize()
         {
-            if (GPSaveConverter.Properties.Settings.Default.UserGameLibrary == string.Empty)
+            if (Settings.UserGameLibrary == string.Empty)
             {
                 await Task.Run(FirstTimeInitializeGameLibrary);
             }
             else
             {
-                if (GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+                if (Settings.AllowWebDataFetch)
                 {
                     UpdateDefaultLibrary();
                 }
@@ -74,15 +75,15 @@ namespace GPSaveConverter.Library
 
         private static void FirstTimeInitializeGameLibrary()
         {
-            GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
+            Settings.DefaultGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
 
-            if (GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+            if (Settings.AllowWebDataFetch)
             {
                 UpdateDefaultLibrary();
             }
 
-            GPSaveConverter.Properties.Settings.Default.UserGameLibrary = GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary;
-            GPSaveConverter.Properties.Settings.Default.Save();
+            Settings.UserGameLibrary = Settings.DefaultGameLibrary;
+            Settings.Save();
         }
 
         /// <summary>
@@ -100,8 +101,8 @@ namespace GPSaveConverter.Library
             if(githubLibrary.Version.CompareTo(Default.Version) > 0)
             {
                 currentDefault = githubLibrary;
-                GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = githubLibraryJson;
-                GPSaveConverter.Properties.Settings.Default.Save();
+                Settings.DefaultGameLibrary = githubLibraryJson;
+                Settings.Save();
                 returnVal = true;
                 logger.Info("Default game library updated");
             }
@@ -135,7 +136,7 @@ namespace GPSaveConverter.Library
             IList<GameInfo> infoSource = null;
             try
             {
-                StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
+                StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(Settings.UserGameLibrary);
 
                 UserLibraryVersion = jsonLibrary.Version;
                 savedGameLibrary = new Dictionary<string, GameInfo>();
@@ -146,7 +147,7 @@ namespace GPSaveConverter.Library
             }
             if(infoSource == null)
             {
-                infoSource = JsonSerializer.Deserialize<IList<GameInfo>>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
+                infoSource = JsonSerializer.Deserialize<IList<GameInfo>>(Settings.UserGameLibrary);
 
                 UserLibraryVersion = DateTime.Parse(Default.Version).AddDays(-1).ToString("yyyy-MM-dd");
                 savedGameLibrary = new Dictionary<string, GameInfo>();
@@ -268,7 +269,7 @@ namespace GPSaveConverter.Library
                 RegisterSerializedInfo(saveLibraryInfo);
             }
 
-            if (i.BaseNonXboxSaveLocation == null && GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+            if (i.BaseNonXboxSaveLocation == null && Settings.AllowWebDataFetch)
             {
                 var pcGameWiki = new PCGameWiki(HttpClient);
                 await pcGameWiki.FetchSaveLocation(i);

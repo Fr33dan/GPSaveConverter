@@ -16,6 +16,7 @@ namespace GPSaveConverter
 {
     public partial class SaveFileConverterForm : Form
     {
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
         internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
         private static NLog.Logger logger = LogHelper.getClassLogger();
         Xbox.XboxContainerIndex currentContainer;
@@ -30,7 +31,7 @@ namespace GPSaveConverter
         {
             InitializeComponent();
 
-            if (!Properties.Settings.Default.ShowFileTranslations)
+            if (!Settings.ShowFileTranslations)
             {
                 toggleFileTranslationPanel();
             }
@@ -216,15 +217,15 @@ namespace GPSaveConverter
 
         private async void SaveFileConverterForm_Load(object sender, EventArgs e)
         {
-            if (GPSaveConverter.Properties.Settings.Default.FirstRun)
+            if (Settings.FirstRun)
             {
                 DialogResult res;
                 do {
                     res = MessageBox.Show(this, "Xbox Save File Converter can lookup save file locations online from pcgamingwiki.com." + Environment.NewLine + Environment.NewLine + "Do you allow this? (Can be changed any time in preferences)", "Allow internet access?", MessageBoxButtons.YesNo);
                 }while (res == DialogResult.Cancel);
-                GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch = res == DialogResult.Yes;
-                GPSaveConverter.Properties.Settings.Default.FirstRun = false;
-                GPSaveConverter.Properties.Settings.Default.Save();
+                Settings.AllowWebDataFetch = res == DialogResult.Yes;
+                Settings.FirstRun = false;
+                Settings.Save();
             }
         }
 
@@ -257,8 +258,8 @@ namespace GPSaveConverter
             // No need to save library if it was never initialized.
             if (Library.GameLibrary.Initialized && (this.prefsForm == null || !this.prefsForm.SkipSave))
             {
-                GPSaveConverter.Properties.Settings.Default.UserGameLibrary = Library.GameLibrary.GetLibraryJson();
-                GPSaveConverter.Properties.Settings.Default.Save();
+                Settings.UserGameLibrary = Library.GameLibrary.GetLibraryJson();
+                Settings.Save();
             }
         }
 
@@ -597,21 +598,21 @@ namespace GPSaveConverter
 
         private void showFileTranslationsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.ShowFileTranslations = !Properties.Settings.Default.ShowFileTranslations;
-            Properties.Settings.Default.Save();
+            Settings.ShowFileTranslations = !Settings.ShowFileTranslations;
+            Settings.Save();
             toggleFileTranslationPanel();
         }
 
         private void toggleFileTranslationPanel()
         {
-            int sizeDelta = Properties.Settings.Default.ShowFileTranslations ? -this.fileTranslationPanel.Height : this.fileTranslationPanel.Height;
+            int sizeDelta = Settings.ShowFileTranslations ? -this.fileTranslationPanel.Height : this.fileTranslationPanel.Height;
             this.packagesScrollPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             this.packagesScrollPanel.Height = this.packagesScrollPanel.Height + sizeDelta;
             this.packagesBasePanel.Height = this.packagesBasePanel.Height + sizeDelta;
             this.packagesScrollPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
 
-            this.fileTranslationPanel.Visible = Properties.Settings.Default.ShowFileTranslations;
-            this.showFileTranslationsToolStripMenuItem.Checked = Properties.Settings.Default.ShowFileTranslations;
+            this.fileTranslationPanel.Visible = Settings.ShowFileTranslations;
+            this.showFileTranslationsToolStripMenuItem.Checked = Settings.ShowFileTranslations;
         }
 
         private void addTranslationButton_Click(object sender, EventArgs e)

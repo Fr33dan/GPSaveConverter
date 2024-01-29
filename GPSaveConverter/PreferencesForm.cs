@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter
 {
     public partial class PreferencesForm : Form
     {
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
         internal bool SkipSave = false;
         public PreferencesForm()
         {
@@ -33,8 +35,8 @@ namespace GPSaveConverter
             DialogResult res = MessageBox.Show(this, "Remove all local configurations? (Software will then exit)", "Are you sure?", MessageBoxButtons.YesNoCancel);
             if(res == DialogResult.Yes)
             {
-                Properties.Settings.Default.Reset();
-                Properties.Settings.Default.Save();
+                Settings.Reset();
+                Settings.Save();
                 SkipSave = true;
                 Application.Exit();
             }
@@ -44,17 +46,17 @@ namespace GPSaveConverter
         private void PreferencesForm_Load(object sender, EventArgs e)
         {
             this.logLevelComboBox.Items.AddRange(NLog.LogLevel.AllLevels.ToArray());
-            this.logLevelComboBox.SelectedIndex = Properties.Settings.Default.FileLogLevel.Ordinal;
-            this.allowNetworkCheckbox.Checked = Properties.Settings.Default.AllowWebDataFetch;
+            this.logLevelComboBox.SelectedIndex = Settings.FileLogLevel.Ordinal;
+            this.allowNetworkCheckbox.Checked = Settings.AllowWebDataFetch;
         }
 
         private void saveButton_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.FileLogLevel = this.logLevelComboBox.SelectedItem as NLog.LogLevel;
-            Properties.Settings.Default.AllowWebDataFetch = this.allowNetworkCheckbox.Checked;
-            Properties.Settings.Default.Save();
+            Settings.FileLogLevel = this.logLevelComboBox.SelectedItem as NLog.LogLevel;
+            Settings.AllowWebDataFetch = this.allowNetworkCheckbox.Checked;
+            Settings.Save();
 
-            NLog.LogManager.Configuration.Variables["fileLogLevel"] = GPSaveConverter.Properties.Settings.Default.FileLogLevel.ToString();
+            NLog.LogManager.Configuration.Variables["fileLogLevel"] = Settings.FileLogLevel.ToString();
 
             this.Hide();
         }

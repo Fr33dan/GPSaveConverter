@@ -15,6 +15,7 @@ namespace GPSaveConverter
     {
         internal ProfileType profileType;
 
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
         internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
         internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
 
@@ -152,7 +153,7 @@ namespace GPSaveConverter
 
         internal async Task FetchProfileInformation()
         {
-            if (Properties.Settings.Default.AllowWebDataFetch)
+            if (Settings.AllowWebDataFetch)
             {
                 if (profileType == ProfileType.Steam)
                 {
