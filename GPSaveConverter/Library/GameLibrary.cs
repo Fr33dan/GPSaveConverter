@@ -16,6 +16,7 @@ namespace GPSaveConverter.Library
 
         internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
         internal static IRegistry Registry { get; set; } = new DefaultRegistry();
+        internal static IScriptRunner ScriptRunner { get; set; } = new DefaultScriptRunner();
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
@@ -173,7 +174,7 @@ namespace GPSaveConverter.Library
                 string scriptText = GPSaveConverter.Properties.Resources.GetAUMIDScript;
                 logger.Info("Getting UWP package manifests...");
                 
-                string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
+                string scriptOutput = ScriptRunner.RunScript(scriptText).Trim();
                 logger.Trace("Powershell script results:\n{0}", scriptOutput);
 
                 StringReader sr = new StringReader(scriptOutput);
