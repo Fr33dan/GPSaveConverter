@@ -34,3 +34,5 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.4.0.0")]
 [assembly: AssemblyFileVersion("0.4.10.0")]
+
+[assembly: InternalsVisibleTo("GPSaveConverter.Tests, PublicKey=002400000480000094000000060200000024000052534131000400000100010061d667bbfb49aaebd0cde0ddf697de9a01e46861c020a49f9737194b1ed2dcfed9baf36de353cbf600caf4eb3145dccacac9b4d58d6e38cd0aacd87497d18514d64da0f979d79e884d323add89b4a35bcda0905c41b9905cddc37f70d322b1e3c039075ae1108d0c7aa021a2dcc5edaab6c10dd4e25f6130c2a303eacf3917b2")]
