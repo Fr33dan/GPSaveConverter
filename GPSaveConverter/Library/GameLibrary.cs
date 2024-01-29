@@ -17,6 +17,7 @@ namespace GPSaveConverter.Library
         internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
         internal static IRegistry Registry { get; set; } = new DefaultRegistry();
         internal static IScriptRunner ScriptRunner { get; set; } = new DefaultScriptRunner();
+        internal static IEnvironment Environment { get; set; } = new DefaultEnvironment();
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
@@ -207,7 +208,7 @@ namespace GPSaveConverter.Library
             }
             catch (Exception e)
             {
-                throw new Exception("Error trying to get installed apps on your PC " + Environment.NewLine + e.Message, e.InnerException);
+                throw new Exception("Error trying to get installed apps on your PC " + System.Environment.NewLine + e.Message, e.InnerException);
             }
         }
 
