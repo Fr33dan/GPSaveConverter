@@ -15,6 +15,7 @@ namespace GPSaveConverter.Library
         private static readonly NLog.Logger logger = LogHelper.getClassLogger();
 
         internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
+        internal static IRegistry Registry { get; set; } = new DefaultRegistry();
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
@@ -239,7 +240,7 @@ namespace GPSaveConverter.Library
 
             if (returnVal.Contains(SteamInstallMarker))
             {
-                string steamLocation = (string)Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null);
+                string steamLocation = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null);
                 if(steamLocation == null)
                 {
                     returnVal = null;

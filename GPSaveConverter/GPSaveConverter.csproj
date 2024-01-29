@@ -82,7 +82,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Interfaces\DefaultHttpClient.cs" />
+    <Compile Include="Interfaces\DefaultRegistry.cs" />
     <Compile Include="Interfaces\IHttpClient.cs" />
+    <Compile Include="Interfaces\IRegistry.cs" />
     <Compile Include="Library\FileTranslation.cs" />
     <Compile Include="Library\PCGameWiki.cs" />
     <Compile Include="Library\Steam.cs" />
