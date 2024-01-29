@@ -13,6 +13,7 @@ namespace GPSaveConverter.Xbox
         private static readonly NLog.Logger logger = LogHelper.getClassLogger();
 
         internal static IEnvironment Environment { get; set; } = new DefaultEnvironment();
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
 
         private static Library.GameInfo[] internalList;
         static XboxPackageList()
@@ -20,10 +21,10 @@ namespace GPSaveConverter.Xbox
             logger.Info("Loading Xbox Package List...");
             string packageFolder = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "Packages");
             List<Library.GameInfo> list = new List<Library.GameInfo>();
-            foreach(string package in Directory.GetDirectories(packageFolder))
+            foreach(string package in FileSystem.GetDirectories(packageFolder))
             {
                 string wgsFolder = Path.Combine(package, "SystemAppData", "wgs");
-                if(Directory.Exists(wgsFolder) && Directory.GetDirectories(wgsFolder).Length >= 2)
+                if(FileSystem.DirectoryExists(wgsFolder) && FileSystem.GetDirectories(wgsFolder).Length >= 2)
                 {
                     try
                     {

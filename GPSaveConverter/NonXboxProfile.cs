@@ -16,6 +16,7 @@ namespace GPSaveConverter
         internal ProfileType profileType;
 
         internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
 
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -107,9 +108,9 @@ namespace GPSaveConverter
 
             List<NonXboxProfile> returnVal = new List<NonXboxProfile>();
 
-            if (Directory.Exists(profilesDir))
+            if (FileSystem.DirectoryExists(profilesDir))
             {
-                foreach (string p in Directory.GetDirectories(profilesDir))
+                foreach (string p in FileSystem.GetDirectories(profilesDir))
                 {
                     string newUserID = p.Replace(profilesDir, "");
 
@@ -128,7 +129,7 @@ namespace GPSaveConverter
                         expandedPath = expandedPath.Substring(0,expandedPath.IndexOf(ProfileMarkerPrefix(ProfileIndex + 1)));
                     }
 
-                    if (Directory.Exists(expandedPath))
+                    if (FileSystem.DirectoryExists(expandedPath))
                     {
                         
                         NonXboxProfile newProfile = new NonXboxProfile(newUserID, this.ProfileIndex,this.profileType);

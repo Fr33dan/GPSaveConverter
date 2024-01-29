@@ -10,11 +10,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Ookii.Dialogs.WinForms;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter
 {
     public partial class SaveFileConverterForm : Form
     {
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
         private static NLog.Logger logger = LogHelper.getClassLogger();
         Xbox.XboxContainerIndex currentContainer;
         internal Library.GameInfo ActiveGame { get; set; }
@@ -83,7 +85,7 @@ namespace GPSaveConverter
             bool failed = false;
             string wgsFolder = Xbox.XboxPackageList.getWGSFolder(ActiveGame.PackageName);
             this.xboxProfileListBox.Items.Clear();
-            foreach (string dir in Directory.GetDirectories(wgsFolder))
+            foreach (string dir in FileSystem.GetDirectories(wgsFolder))
             {
                 string folderName = dir.Replace(wgsFolder, "");
                 int underscoreLocation = folderName.IndexOf('_');
@@ -336,7 +338,7 @@ namespace GPSaveConverter
                 }
             }
 
-            if (!Directory.Exists(ActiveGame.NonXboxSaveLocation))
+            if (!FileSystem.DirectoryExists(ActiveGame.NonXboxSaveLocation))
             {
                 MessageBox.Show(this, "Non-Xbox save location not found. Please check your configuration", "Configure Profile");
                 return false;
@@ -508,7 +510,7 @@ namespace GPSaveConverter
                     }
 
 
-                    if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
+                    if (FileSystem.DirectoryExists(ActiveGame.NonXboxSaveLocation))
                     {
                         setNonXboxSaveLocationError(string.Empty);
                         await fetchNonXboxSaveFiles();
@@ -641,7 +643,7 @@ namespace GPSaveConverter
                 options.WriteIndented = true;
                 options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-                File.WriteAllText(saveFileDialog.FileName,JsonSerializer.Serialize(ActiveGame, typeof(Library.GameInfo),options));
+                FileSystem.WriteAllText(saveFileDialog.FileName,JsonSerializer.Serialize(ActiveGame, typeof(Library.GameInfo),options));
             }
         }
 
@@ -654,7 +656,7 @@ namespace GPSaveConverter
 
             if (result == DialogResult.OK)
             {
-                Library.GameInfo newInfo = JsonSerializer.Deserialize(File.ReadAllText(openFileDialog.FileName), typeof(Library.GameInfo)) as Library.GameInfo;
+                Library.GameInfo newInfo = JsonSerializer.Deserialize(FileSystem.ReadAllText(openFileDialog.FileName), typeof(Library.GameInfo)) as Library.GameInfo;
                 Library.GameLibrary.RegisterSerializedInfo(newInfo);
 
                 if(newInfo.PackageName == ActiveGame.PackageName)
@@ -678,7 +680,7 @@ namespace GPSaveConverter
                     options.WriteIndented = true;
                     options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                     options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-                    File.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson(options));
+                    FileSystem.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson(options));
                 }
             }
         }

@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter.Library
 {
     internal class GameInfo
     {
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
 
         private static NLog.Logger logger = LogHelper.getClassLogger();
 
@@ -73,10 +75,10 @@ namespace GPSaveConverter.Library
             {
                 if (gameIcon == null)
                 {
-                    if (File.Exists(IconLocation))
+                    if (FileSystem.FileExists(IconLocation))
                     {
                         gameIcon = Image.FromFile(IconLocation);
-                    } else if (IconLocation != null && File.Exists(IconLocation.Replace(".png", ".scale-200.png")))
+                    } else if (IconLocation != null && FileSystem.FileExists(IconLocation.Replace(".png", ".scale-200.png")))
                     {
                         gameIcon = Image.FromFile(IconLocation.Replace(".png", ".scale-200.png"));
 
@@ -205,24 +207,24 @@ namespace GPSaveConverter.Library
         {
             string fetchLocation = this.NonXboxSaveLocation;
             GameLibrary.nonXboxFiles.Clear();
-            if (Directory.Exists(fetchLocation)) await fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
+            if (FileSystem.DirectoryExists(fetchLocation)) await fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
 
         }
         private async Task fetchNonXboxSaveFiles(string folder, string root)
         {
-            foreach (string file in Directory.GetFiles(folder))
+            foreach (string file in FileSystem.GetFiles(folder))
             {
                 NonXboxFileInfo newInfo = await Task.Run(() => {
                     NonXboxFileInfo ni = new NonXboxFileInfo();
                     ni.FilePath = file;
                     ni.RelativePath = file.Replace(root, "");
-                    ni.Timestamp = System.IO.File.GetLastWriteTime(file);
+                    ni.Timestamp = FileSystem.GetFileLastWriteTime(file);
                     return ni;
                 });
                 GameLibrary.nonXboxFiles.Add(newInfo);
             }
 
-            foreach (string dir in Directory.GetDirectories(folder))
+            foreach (string dir in FileSystem.GetDirectories(folder))
             {
                 await fetchNonXboxSaveFiles(dir, root);
             }
@@ -275,9 +277,9 @@ namespace GPSaveConverter.Library
                 if (createOrUpdate)
                 {
                     logger.Info("Extracting Xbox save file: {0} -> {1}", file.FileID, returnVal.FilePath);
-                    Directory.CreateDirectory(Path.GetDirectoryName(returnVal.FilePath));
-                    File.Copy(file.getFilePath(), returnVal.FilePath, true);
-                    returnVal.Timestamp = File.GetLastWriteTime(returnVal.FilePath);
+                    FileSystem.CreateDirectory(Path.GetDirectoryName(returnVal.FilePath));
+                    FileSystem.CopyFile(file.getFilePath(), returnVal.FilePath, true);
+                    returnVal.Timestamp = FileSystem.GetFileLastWriteTime(returnVal.FilePath);
                 }
             } else if (createOrUpdate)
             {
