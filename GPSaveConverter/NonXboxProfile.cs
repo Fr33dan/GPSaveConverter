@@ -7,12 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter
 {
     internal class NonXboxProfile
     {
         internal ProfileType profileType;
+
+        internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
 
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -152,9 +155,10 @@ namespace GPSaveConverter
             {
                 if (profileType == ProfileType.Steam)
                 {
-                    await Library.Steam.GetUserInformation(this);
+                    var steam = new Library.Steam(HttpClient);
+                    await steam.GetUserInformation(this);
 
-                    this.userIcon = await Library.Steam.LoadIcon(this);
+                    this.userIcon = await steam.LoadIcon(this);
                 }
             }
         }

@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter.Library
 {
     internal class GameLibrary
     {
         private static readonly NLog.Logger logger = LogHelper.getClassLogger();
+
+        internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
@@ -88,24 +90,21 @@ namespace GPSaveConverter.Library
         {
             string sourceURL = @"https://raw.githubusercontent.com/Fr33dan/GPSaveConverter/master/GPSaveConverter/Resources/GameLibrary.json";
             bool returnVal = false;
-            using (WebClient wc = new WebClient())
+            string githubLibraryJson = HttpClient.DownloadString(sourceURL);
+
+            StoredGameLibrary githubLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(githubLibraryJson);
+
+            if(githubLibrary.Version.CompareTo(Default.Version) > 0)
             {
-                string githubLibraryJson = wc.DownloadString(sourceURL);
-
-                StoredGameLibrary githubLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(githubLibraryJson);
-
-                if(githubLibrary.Version.CompareTo(Default.Version) > 0)
-                {
-                    currentDefault = githubLibrary;
-                    GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = githubLibraryJson;
-                    GPSaveConverter.Properties.Settings.Default.Save();
-                    returnVal = true;
-                    logger.Info("Default game library updated");
-                }
-                else
-                {
-                    logger.Info("Default game library up to date");
-                }
+                currentDefault = githubLibrary;
+                GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = githubLibraryJson;
+                GPSaveConverter.Properties.Settings.Default.Save();
+                returnVal = true;
+                logger.Info("Default game library updated");
+            }
+            else
+            {
+                logger.Info("Default game library up to date");
             }
 
             return returnVal;
@@ -268,7 +267,8 @@ namespace GPSaveConverter.Library
 
             if (i.BaseNonXboxSaveLocation == null && GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
             {
-                await PCGameWiki.FetchSaveLocation(i);
+                var pcGameWiki = new PCGameWiki(HttpClient);
+                await pcGameWiki.FetchSaveLocation(i);
             }
         }
 
