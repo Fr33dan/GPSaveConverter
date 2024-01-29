@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csharp",
+        "esbenp.prettier-vscode",
+        "DotJoshJohnson.xml",
+        "DavidAnson.vscode-markdownlint"
+    ]
+}
