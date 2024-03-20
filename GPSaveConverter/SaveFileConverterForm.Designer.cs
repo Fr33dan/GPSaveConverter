@@ -89,9 +89,7 @@
             this.gameListContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyPackageIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editNonXboxLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.XboxContainerName1Column = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.XboxContainerName2Column = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.XboxFileIDColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.filterText = new GPSaveConverter.CueTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -132,7 +130,7 @@
             // nonXboxFilesLabel
             // 
             this.nonXboxFilesLabel.AutoSize = true;
-            this.nonXboxFilesLabel.Location = new System.Drawing.Point(3, 15);
+            this.nonXboxFilesLabel.Location = new System.Drawing.Point(3, 11);
             this.nonXboxFilesLabel.Name = "nonXboxFilesLabel";
             this.nonXboxFilesLabel.Size = new System.Drawing.Size(109, 13);
             this.nonXboxFilesLabel.TabIndex = 10;
@@ -141,7 +139,7 @@
             // xboxFileLabel
             // 
             this.xboxFileLabel.AutoSize = true;
-            this.xboxFileLabel.Location = new System.Drawing.Point(3, 15);
+            this.xboxFileLabel.Location = new System.Drawing.Point(3, 11);
             this.xboxFileLabel.Name = "xboxFileLabel";
             this.xboxFileLabel.Size = new System.Drawing.Size(86, 13);
             this.xboxFileLabel.TabIndex = 12;
@@ -159,12 +157,12 @@
             this.XboxContainerName2Column,
             this.XboxFileIDColumn,
             this.XboxTimestampColumn});
-            this.xboxFilesTable.Location = new System.Drawing.Point(3, 31);
+            this.xboxFilesTable.Location = new System.Drawing.Point(3, 27);
             this.xboxFilesTable.Name = "xboxFilesTable";
             this.xboxFilesTable.ReadOnly = true;
             this.xboxFilesTable.RowHeadersVisible = false;
             this.xboxFilesTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.xboxFilesTable.Size = new System.Drawing.Size(497, 265);
+            this.xboxFilesTable.Size = new System.Drawing.Size(494, 266);
             this.xboxFilesTable.TabIndex = 13;
             this.xboxFilesTable.SelectionChanged += new System.EventHandler(this.xboxFilesTable_SelectionChanged);
             // 
@@ -213,13 +211,13 @@
             this.nonXboxFilesTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.RelativePath,
             this.Timestamp});
-            this.nonXboxFilesTable.Location = new System.Drawing.Point(0, 31);
+            this.nonXboxFilesTable.Location = new System.Drawing.Point(3, 27);
             this.nonXboxFilesTable.Margin = new System.Windows.Forms.Padding(0);
             this.nonXboxFilesTable.Name = "nonXboxFilesTable";
             this.nonXboxFilesTable.ReadOnly = true;
             this.nonXboxFilesTable.RowHeadersVisible = false;
             this.nonXboxFilesTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.nonXboxFilesTable.Size = new System.Drawing.Size(500, 265);
+            this.nonXboxFilesTable.Size = new System.Drawing.Size(494, 265);
             this.nonXboxFilesTable.TabIndex = 14;
             this.nonXboxFilesTable.SelectionChanged += new System.EventHandler(this.nonXboxFilesTable_SelectionChanged);
             // 
@@ -399,6 +397,7 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.packagesBasePanel.Controls.Add(this.packagesScrollPanel);
             this.packagesBasePanel.Controls.Add(this.packagesLabel);
+            this.packagesBasePanel.Controls.Add(this.filterText);
             this.packagesBasePanel.Location = new System.Drawing.Point(9, 27);
             this.packagesBasePanel.Margin = new System.Windows.Forms.Padding(0);
             this.packagesBasePanel.Name = "packagesBasePanel";
@@ -412,9 +411,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.packagesScrollPanel.AutoScroll = true;
             this.packagesScrollPanel.Controls.Add(this.packagesDataGridView);
-            this.packagesScrollPanel.Location = new System.Drawing.Point(0, 19);
+            this.packagesScrollPanel.Location = new System.Drawing.Point(0, 40);
             this.packagesScrollPanel.Name = "packagesScrollPanel";
-            this.packagesScrollPanel.Size = new System.Drawing.Size(407, 274);
+            this.packagesScrollPanel.Size = new System.Drawing.Size(407, 253);
             this.packagesScrollPanel.TabIndex = 9;
             // 
             // packagesDataGridView
@@ -429,7 +428,7 @@
             this.GameIcon,
             this.GameName});
             this.packagesDataGridView.ContextMenuStrip = this.gameListContextMenu;
-            this.packagesDataGridView.Location = new System.Drawing.Point(0, 0);
+            this.packagesDataGridView.Location = new System.Drawing.Point(3, 1);
             this.packagesDataGridView.Margin = new System.Windows.Forms.Padding(0);
             this.packagesDataGridView.MultiSelect = false;
             this.packagesDataGridView.Name = "packagesDataGridView";
@@ -437,7 +436,7 @@
             this.packagesDataGridView.RowHeadersVisible = false;
             this.packagesDataGridView.RowTemplate.Height = 75;
             this.packagesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.packagesDataGridView.Size = new System.Drawing.Size(407, 274);
+            this.packagesDataGridView.Size = new System.Drawing.Size(401, 252);
             this.packagesDataGridView.TabIndex = 9;
             this.packagesDataGridView.Click += new System.EventHandler(this.packagesDataGridView_Click);
             // 
@@ -537,7 +536,7 @@
             // 
             // tabControl1
             // 
-            this.tabControl1.Location = new System.Drawing.Point(3, 17);
+            this.tabControl1.Location = new System.Drawing.Point(3, 16);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(200, 100);
@@ -730,6 +729,15 @@
             this.copyPackageIDToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
             this.copyPackageIDToolStripMenuItem.Text = "Copy game package name";
             this.copyPackageIDToolStripMenuItem.Click += new System.EventHandler(this.copyPackageIDToolStripMenuItem_Click);
+            // filterText
+            // 
+            this.filterText.Cue = "Filter";
+            this.filterText.Location = new System.Drawing.Point(3, 18);
+            this.filterText.Name = "filterText";
+            this.filterText.Size = new System.Drawing.Size(401, 20);
+            this.filterText.TabIndex = 10;
+            this.filterText.TextChanged += new System.EventHandler(this.filterText_TextChanged);
+            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -839,6 +847,7 @@
         private System.Windows.Forms.ToolStripMenuItem editNonXboxLocationToolStripMenuItem2;
         private System.Windows.Forms.ContextMenuStrip gameListContextMenu;
         private System.Windows.Forms.ToolStripMenuItem copyPackageIDToolStripMenuItem;
+        private CueTextBox filterText;
     }
 }
 

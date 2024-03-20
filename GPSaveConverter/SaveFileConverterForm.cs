@@ -130,7 +130,7 @@ namespace GPSaveConverter
                 // 
                 // UserIcon
                 // 
-                    userIconColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+                userIconColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
                 userIconColumn.DataPropertyName = "UserIcon";
                 userIconColumn.HeaderText = "User Icon";
                 userIconColumn.Name = "UserIcon";
@@ -151,8 +151,7 @@ namespace GPSaveConverter
 
                 profileDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
                 profileDataGrid.ColumnHeadersVisible = false;
-                profileDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { userIconColumn,
-                                                                                                 userNameColumn});
+                profileDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { userIconColumn, userNameColumn });
                 profileDataGrid.Location = new System.Drawing.Point(183, 78);
                 profileDataGrid.Name = "nonXboxProfileTable" + index;
                 profileDataGrid.ReadOnly = true;
@@ -240,7 +239,7 @@ namespace GPSaveConverter
 
             Library.GameInfo[] gameInfo = await LoadGameInfo();
 
-            this.packagesDataGridView.Height = gameInfo.Length * 75 + 10;
+            this.packagesDataGridView.Height = Math.Max(252, gameInfo.Length * 75 + 10);
 
             this.packagesDataGridView.DataSource = gameInfo;
         }
@@ -449,6 +448,10 @@ namespace GPSaveConverter
 
         private async void packagesDataGridView_Click(object sender, EventArgs e)
         {
+            if (this.packagesDataGridView.SelectedRows.Count < 1)
+            {
+                return;
+            }
             ClearForm();
 
             ActiveGame = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
@@ -741,6 +744,24 @@ namespace GPSaveConverter
             }
 
             Clipboard.SetText(sb.ToString());
+        }
+
+        private void filterText_TextChanged(object sender, EventArgs e)
+        {
+            if (this.packagesDataGridView.Rows.Count < 1)
+            {
+                return;
+            }
+            CurrencyManager cm = (CurrencyManager)BindingContext[this.packagesDataGridView.DataSource];
+            cm.SuspendBinding();
+            foreach (DataGridViewRow r in this.packagesDataGridView.Rows)
+            {
+                r.Visible = this.filterText.TextLength < 2 || (r.DataBoundItem as Library.GameInfo).Name.IndexOf(this.filterText.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            cm.ResumeBinding();
+
+            // GetRowsHeight doesn't seem to function as intended for the Height calc
+            this.packagesDataGridView.Height = Math.Max(252, this.packagesDataGridView.Rows.GetRowCount(DataGridViewElementStates.Visible) * 75 + 10);
         }
     }
 }
