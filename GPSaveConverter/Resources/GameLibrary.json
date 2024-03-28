@@ -290,6 +290,103 @@
           ]
         }
       ]
-    }
+    },
+    {
+      "PackageName": "CoffeeStainStudios.GoatSimulator3PC_496a1srhmar9w",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Goat2\\Saved\\SaveGames\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "PlayerGoatSave.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "PlayerGoatSave",
+          "ContainerName2": "PlayerGoatSave",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "PlayerGoatSave_backup.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "PlayerGoatSave_backup",
+          "ContainerName2": "PlayerGoatSave_backup",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "UPrefStore.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "UPrefStore",
+          "ContainerName2": "UPrefStore",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "WorldCollectionSlot0_0_Map_Island_01.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "WorldCollectionSlot0_0_Map_Island_01",
+          "ContainerName2": "WorldCollectionSlot0_0_Map_Island_01",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "WorldCollectionSlot0_0_Map_Island_01_backup.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "WorldCollectionSlot0_0_Map_Island_01_backup",
+          "ContainerName2": "WorldCollectionSlot0_0_Map_Island_01_backup",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "WorldCollectionSlot1_0_Map_Island_01.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "WorldCollectionSlot1_0_Map_Island_01",
+          "ContainerName2": "WorldCollectionSlot1_0_Map_Island_01",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "WorldCollectionSlot1_0_Map_Island_01_backup.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "WorldCollectionSlot1_0_Map_Island_01_backup",
+          "ContainerName2": "WorldCollectionSlot1_0_Map_Island_01_backup",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "WorldCollectionSlot1_0_Map_Island_02.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "WorldCollectionSlot1_0_Map_Island_02",
+          "ContainerName2": "WorldCollectionSlot1_0_Map_Island_02",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "WorldCollectionSlot1_0_Map_Island_02_backup.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "WorldCollectionSlot1_0_Map_Island_02_backup",
+          "ContainerName2": "WorldCollectionSlot1_0_Map_Island_02_backup",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "WorldSaveCollections_0.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "WorldSaveCollections_0",
+          "ContainerName2": "WorldSaveCollections_0",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w\\-. \\\\]+)"
+          ]
+        }
+      ]
+    },
   ]
 }
