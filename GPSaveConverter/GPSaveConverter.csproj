@@ -78,6 +78,9 @@
     <Compile Include="EditBaseLocationForm.Designer.cs">
       <DependentUpon>EditBaseLocationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CueTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Library\FileTranslation.cs" />
     <Compile Include="Library\PCGameWiki.cs" />
     <Compile Include="Library\Steam.cs" />
