@@ -306,6 +306,26 @@
           ]
         }
       ]
+    },
+    {
+      "PackageName": "UnboundCreations.RainonYourParade_8hzbqm23g39hj",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\Unbound Creations\\Rain on Your Parade\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "saves\\slot_main.sav",
+          "XboxFileID": "slot_main",
+          "ContainerName1": "RoYP_Container",
+          "ContainerName2": "",
+          "NamedRegexGroups": []
+        },
+        {
+          "NonXboxFilename": "config.cfg",
+          "XboxFileID": "config",
+          "ContainerName1": "RoYP_Container",
+          "ContainerName2": "",
+          "NamedRegexGroups": []
+        }
+      ]
     }
   ]
 }
