@@ -290,6 +290,22 @@
           ]
         }
       ]
+    },
+    {
+      "PackageName": "CoffeeStainStudios.GoatSimulator3PC_496a1srhmar9w",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Goat2\\Saved\\SaveGames\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FileName}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${FileName}",
+          "ContainerName2": "${FileName}",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w]+)"
+          ]
+        }
+      ]
     }
   ]
 }
