@@ -58,6 +58,10 @@ namespace GPSaveConverter
             if (res == DialogResult.OK)
             {
                 VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog();
+                if (ActiveGame.BaseNonXboxSaveLocation != null && ActiveGame.BaseNonXboxSaveLocation != string.Empty)
+                {
+                    dialog.SelectedPath = ActiveGame.BaseNonXboxSaveLocation;
+                }
                 res = dialog.ShowDialog();
                 if (res == DialogResult.OK)
                 {
