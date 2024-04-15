@@ -35,6 +35,10 @@ namespace GPSaveConverter.Library
                     {
                         return;
                     }
+                    if (queryRoot["query"]["pages"][0]["missing"] != null && queryRoot["query"]["pages"][0]["missing"].AsValue().GetValue<bool>())
+                    {
+                        return;
+                    }
                     int pageID = queryRoot["query"]["pages"][0]["pageid"].AsValue().GetValue<int>();
 
 
