@@ -58,6 +58,10 @@ namespace GPSaveConverter.Library
                             sectionIndex = n["index"].GetValue<string>();
                         }
                     }
+                    if (sectionIndex == null || sectionIndex == "-1")
+                    {
+                        return;
+                    }
 
                     url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=parse&pageid={0}&formatversion=2&format=json&prop=wikitext&section={1}", pageID, sectionIndex);
                     string saveFileSectionJson = await wc.DownloadStringTaskAsync(url);
