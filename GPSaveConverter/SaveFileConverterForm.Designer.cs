@@ -90,6 +90,7 @@
             this.copyPackageIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editNonXboxLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filterText = new GPSaveConverter.CueTextBox();
+            this.nonXboxLocationError = new System.Windows.Forms.ErrorProvider(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.xboxFilesTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nonXboxFilesTable)).BeginInit();
             this.saveFilesBasePanel.SuspendLayout();
@@ -107,6 +108,7 @@
             this.fileTranslationPanel.SuspendLayout();
             this.nonXboxMenuStrip.SuspendLayout();
             this.gameListContextMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nonXboxLocationError)).BeginInit();
             this.SuspendLayout();
             // 
             // packagesLabel
@@ -738,6 +740,12 @@
             this.filterText.TabIndex = 10;
             this.filterText.TextChanged += new System.EventHandler(this.filterText_TextChanged);
             // 
+            // nonXboxLocationError
+            // 
+            this.nonXboxLocationError.ContainerControl = this;
+            this.nonXboxLocationError.SetIconAlignment(this.promptNonXboxLocationButton, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
+            this.nonXboxLocationError.SetIconPadding(this.promptNonXboxLocationButton, 2);
+            // 
             // SaveFileConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -781,6 +789,7 @@
             this.fileTranslationPanel.PerformLayout();
             this.nonXboxMenuStrip.ResumeLayout(false);
             this.gameListContextMenu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.nonXboxLocationError)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -848,6 +857,7 @@
         private System.Windows.Forms.ContextMenuStrip gameListContextMenu;
         private System.Windows.Forms.ToolStripMenuItem copyPackageIDToolStripMenuItem;
         private CueTextBox filterText;
+        private System.Windows.Forms.ErrorProvider nonXboxLocationError;
     }
 }
 
