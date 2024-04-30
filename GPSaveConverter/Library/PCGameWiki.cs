@@ -95,7 +95,7 @@ namespace GPSaveConverter.Library
             int entryStart = unparsedWikiTable.IndexOf("{{Game data/saves|");
             int entryEnd = entryStart;
             Dictionary<string, string> result = new Dictionary<string, string>();
-            do
+            while (entryStart != -1)
             {
                 int subEntryEnd = entryStart;
                 int subEntryStart = entryStart;
@@ -113,8 +113,7 @@ namespace GPSaveConverter.Library
                 result.Add(lineInfo[1], lineInfo[2]);
 
                 entryStart = unparsedWikiTable.IndexOf("{{Game data/saves|", entryEnd);
-            } while (entryStart != -1);
-
+            }
 
             return result;
         }
