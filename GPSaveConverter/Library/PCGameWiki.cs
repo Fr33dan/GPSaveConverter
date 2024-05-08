@@ -35,6 +35,10 @@ namespace GPSaveConverter.Library
                     {
                         return;
                     }
+                    if (queryRoot["query"]["pages"][0]["missing"] != null && queryRoot["query"]["pages"][0]["missing"].AsValue().GetValue<bool>())
+                    {
+                        return;
+                    }
                     int pageID = queryRoot["query"]["pages"][0]["pageid"].AsValue().GetValue<int>();
 
 
@@ -53,6 +57,10 @@ namespace GPSaveConverter.Library
                         {
                             sectionIndex = n["index"].GetValue<string>();
                         }
+                    }
+                    if (sectionIndex == null || sectionIndex == "-1")
+                    {
+                        return;
                     }
 
                     url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=parse&pageid={0}&formatversion=2&format=json&prop=wikitext&section={1}", pageID, sectionIndex);

@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Ookii.Dialogs.WinForms;
 
 namespace GPSaveConverter
 {
@@ -56,7 +57,11 @@ namespace GPSaveConverter
             }
             if (res == DialogResult.OK)
             {
-                FolderBrowserDialog dialog = new FolderBrowserDialog();
+                VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog();
+                if (ActiveGame.BaseNonXboxSaveLocation != null && ActiveGame.BaseNonXboxSaveLocation != string.Empty)
+                {
+                    dialog.SelectedPath = ActiveGame.BaseNonXboxSaveLocation;
+                }
                 res = dialog.ShowDialog();
                 if (res == DialogResult.OK)
                 {
