@@ -44,36 +44,36 @@ namespace GPSaveConverter
             await ActiveGame.fetchNonXboxSaveFiles();
         }
 
-        private async Task<bool> promptForNonXboxSaveLocation(string reason)
+        private async void setNonXboxSaveLocationError(string reason)
         {
-            DialogResult res;
-            if (reason != null)
+            if (reason != null && reason != string.Empty)
             {
-                 res = MessageBox.Show(this, reason + " Please select save file location.", "Non-Xbox save location not found", MessageBoxButtons.OKCancel);
+                nonXboxLocationError.SetError(promptNonXboxLocationButton, reason + " Please select save file location.");
             }
             else
             {
-                res = DialogResult.OK;
+                nonXboxLocationError.SetError(promptNonXboxLocationButton, string.Empty);
             }
+        }
+
+        private async Task<bool> promptForNonXboxSaveLocation()
+        {
+            VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog();
+            if (ActiveGame.BaseNonXboxSaveLocation != null && ActiveGame.BaseNonXboxSaveLocation != string.Empty)
+            {
+                dialog.SelectedPath = ActiveGame.BaseNonXboxSaveLocation;
+            }
+            DialogResult res = dialog.ShowDialog();
             if (res == DialogResult.OK)
             {
-                VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog();
-                if (ActiveGame.BaseNonXboxSaveLocation != null && ActiveGame.BaseNonXboxSaveLocation != string.Empty)
-                {
-                    dialog.SelectedPath = ActiveGame.BaseNonXboxSaveLocation;
-                }
-                res = dialog.ShowDialog();
-                if (res == DialogResult.OK)
-                {
-                    ActiveGame.BaseNonXboxSaveLocation = dialog.SelectedPath + "\\";
+                ActiveGame.BaseNonXboxSaveLocation = dialog.SelectedPath + "\\";
 
-                    // Clear profiles when manual save file location is used.
-                    ActiveGame.TargetProfiles = null;
+                // Clear profiles when manual save file location is used.
+                ActiveGame.TargetProfiles = null;
 
-                    await fetchNonXboxSaveFiles();
-                    return true;
-                }
-                else return false;
+                setNonXboxSaveLocationError(string.Empty);
+                await fetchNonXboxSaveFiles();
+                return true;
             }
             else return false;
         }
@@ -200,12 +200,13 @@ namespace GPSaveConverter
             {
                 profileDataGrid.Rows[0].Selected = true;
                 nonXboxProfileTable_CellClicked(profileDataGrid, null);
+                setNonXboxSaveLocationError(string.Empty);
             }
             else if(profileList.Count == 0)
             {
                 profileList.Add(new NonXboxProfile("No non-Xbox profiles found", index, NonXboxProfile.ProfileType.DisplayOnly));
                 profileDataGrid.Enabled = false;
-                await promptForNonXboxSaveLocation("Game library defines non-Xbox profiles, but none were found.");
+                setNonXboxSaveLocationError("Game library defines non-Xbox profiles, but none were found.");
             }
         }
 
@@ -485,12 +486,13 @@ namespace GPSaveConverter
 
             if (ActiveGame.BaseNonXboxSaveLocation == null || ActiveGame.BaseNonXboxSaveLocation == string.Empty)
             {
-                await promptForNonXboxSaveLocation("Non-Xbox save location not found in game library.");
+                setNonXboxSaveLocationError("Non-Xbox save location not found in game library.");
             }
             else
             {
                 if (ActiveGame.BaseNonXboxSaveLocation.Contains(Library.GameLibrary.NonSteamProfileMarker))
                 {
+                    setNonXboxSaveLocationError(string.Empty);
                     await this.fetchNonXboxProfiles(0);
                 }
                 else
@@ -506,11 +508,12 @@ namespace GPSaveConverter
 
                     if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
                     {
+                        setNonXboxSaveLocationError(string.Empty);
                         await fetchNonXboxSaveFiles();
                     }
                     else
                     {
-                        await promptForNonXboxSaveLocation("Non-Xbox save location from library does not exist.");
+                        setNonXboxSaveLocationError("Non-Xbox save location from library does not exist.");
                     }
                 }
             }
@@ -518,7 +521,7 @@ namespace GPSaveConverter
 
         private async void promptNonXboxLocationButton_Click(object sender, EventArgs e)
         {
-            await this.promptForNonXboxSaveLocation(null);
+            await this.promptForNonXboxSaveLocation();
         }
 
         private bool suspendCrossMatch = false;
