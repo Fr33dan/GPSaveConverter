@@ -326,6 +326,21 @@
           "NamedRegexGroups": []
         }
       ]
+    },
+    {
+      "PackageName": "HumbleBundle.CoralIsland_q2mcdwmzx4qja",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\ProjectCoral\\Saved\\SaveGames\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FileName}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${FileName}",
+          "ContainerName2": "${FileName}",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w]+)"
+          ]
+        }
+      ]
     }
   ]
 }
