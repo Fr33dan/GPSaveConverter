@@ -8,3 +8,7 @@ There is an extremely small (as of now at least) game library that contains the 
 It is strongly recommended you back up both save file folders before using this application. 
 
 ![Save File Converter v0 4 3 Screenshot](https://user-images.githubusercontent.com/4670572/159533555-dbc49599-7620-4774-bd78-501e997ac22c.png)
+
+Garen Thomas created a YouTube video going over the process for Forza Horizon 5 (although he also covers some pitfalls that have hopefully been fixed since he created it):
+
+[![FH 5 Tutorial](http://img.youtube.com/vi/tGKV-aumZ-g/0.jpg)](http://www.youtube.com/watch?v=tGKV-aumZ-g "FH 5 Tutorial")
