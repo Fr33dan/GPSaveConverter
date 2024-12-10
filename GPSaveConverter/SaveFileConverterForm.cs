@@ -59,7 +59,7 @@ namespace GPSaveConverter
         private async Task<bool> promptForNonXboxSaveLocation()
         {
             VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog();
-            if (ActiveGame.BaseNonXboxSaveLocation != null && ActiveGame.BaseNonXboxSaveLocation != string.Empty)
+            if (!string.IsNullOrEmpty(ActiveGame.BaseNonXboxSaveLocation) && ActiveGame.BaseNonXboxSaveLocation.IndexOfAny(Path.GetInvalidPathChars()) < 0)
             {
                 dialog.SelectedPath = ActiveGame.BaseNonXboxSaveLocation;
             }

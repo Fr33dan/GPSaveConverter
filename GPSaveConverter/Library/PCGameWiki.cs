@@ -12,12 +12,12 @@ namespace GPSaveConverter.Library
     internal static class PCGameWiki
     {
         private static NLog.Logger logger = LogHelper.getClassLogger();
-        public static readonly string[,] FolderNameSubstitutions = new string[,] { { "{{p|userprofile}}", "	%USERPROFILE%" }
-                                                                                 , { "{{p|appdata}}", "	%APPDATA%" }
-                                                                                 , { "{{p|localappdata}}", "%LOCALAPPDATA%" }
-                                                                                 , { "{{p|programdata}}", "	%PROGRAMDATA%" }
-                                                                                 , { "{{p|uid}}", "<user-id>"}
-                                                                                 , { "{{p|steam}}", "<Steam-folder>"} };
+        public static readonly string[,] FolderNameSubstitutions = new string[,] { { "{{p|userprofile}}",   "%USERPROFILE%"     }
+                                                                                 , { "{{p|appdata}}",       "%APPDATA%"         }
+                                                                                 , { "{{p|localappdata}}",  "%LOCALAPPDATA%"    }
+                                                                                 , { "{{p|programdata}}",   "%PROGRAMDATA%"     }
+                                                                                 , { "{{p|uid}}",           "<user-id>"         }
+                                                                                 , { "{{p|steam}}",         "<Steam-folder>"    } };
         public static async Task FetchSaveLocation(GameInfo i)
         {
             logger.Info("Fetching save data from pcgamingwiki.com");
@@ -115,7 +115,7 @@ namespace GPSaveConverter.Library
                 } while (subEntryStart != -1);
 
                 string entryLine = unparsedWikiTable.Substring(entryStart, entryEnd - entryStart);
-                entryLine = NameSubsitution(entryLine);
+                entryLine = NameSubstitution(entryLine);
                 string[] lineInfo = entryLine.Split('|');
 
                 result.Add(lineInfo[1], lineInfo[2]);
@@ -126,7 +126,7 @@ namespace GPSaveConverter.Library
             return result;
         }
 
-        private static string NameSubsitution(string path)
+        private static string NameSubstitution(string path)
         {
             for (int i = 0; i < FolderNameSubstitutions.GetLength(0); i++)
             {
