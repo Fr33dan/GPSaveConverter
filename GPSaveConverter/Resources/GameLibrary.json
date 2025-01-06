@@ -356,6 +356,40 @@
           ]
         }
       ]
+    },
+    {
+      "Name": "Escape Academy",
+      "PackageName": "iam8bit.EscapeAcademy_1fvhzehbk749p",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\CoinCrewGames\\Escape Academy\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "Save${FileSlot}\\\\EscapeAcademyMeta.json",
+          "XboxFileID": "meta${FileSlot}",
+          "ContainerName1": "container",
+          "ContainerName2": "container",
+          "NamedRegexGroups": [
+            "(?<FileSlot>[0-9]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "Save${FileSlot}\\\\EscapeAcademyProfile.json",
+          "XboxFileID": "progress${FileSlot}",
+          "ContainerName1": "container",
+          "ContainerName2": "container",
+          "NamedRegexGroups": [
+            "(?<FileSlot>[0-9]+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "Save${FileSlot}\\\\EscapeAcademyPlayerSettings.json",
+          "XboxFileID": "settings${FileSlot}",
+          "ContainerName1": "container",
+          "ContainerName2": "container",
+          "NamedRegexGroups": [
+            "(?<FileSlot>[0-9]+)"
+          ]
+        }
+      ]
     }
   ]
 }
