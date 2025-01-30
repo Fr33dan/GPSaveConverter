@@ -171,10 +171,14 @@ namespace GPSaveConverter.Library
 
         private FileTranslation findTranslation(NonXboxFileInfo file)
         {
+            if (file.RelativePath == null)
+            {
+                return null;
+            }
             foreach (FileTranslation t in this.FileTranslations)
             {
                 t.NonXboxFileInfo = file;
-                if (Regex.Match(file.RelativePath, t.NonXboxFilenameRegex).Success)
+                if (t.NonXboxFilenameRegex != null && Regex.Match(file.RelativePath, t.NonXboxFilenameRegex).Success)
                 {
                     return t;
                 }
