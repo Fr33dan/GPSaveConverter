@@ -20,6 +20,14 @@
             base.Dispose(disposing);
         }
 
+        private class PackagesScrollPanel : System.Windows.Forms.Panel
+        {
+            protected override System.Drawing.Point ScrollToControl(System.Windows.Forms.Control activeControl)
+            {
+                return this.AutoScrollPosition;
+            }
+        }
+
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -53,7 +61,7 @@
             this.moveAllToXboxButton = new System.Windows.Forms.Button();
             this.moveSelectionToXboxButton = new System.Windows.Forms.Button();
             this.packagesBasePanel = new System.Windows.Forms.Panel();
-            this.packagesScrollPanel = new System.Windows.Forms.Panel();
+            this.packagesScrollPanel = new PackagesScrollPanel();
             this.packagesDataGridView = new System.Windows.Forms.DataGridView();
             this.GameIcon = new System.Windows.Forms.DataGridViewImageColumn();
             this.GameName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -422,6 +430,8 @@
             // 
             this.packagesDataGridView.AllowUserToAddRows = false;
             this.packagesDataGridView.AllowUserToDeleteRows = false;
+            this.packagesDataGridView.AllowUserToResizeRows = false;
+            this.packagesDataGridView.AllowUserToResizeColumns = false;
             this.packagesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.packagesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
