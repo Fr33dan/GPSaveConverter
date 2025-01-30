@@ -133,6 +133,8 @@ namespace GPSaveConverter.Library
 
         internal async Task<NonXboxProfile[]> getProfileOptions(int index)
         {
+            if (this.TargetProfiles == null || this.TargetProfiles.Length == 0) return Array.Empty<NonXboxProfile>();
+
             string baseLocation = GameLibrary.ExpandSaveFileLocation(BaseNonXboxSaveLocation);
             for(int j = 0; j < index; j++)
             {
@@ -169,10 +171,14 @@ namespace GPSaveConverter.Library
 
         private FileTranslation findTranslation(NonXboxFileInfo file)
         {
+            if (file == null || file.RelativePath == null)
+            {
+                return null;
+            }
             foreach (FileTranslation t in this.FileTranslations)
             {
                 t.NonXboxFileInfo = file;
-                if (Regex.Match(file.RelativePath, t.NonXboxFilenameRegex).Success)
+                if (t.NonXboxFilenameRegex != null && Regex.Match(file.RelativePath, t.NonXboxFilenameRegex).Success)
                 {
                     return t;
                 }
