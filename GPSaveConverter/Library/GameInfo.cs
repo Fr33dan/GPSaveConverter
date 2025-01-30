@@ -133,6 +133,8 @@ namespace GPSaveConverter.Library
 
         internal async Task<NonXboxProfile[]> getProfileOptions(int index)
         {
+            if (this.TargetProfiles == null || this.TargetProfiles.Length == 0) return Array.Empty<NonXboxProfile>();
+
             string baseLocation = GameLibrary.ExpandSaveFileLocation(BaseNonXboxSaveLocation);
             for(int j = 0; j < index; j++)
             {
