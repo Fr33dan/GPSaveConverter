@@ -171,7 +171,7 @@ namespace GPSaveConverter.Library
 
         private FileTranslation findTranslation(NonXboxFileInfo file)
         {
-            if (file.RelativePath == null)
+            if (file == null || file.RelativePath == null)
             {
                 return null;
             }
