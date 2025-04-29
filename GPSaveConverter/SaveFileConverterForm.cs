@@ -363,7 +363,7 @@ namespace GPSaveConverter
                         }
                         catch (Exception e)
                         {
-                            res = MessageBox.Show(this, "An error occured updating file " + file.RelativePath + Environment.NewLine + e.Message, "Error", MessageBoxButtons.AbortRetryIgnore);
+                            res = MessageBox.Show(this, "An error occurred updating file " + file.RelativePath + Environment.NewLine + e.Message, "Error", MessageBoxButtons.AbortRetryIgnore);
 
                             if (res == DialogResult.Abort)
                             {
@@ -403,7 +403,7 @@ namespace GPSaveConverter
                         }
                         catch (Exception e)
                         {
-                            res = MessageBox.Show(this, "An error occured updating file " + file.FileID + Environment.NewLine + e.Message, "Error", MessageBoxButtons.AbortRetryIgnore);
+                            res = MessageBox.Show(this, "An error occurred updating file " + file.FileID + Environment.NewLine + e.Message, "Error", MessageBoxButtons.AbortRetryIgnore);
 
                             if (res == DialogResult.Abort)
                             {
