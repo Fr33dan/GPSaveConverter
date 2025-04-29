@@ -444,7 +444,9 @@ namespace GPSaveConverter
 
         private void viewXboxFilesButton_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(this.currentContainer.Children[0].getSaveFilePath());
+            System.Diagnostics.Process.Start(this.currentContainer.Children.Length > 0
+                ? this.currentContainer.Children[0].getSaveFilePath()
+                : this.currentContainer.xboxProfileFolder);
         }
 
         private void viewNonXboxFileButton_Click(object sender, EventArgs e)
