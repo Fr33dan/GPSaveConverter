@@ -41,7 +41,7 @@ namespace GPSaveConverter
             this.foldersToolTip.SetToolTip(this.nonXboxFilesLabel, ActiveGame.NonXboxSaveLocation);
 
             this.viewNonXboxFileButton.Enabled = true;
-            await ActiveGame.fetchNonXboxSaveFiles();
+            await ActiveGame.refreshNonXboxSaveFiles();
         }
 
         private async void setNonXboxSaveLocationError(string reason)
