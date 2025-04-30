@@ -201,10 +201,10 @@ namespace GPSaveConverter.Library
             return null;
         }
 
-        internal async Task fetchNonXboxSaveFiles()
+        internal async Task refreshNonXboxSaveFiles()
         {
             string fetchLocation = this.NonXboxSaveLocation;
-
+            GameLibrary.nonXboxFiles.Clear();
             if (Directory.Exists(fetchLocation)) await fetchNonXboxSaveFiles(fetchLocation, fetchLocation);
 
         }
@@ -281,7 +281,7 @@ namespace GPSaveConverter.Library
                 }
             } else if (createOrUpdate)
             {
-                throw new Exception("Relative file path translation to Xbox file ID not found.");
+                throw new Exception("Relative file path translation to Xbox file ID not found." + Environment.NewLine + Environment.NewLine + "You may need to add file translations via https://github.com/Fr33dan/GPSaveConverter/wiki/File-Translations");
 
             }
             return returnVal;
@@ -335,7 +335,7 @@ namespace GPSaveConverter.Library
                 }
             } else if (createOrUpdate)
             {
-                throw new Exception("Relative file path translation to Xbox file ID not found.");
+                throw new Exception("Relative file path translation to Xbox file ID not found." + Environment.NewLine + Environment.NewLine + "You may need to add file translations via https://github.com/Fr33dan/GPSaveConverter/wiki/File-Translations");
             }
             return matchedFile;
         }

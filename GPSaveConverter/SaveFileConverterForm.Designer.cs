@@ -159,6 +159,7 @@
             // 
             this.xboxFilesTable.AllowUserToAddRows = false;
             this.xboxFilesTable.AllowUserToDeleteRows = false;
+            this.xboxFilesTable.AllowUserToResizeRows = false;
             this.xboxFilesTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -215,6 +216,7 @@
             // 
             this.nonXboxFilesTable.AllowUserToAddRows = false;
             this.nonXboxFilesTable.AllowUserToDeleteRows = false;
+            this.nonXboxFilesTable.AllowUserToResizeRows = false;
             this.nonXboxFilesTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
