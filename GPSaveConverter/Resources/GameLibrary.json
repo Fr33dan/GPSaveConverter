@@ -390,6 +390,42 @@
           ]
         }
       ]
+    },
+    {
+      "Name": "FINAL FANTASY IX",
+      "PackageName": "39EA002F.FINALFANTASYIX_n746a19ndrrjg",
+      "BaseNonXboxSaveLocation": "",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "AUTO",
+          "XboxFileID": "Data",
+          "ContainerName1": "AutoSave",
+          "ContainerName2": "FF9AutoSave",
+          "NamedRegexGroups": [
+            ""
+          ]
+        },
+        {
+          "NonXboxFilename": "DATA_SLOT${SlotNumber}_FILE${SaveNumber}",
+          "XboxFileID": "Data",
+          "ContainerName1": "DataSlot${SlotNumber}Save${SaveNumber}",
+          "ContainerName2": "FF9DataSlot${SlotNumber}Save${SaveNumber}",
+          "NamedRegexGroups": [
+            "(?<SlotNumber>(?<=SLOT)\\d+)",
+            "(?<SaveNumber>(?<=FILE)\\d+)"
+          ]
+        },
+        {
+          "NonXboxFilename": "PREVIEW_SLOT${SlotNumber}_FILE${SaveNumber}",
+          "XboxFileID": "Data${SaveNumber}",
+          "ContainerName1": "PreviewSlot${SlotNumber}",
+          "ContainerName2": "FF9PreviewSlot${SlotNumber}",
+          "NamedRegexGroups": [
+            "(?<SlotNumber>(?<=SLOT)\\d+)",
+            "(?<SaveNumber>(?<=FILE)\\d+)"
+          ]
+        }
+      ]
     }
   ]
 }
