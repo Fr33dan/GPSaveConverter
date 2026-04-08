@@ -18,14 +18,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.x'
 
       - name: Create Steam API key placeholder
         run: Set-Content -Path GPSaveConverter/Resources/steamapikey.txt -Value "${{ secrets.STEAM_API_KEY }}"
 
       - name: Restore and Build
-        run: msbuild GPSaveConverter.sln -restore -p:Configuration=${{ matrix.configuration }} -verbosity:minimal
+        run: dotnet build GPSaveConverter.sln --configuration ${{ matrix.configuration }} --verbosity minimal
 
       - name: Upload build artifacts
         if: matrix.configuration == 'Release'
@@ -33,4 +35,4 @@ jobs:
         with:
           name: GPSaveConverter-Release
           overwrite: true
-          path: GPSaveConverter/bin/Release/
+          path: GPSaveConverter/bin/Release/net472/
