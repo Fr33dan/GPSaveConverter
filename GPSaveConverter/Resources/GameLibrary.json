@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2024-12-04",
+  "Version": "2026-03-30",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -387,6 +387,23 @@
           "ContainerName2": "container",
           "NamedRegexGroups": [
             "(?<FileSlot>[0-9]+)"
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "A Plague Tale: Requiem - Windows",
+      "PackageName": "FocusHomeInteractiveSA.APlagueTaleRequiem-Windows_4hny5m903y3g0",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1182900\\remote\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FileName}",
+          "XboxFileID": "data",
+          "ContainerName1": "${FileName}",
+          "ContainerName2": "${FileName}",
+          "NamedRegexGroups": [
+            "(?<FileName>[\\w]+)"
           ]
         }
       ]
