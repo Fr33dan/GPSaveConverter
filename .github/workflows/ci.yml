@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      checks: write
 
     strategy:
       matrix:
@@ -18,14 +20,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.x'
 
       - name: Create Steam API key placeholder
         run: Set-Content -Path GPSaveConverter/Resources/steamapikey.txt -Value "${{ secrets.STEAM_API_KEY }}"
 
       - name: Restore and Build
-        run: msbuild GPSaveConverter.sln -restore -p:Configuration=${{ matrix.configuration }} -verbosity:minimal
+        run: dotnet build GPSaveConverter.sln --configuration ${{ matrix.configuration }} --verbosity minimal
+
+      - name: Run tests
+        run: dotnet test GPSaveConverter.Tests/GPSaveConverter.Tests.csproj --configuration ${{ matrix.configuration }} --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-${{ matrix.configuration }}
+          overwrite: true
+          path: GPSaveConverter.Tests/TestResults/
+
+      - name: Publish unit test results
+        if: always()
+        uses: dorny/test-reporter@v3
+        with:
+          name: Test Results (${{ matrix.configuration }})
+          path: GPSaveConverter.Tests/TestResults/*.trx
+          reporter: dotnet-trx
 
       - name: Upload build artifacts
         if: matrix.configuration == 'Release'
@@ -33,4 +56,4 @@ jobs:
         with:
           name: GPSaveConverter-Release
           overwrite: true
-          path: GPSaveConverter/bin/Release/
+          path: GPSaveConverter/bin/Release/net472/
