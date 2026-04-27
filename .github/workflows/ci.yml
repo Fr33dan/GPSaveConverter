@@ -22,7 +22,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Create Steam API key placeholder
-        run: New-Item -Path GPSaveConverter/Resources/steamapikey.txt -ItemType File -Force
+        run: Set-Content -Path GPSaveConverter/Resources/steamapikey.txt -Value "${{ secrets.STEAM_API_KEY }}"
 
       - name: Restore and Build
         run: msbuild GPSaveConverter.sln -restore -p:Configuration=${{ matrix.configuration }} -verbosity:minimal
