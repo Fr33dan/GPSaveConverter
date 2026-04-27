@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter.Library
 {
     internal class GameLibrary
     {
         private static readonly NLog.Logger logger = LogHelper.getClassLogger();
+
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
+        internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
+        internal static IRegistry Registry { get; set; } = new DefaultRegistry();
+        internal static IScriptRunner ScriptRunner { get; set; } = new DefaultScriptRunner();
+        internal static IEnvironment Environment { get; set; } = new DefaultEnvironment();
         public static readonly FileTranslation DefaultTranslation;
         internal const string NonSteamProfileMarker = "<user-id>";
         internal const string SteamInstallMarker = "<Steam-folder>";
@@ -37,7 +43,7 @@ namespace GPSaveConverter.Library
             {
                 if(currentDefault == null)
                 {
-                    currentDefault = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary);
+                    currentDefault = JsonSerializer.Deserialize<StoredGameLibrary>(Settings.DefaultGameLibrary);
                 }
                 return currentDefault;
             }
@@ -52,13 +58,13 @@ namespace GPSaveConverter.Library
 
         public static async Task Initialize()
         {
-            if (GPSaveConverter.Properties.Settings.Default.UserGameLibrary == string.Empty)
+            if (Settings.UserGameLibrary == string.Empty)
             {
                 await Task.Run(FirstTimeInitializeGameLibrary);
             }
             else
             {
-                if (GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+                if (Settings.AllowWebDataFetch)
                 {
                     UpdateDefaultLibrary();
                 }
@@ -69,15 +75,15 @@ namespace GPSaveConverter.Library
 
         private static void FirstTimeInitializeGameLibrary()
         {
-            GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
+            Settings.DefaultGameLibrary = GPSaveConverter.Properties.Resources.GameLibrary;
 
-            if (GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+            if (Settings.AllowWebDataFetch)
             {
                 UpdateDefaultLibrary();
             }
 
-            GPSaveConverter.Properties.Settings.Default.UserGameLibrary = GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary;
-            GPSaveConverter.Properties.Settings.Default.Save();
+            Settings.UserGameLibrary = Settings.DefaultGameLibrary;
+            Settings.Save();
         }
 
         /// <summary>
@@ -88,24 +94,21 @@ namespace GPSaveConverter.Library
         {
             string sourceURL = @"https://raw.githubusercontent.com/Fr33dan/GPSaveConverter/master/GPSaveConverter/Resources/GameLibrary.json";
             bool returnVal = false;
-            using (WebClient wc = new WebClient())
+            string githubLibraryJson = HttpClient.DownloadString(sourceURL);
+
+            StoredGameLibrary githubLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(githubLibraryJson);
+
+            if(githubLibrary.Version.CompareTo(Default.Version) > 0)
             {
-                string githubLibraryJson = wc.DownloadString(sourceURL);
-
-                StoredGameLibrary githubLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(githubLibraryJson);
-
-                if(githubLibrary.Version.CompareTo(Default.Version) > 0)
-                {
-                    currentDefault = githubLibrary;
-                    GPSaveConverter.Properties.Settings.Default.DefaultGameLibrary = githubLibraryJson;
-                    GPSaveConverter.Properties.Settings.Default.Save();
-                    returnVal = true;
-                    logger.Info("Default game library updated");
-                }
-                else
-                {
-                    logger.Info("Default game library up to date");
-                }
+                currentDefault = githubLibrary;
+                Settings.DefaultGameLibrary = githubLibraryJson;
+                Settings.Save();
+                returnVal = true;
+                logger.Info("Default game library updated");
+            }
+            else
+            {
+                logger.Info("Default game library up to date");
             }
 
             return returnVal;
@@ -133,7 +136,7 @@ namespace GPSaveConverter.Library
             IList<GameInfo> infoSource = null;
             try
             {
-                StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
+                StoredGameLibrary jsonLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(Settings.UserGameLibrary);
 
                 UserLibraryVersion = jsonLibrary.Version;
                 savedGameLibrary = new Dictionary<string, GameInfo>();
@@ -144,7 +147,7 @@ namespace GPSaveConverter.Library
             }
             if(infoSource == null)
             {
-                infoSource = JsonSerializer.Deserialize<IList<GameInfo>>(GPSaveConverter.Properties.Settings.Default.UserGameLibrary);
+                infoSource = JsonSerializer.Deserialize<IList<GameInfo>>(Settings.UserGameLibrary);
 
                 UserLibraryVersion = DateTime.Parse(Default.Version).AddDays(-1).ToString("yyyy-MM-dd");
                 savedGameLibrary = new Dictionary<string, GameInfo>();
@@ -173,7 +176,7 @@ namespace GPSaveConverter.Library
                 string scriptText = GPSaveConverter.Properties.Resources.GetAUMIDScript;
                 logger.Info("Getting UWP package manifests...");
                 
-                string scriptOutput = ScriptManager.RunScript(scriptText).Trim();
+                string scriptOutput = ScriptRunner.RunScript(scriptText).Trim();
                 logger.Trace("Powershell script results:\n{0}", scriptOutput);
 
                 StringReader sr = new StringReader(scriptOutput);
@@ -206,7 +209,7 @@ namespace GPSaveConverter.Library
             }
             catch (Exception e)
             {
-                throw new Exception("Error trying to get installed apps on your PC " + Environment.NewLine + e.Message, e.InnerException);
+                throw new Exception("Error trying to get installed apps on your PC " + System.Environment.NewLine + e.Message, e.InnerException);
             }
         }
 
@@ -240,7 +243,7 @@ namespace GPSaveConverter.Library
 
             if (returnVal.Contains(SteamInstallMarker))
             {
-                string steamLocation = (string)Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null);
+                string steamLocation = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null);
                 if(steamLocation == null)
                 {
                     returnVal = null;
@@ -266,9 +269,10 @@ namespace GPSaveConverter.Library
                 RegisterSerializedInfo(saveLibraryInfo);
             }
 
-            if (i.BaseNonXboxSaveLocation == null && GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch)
+            if (i.BaseNonXboxSaveLocation == null && Settings.AllowWebDataFetch)
             {
-                await PCGameWiki.FetchSaveLocation(i);
+                var pcGameWiki = new PCGameWiki(HttpClient);
+                await pcGameWiki.FetchSaveLocation(i);
             }
         }
 

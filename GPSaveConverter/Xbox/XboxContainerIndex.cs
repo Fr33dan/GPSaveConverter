@@ -4,12 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using GPSaveConverter.Interfaces;
 using GPSaveConverter.Library;
 
 namespace GPSaveConverter.Xbox
 {
     internal class XboxContainerIndex
     {
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
+
         string packageName;
         string wgsFolder;
         internal string xboxProfileFolder;
@@ -32,9 +35,9 @@ namespace GPSaveConverter.Xbox
             this.xboxProfileID = id;
 
             wgsFolder = XboxPackageList.getWGSFolder(packageName);
-            xboxProfileFolder = Directory.GetDirectories(wgsFolder, xboxProfileID + "_*" + (info.WGSProfileSuffix != null ? info.WGSProfileSuffix : "")).First();
+            xboxProfileFolder = FileSystem.GetDirectories(wgsFolder, xboxProfileID + "_*" + (info.WGSProfileSuffix != null ? info.WGSProfileSuffix : "")).First();
             indexPath = Path.Combine(xboxProfileFolder, "containers.index");
-            byte[] containerData = File.ReadAllBytes(indexPath);
+            byte[] containerData = FileSystem.ReadAllBytes(indexPath);
 
 
             int currentByte = 4;
@@ -133,7 +136,7 @@ namespace GPSaveConverter.Xbox
         internal void UpdateIndex()
         {
             DateTime saveTime = DateTime.Now;
-            BinaryWriter writer = new BinaryWriter(File.OpenWrite(this.indexPath), Encoding.Unicode);
+            BinaryWriter writer = new BinaryWriter(FileSystem.OpenWrite(this.indexPath), Encoding.Unicode);
             writer.Write(0x00000000E);
 
             writer.Write(this.Children.Length);
@@ -171,7 +174,7 @@ namespace GPSaveConverter.Xbox
             }
             writer.Flush();
             writer.Close();
-            File.SetLastWriteTime(this.indexPath, saveTime);
+            FileSystem.SetFileLastWriteTime(this.indexPath, saveTime);
 
         }
     }

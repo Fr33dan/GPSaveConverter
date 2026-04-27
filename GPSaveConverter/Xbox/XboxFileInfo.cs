@@ -6,16 +6,19 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter.Xbox
 {
     internal class XboxFileInfo
     {
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
+
         public static byte[] GetChecksum(string filename)
         {
             using (System.Security.Cryptography.HashAlgorithm hasher = System.Security.Cryptography.MD5.Create())
             {
-                using (Stream stream = System.IO.File.OpenRead(filename))
+                using (Stream stream = FileSystem.OpenRead(filename))
                 {
                     return hasher.ComputeHash(stream);
                 }
@@ -57,11 +60,11 @@ namespace GPSaveConverter.Xbox
             Array.Copy(sourceFile, index + XboxHelper.FileIDByteLength + XboxHelper.GuidLength, guidTempArray, 0, XboxHelper.GuidLength);
             this.FileCode = new Guid(guidTempArray);
 
-            if (!File.Exists(getFilePath()))
+            if (!FileSystem.FileExists(getFilePath()))
             {
                 throw new FileNotFoundException("Could not find file for " + this.GetRelativeFilePath() + " (" + getFileName() + ")");
             }
-            this.timestamp = File.GetLastWriteTime(getFilePath());
+            this.timestamp = FileSystem.GetFileLastWriteTime(getFilePath());
         }
         internal XboxFileInfo(XboxFileContainer parent,string filePath, string xboxFileID)
         {
@@ -69,7 +72,7 @@ namespace GPSaveConverter.Xbox
 
             this.fileID = xboxFileID;
             this.FileCode = Guid.NewGuid();
-            File.Copy(filePath, getFilePath());
+            FileSystem.CopyFile(filePath, getFilePath());
         }
 
         /// <summary>
@@ -78,7 +81,7 @@ namespace GPSaveConverter.Xbox
         /// <param name="replacement"></param>
         internal void Replace(NonXboxFileInfo replacement)
         {
-            File.Copy(replacement.FilePath, this.getFilePath(), true);
+            FileSystem.CopyFile(replacement.FilePath, this.getFilePath(), true);
         }
 
         /// <summary>

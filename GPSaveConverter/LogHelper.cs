@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter
 {
     internal static class LogHelper
     {
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
         static LogHelper()
         {
             // Manually load configuration item factory so that extension is loaded.
@@ -16,7 +18,7 @@ namespace GPSaveConverter
             System.Xml.XmlReader xmlReader = System.Xml.XmlReader.Create(new System.IO.StringReader(GPSaveConverter.Properties.Resources.nlog_config));
             NLog.LogManager.Configuration = new XmlLoggingConfiguration(xmlReader, null);
 
-            NLog.LogManager.Configuration.Variables["fileLogLevel"] = GPSaveConverter.Properties.Settings.Default.FileLogLevel.ToString();
+            NLog.LogManager.Configuration.Variables["fileLogLevel"] = Settings.FileLogLevel.ToString();
         }
         public static NLog.Logger getClassLogger()
         {

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Create Steam API key placeholder
+        run: New-Item -Path GPSaveConverter/Resources/steamapikey.txt -ItemType File -Force
+
+      - name: Restore and Build
+        run: msbuild GPSaveConverter.sln -restore -p:Configuration=${{ matrix.configuration }} -verbosity:minimal
+
+      - name: Upload build artifacts
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v7
+        with:
+          name: GPSaveConverter-Release
+          overwrite: true
+          path: GPSaveConverter/bin/Release/

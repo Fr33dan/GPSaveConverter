@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter.Xbox
 {
     internal class XboxFileContainer
     {
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
+
         private XboxContainerIndex parent;
 
         internal XboxContainerIndex Parent { get { return parent; } }
@@ -82,7 +85,7 @@ namespace GPSaveConverter.Xbox
 
         private void parseContainer()
         {
-            containerData = File.ReadAllBytes(containerPath);
+            containerData = FileSystem.ReadAllBytes(containerPath);
             this.fileList = new List<XboxFileInfo>();
             for(int j = ContainerHeaderLength; j < containerData.Length;j += XboxHelper.EntryByteLength)
             {
@@ -93,7 +96,7 @@ namespace GPSaveConverter.Xbox
 
         public void SaveContainer()
         {
-            FileStream s = File.OpenWrite(containerPath);
+            FileStream s = FileSystem.OpenWrite(containerPath);
 
             s.Write(BitConverter.GetBytes(4u),0,4);
 

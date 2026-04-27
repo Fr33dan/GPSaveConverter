@@ -10,11 +10,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Ookii.Dialogs.WinForms;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter
 {
     public partial class SaveFileConverterForm : Form
     {
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
         private static NLog.Logger logger = LogHelper.getClassLogger();
         Xbox.XboxContainerIndex currentContainer;
         internal Library.GameInfo ActiveGame { get; set; }
@@ -28,7 +31,7 @@ namespace GPSaveConverter
         {
             InitializeComponent();
 
-            if (!Properties.Settings.Default.ShowFileTranslations)
+            if (!Settings.ShowFileTranslations)
             {
                 toggleFileTranslationPanel();
             }
@@ -83,7 +86,7 @@ namespace GPSaveConverter
             bool failed = false;
             string wgsFolder = Xbox.XboxPackageList.getWGSFolder(ActiveGame.PackageName);
             this.xboxProfileListBox.Items.Clear();
-            foreach (string dir in Directory.GetDirectories(wgsFolder))
+            foreach (string dir in FileSystem.GetDirectories(wgsFolder))
             {
                 string folderName = dir.Replace(wgsFolder, "");
                 int underscoreLocation = folderName.IndexOf('_');
@@ -214,15 +217,15 @@ namespace GPSaveConverter
 
         private async void SaveFileConverterForm_Load(object sender, EventArgs e)
         {
-            if (GPSaveConverter.Properties.Settings.Default.FirstRun)
+            if (Settings.FirstRun)
             {
                 DialogResult res;
                 do {
                     res = MessageBox.Show(this, "Xbox Save File Converter can lookup save file locations online from pcgamingwiki.com." + Environment.NewLine + Environment.NewLine + "Do you allow this? (Can be changed any time in preferences)", "Allow internet access?", MessageBoxButtons.YesNo);
                 }while (res == DialogResult.Cancel);
-                GPSaveConverter.Properties.Settings.Default.AllowWebDataFetch = res == DialogResult.Yes;
-                GPSaveConverter.Properties.Settings.Default.FirstRun = false;
-                GPSaveConverter.Properties.Settings.Default.Save();
+                Settings.AllowWebDataFetch = res == DialogResult.Yes;
+                Settings.FirstRun = false;
+                Settings.Save();
             }
         }
 
@@ -255,8 +258,8 @@ namespace GPSaveConverter
             // No need to save library if it was never initialized.
             if (Library.GameLibrary.Initialized && (this.prefsForm == null || !this.prefsForm.SkipSave))
             {
-                GPSaveConverter.Properties.Settings.Default.UserGameLibrary = Library.GameLibrary.GetLibraryJson();
-                GPSaveConverter.Properties.Settings.Default.Save();
+                Settings.UserGameLibrary = Library.GameLibrary.GetLibraryJson();
+                Settings.Save();
             }
         }
 
@@ -336,7 +339,7 @@ namespace GPSaveConverter
                 }
             }
 
-            if (!Directory.Exists(ActiveGame.NonXboxSaveLocation))
+            if (!FileSystem.DirectoryExists(ActiveGame.NonXboxSaveLocation))
             {
                 MessageBox.Show(this, "Non-Xbox save location not found. Please check your configuration", "Configure Profile");
                 return false;
@@ -508,7 +511,7 @@ namespace GPSaveConverter
                     }
 
 
-                    if (Directory.Exists(ActiveGame.NonXboxSaveLocation))
+                    if (FileSystem.DirectoryExists(ActiveGame.NonXboxSaveLocation))
                     {
                         setNonXboxSaveLocationError(string.Empty);
                         await fetchNonXboxSaveFiles();
@@ -595,21 +598,21 @@ namespace GPSaveConverter
 
         private void showFileTranslationsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.ShowFileTranslations = !Properties.Settings.Default.ShowFileTranslations;
-            Properties.Settings.Default.Save();
+            Settings.ShowFileTranslations = !Settings.ShowFileTranslations;
+            Settings.Save();
             toggleFileTranslationPanel();
         }
 
         private void toggleFileTranslationPanel()
         {
-            int sizeDelta = Properties.Settings.Default.ShowFileTranslations ? -this.fileTranslationPanel.Height : this.fileTranslationPanel.Height;
+            int sizeDelta = Settings.ShowFileTranslations ? -this.fileTranslationPanel.Height : this.fileTranslationPanel.Height;
             this.packagesScrollPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             this.packagesScrollPanel.Height = this.packagesScrollPanel.Height + sizeDelta;
             this.packagesBasePanel.Height = this.packagesBasePanel.Height + sizeDelta;
             this.packagesScrollPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
 
-            this.fileTranslationPanel.Visible = Properties.Settings.Default.ShowFileTranslations;
-            this.showFileTranslationsToolStripMenuItem.Checked = Properties.Settings.Default.ShowFileTranslations;
+            this.fileTranslationPanel.Visible = Settings.ShowFileTranslations;
+            this.showFileTranslationsToolStripMenuItem.Checked = Settings.ShowFileTranslations;
         }
 
         private void addTranslationButton_Click(object sender, EventArgs e)
@@ -641,7 +644,7 @@ namespace GPSaveConverter
                 options.WriteIndented = true;
                 options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-                File.WriteAllText(saveFileDialog.FileName,JsonSerializer.Serialize(ActiveGame, typeof(Library.GameInfo),options));
+                FileSystem.WriteAllText(saveFileDialog.FileName,JsonSerializer.Serialize(ActiveGame, typeof(Library.GameInfo),options));
             }
         }
 
@@ -654,7 +657,7 @@ namespace GPSaveConverter
 
             if (result == DialogResult.OK)
             {
-                Library.GameInfo newInfo = JsonSerializer.Deserialize(File.ReadAllText(openFileDialog.FileName), typeof(Library.GameInfo)) as Library.GameInfo;
+                Library.GameInfo newInfo = JsonSerializer.Deserialize(FileSystem.ReadAllText(openFileDialog.FileName), typeof(Library.GameInfo)) as Library.GameInfo;
                 Library.GameLibrary.RegisterSerializedInfo(newInfo);
 
                 if(newInfo.PackageName == ActiveGame.PackageName)
@@ -678,7 +681,7 @@ namespace GPSaveConverter
                     options.WriteIndented = true;
                     options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                     options.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-                    File.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson(options));
+                    FileSystem.WriteAllText(saveFileDialog.FileName, Library.GameLibrary.GetLibraryJson(options));
                 }
             }
         }

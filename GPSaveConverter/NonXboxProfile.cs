@@ -7,12 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter
 {
     internal class NonXboxProfile
     {
         internal ProfileType profileType;
+
+        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
+        internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
+        internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
 
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -104,9 +109,9 @@ namespace GPSaveConverter
 
             List<NonXboxProfile> returnVal = new List<NonXboxProfile>();
 
-            if (Directory.Exists(profilesDir))
+            if (FileSystem.DirectoryExists(profilesDir))
             {
-                foreach (string p in Directory.GetDirectories(profilesDir))
+                foreach (string p in FileSystem.GetDirectories(profilesDir))
                 {
                     string newUserID = p.Replace(profilesDir, "");
 
@@ -125,7 +130,7 @@ namespace GPSaveConverter
                         expandedPath = expandedPath.Substring(0,expandedPath.IndexOf(ProfileMarkerPrefix(ProfileIndex + 1)));
                     }
 
-                    if (Directory.Exists(expandedPath))
+                    if (FileSystem.DirectoryExists(expandedPath))
                     {
                         
                         NonXboxProfile newProfile = new NonXboxProfile(newUserID, this.ProfileIndex,this.profileType);
@@ -148,13 +153,14 @@ namespace GPSaveConverter
 
         internal async Task FetchProfileInformation()
         {
-            if (Properties.Settings.Default.AllowWebDataFetch)
+            if (Settings.AllowWebDataFetch)
             {
                 if (profileType == ProfileType.Steam)
                 {
-                    await Library.Steam.GetUserInformation(this);
+                    var steam = new Library.Steam(HttpClient);
+                    await steam.GetUserInformation(this);
 
-                    this.userIcon = await Library.Steam.LoadIcon(this);
+                    this.userIcon = await steam.LoadIcon(this);
                 }
             }
         }
