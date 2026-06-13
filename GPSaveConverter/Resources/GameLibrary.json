@@ -426,6 +426,23 @@
           ]
         }
       ]
+    },
+    {
+      "Name": "TerraTech Legion",
+      "PackageName": "Mythwright.TerraTechLegion_9b483820r0x2c",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\TerraTech_Legion\\<user-id>\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "DefaultPlayerProfile.dat",
+          "XboxFileID": "Data",
+          "ContainerName1": "${xbox_profile_u32}DefaultPlayerProfiledat",
+          "ContainerName2": "${xbox_profile_u32}DefaultPlayerProfiledat",
+          "NamedRegexGroups": [
+            "^(?<xbox_profile_u32>\\d+)"
+          ]
+        }
+      ]
     }
   ]
 }
