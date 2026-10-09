@@ -488,5 +488,8 @@ $RECYCLE.BIN/
 [Cc]erts/
 SteamAPIKey.txt
 
+# Claude Code per-user settings
+.claude/settings.local.json
+
 # VSCode C# Dev Kit
 *.lscache
