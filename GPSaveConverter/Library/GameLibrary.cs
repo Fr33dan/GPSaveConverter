@@ -14,7 +14,17 @@ namespace GPSaveConverter.Library
     {
         private static readonly NLog.Logger logger = LogHelper.getClassLogger();
 
-        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
+        private static ISettingsProvider settings = new DefaultSettingsProvider();
+        internal static ISettingsProvider Settings
+        {
+            get { return settings; }
+            set
+            {
+                settings = value;
+                // The cached default library was read from the previous settings.
+                currentDefault = null;
+            }
+        }
         internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
         internal static IRegistry Registry { get; set; } = new DefaultRegistry();
         internal static IScriptRunner ScriptRunner { get; set; } = new DefaultScriptRunner();
@@ -94,21 +104,34 @@ namespace GPSaveConverter.Library
         {
             string sourceURL = @"https://raw.githubusercontent.com/Fr33dan/GPSaveConverter/master/GPSaveConverter/Resources/GameLibrary.json";
             bool returnVal = false;
-            string githubLibraryJson = HttpClient.DownloadString(sourceURL);
-
-            StoredGameLibrary githubLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(githubLibraryJson);
-
-            if(githubLibrary.Version.CompareTo(Default.Version) > 0)
+            try
             {
-                currentDefault = githubLibrary;
-                Settings.DefaultGameLibrary = githubLibraryJson;
-                Settings.Save();
-                returnVal = true;
-                logger.Info("Default game library updated");
+                string githubLibraryJson = HttpClient.DownloadString(sourceURL);
+
+                StoredGameLibrary githubLibrary = JsonSerializer.Deserialize<StoredGameLibrary>(githubLibraryJson);
+
+                string problem = githubLibrary == null ? "The library is empty." : githubLibrary.FindProblem();
+                if (problem != null)
+                {
+                    logger.Warn("Downloaded game library ignored. {0}", problem);
+                }
+                else if (githubLibrary.Version.CompareTo(Default.Version) > 0)
+                {
+                    currentDefault = githubLibrary;
+                    Settings.DefaultGameLibrary = githubLibraryJson;
+                    Settings.Save();
+                    returnVal = true;
+                    logger.Info("Default game library updated");
+                }
+                else
+                {
+                    logger.Info("Default game library up to date");
+                }
             }
-            else
+            catch (Exception e)
             {
-                logger.Info("Default game library up to date");
+                // Offline or a bad download. The library already stored still works.
+                logger.Warn(e, "Unable to check for game library updates");
             }
 
             return returnVal;
