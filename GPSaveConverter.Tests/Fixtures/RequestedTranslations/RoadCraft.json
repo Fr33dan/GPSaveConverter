@@ -1,0 +1,13 @@
+{
+  "Name": "RoadCraft",
+  "PackageName": "FocusHomeInteractiveSA.Roadbuilder_4hny5m903y3g0",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "SLOT_${SlotNumber}\\\\${FileName}",
+      "XboxFileID": "save\\\\SLOT_${SlotNumber}/${FileName}",
+      "ContainerName1": "MainSave",
+      "ContainerName2": "MainSave",
+      "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
+    }
+  ]
+}

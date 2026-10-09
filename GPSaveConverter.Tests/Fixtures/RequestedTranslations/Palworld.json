@@ -1,0 +1,28 @@
+{
+  "Name": "Palworld",
+  "PackageName": "PocketpairInc.Palworld_ad4psfrxyesvt",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Pal\\Saved\\savegames\\76561197960271872\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "9FD2FB8F42EF417C4C03F590F9B3C655\\\\Level01.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "04BDF4C0422948D9B8A856BF4F981A91-Level-01",
+      "ContainerName2": "04BDF4C0422948D9B8A856BF4F981A91-Level-01",
+      "NamedRegexGroups": []
+    },
+    {
+      "NonXboxFilename": "9FD2FB8F42EF417C4C03F590F9B3C655\\\\${File}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "04BDF4C0422948D9B8A856BF4F981A91-${File}",
+      "ContainerName2": "04BDF4C0422948D9B8A856BF4F981A91-${File}",
+      "NamedRegexGroups": [ "(?<File>LevelMeta|LocalData|WorldOption)" ]
+    },
+    {
+      "NonXboxFilename": "9FD2FB8F42EF417C4C03F590F9B3C655\\\\Players\\\\${Player}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "04BDF4C0422948D9B8A856BF4F981A91-Players-${Player}",
+      "ContainerName2": "04BDF4C0422948D9B8A856BF4F981A91-Players-${Player}",
+      "NamedRegexGroups": [ "(?<Player>[0-9A-F]{32})" ]
+    }
+  ]
+}
