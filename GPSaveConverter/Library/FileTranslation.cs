@@ -77,6 +77,72 @@ namespace GPSaveConverter.Library
             return instance;
         }
 
+        /// <summary>
+        /// Checks this translation for mistakes that would make it fail when it is used.
+        /// </summary>
+        /// <returns>A description of the first problem found, or null if there is none.</returns>
+        internal string FindProblem()
+        {
+            if (NonXboxFilename == null) return "NonXboxFilename is missing.";
+            if (XboxFileID == null) return "XboxFileID is missing.";
+            if (ContainerName1 == null) return "ContainerName1 is missing.";
+            if (ContainerName2 == null) return "ContainerName2 is missing.";
+            if (NamedRegexGroups == null) return "NamedRegexGroups is missing.";
+
+            Dictionary<string, string> groups = new Dictionary<string, string>();
+            foreach (string groupPattern in NamedRegexGroups)
+            {
+                string groupName;
+                try
+                {
+                    // The same name replaceRegex substitutes. A pattern with no named group provides none.
+                    groupName = new Regex(groupPattern).GetGroupNames().Last();
+                }
+                catch (ArgumentException e)
+                {
+                    return "Named regex group '" + groupPattern + "' is not a valid pattern: " + e.Message;
+                }
+
+                if (!groups.ContainsKey(groupName))
+                {
+                    groups.Add(groupName, groupPattern);
+                }
+            }
+
+            foreach (string value in new string[] { NonXboxFilename, XboxFileID, ContainerName1, ContainerName2 })
+            {
+                string pattern = value;
+                foreach (Match substitution in Regex.Matches(value, @"\$\{(\w+)\}"))
+                {
+                    string name = substitution.Groups[1].Value;
+                    if (name == "XboxProfileID" || name == "XboxProfileID_Int")
+                    {
+                        // Filled in from the Xbox profile when the translation is used.
+                        pattern = pattern.Replace(substitution.Value, "0");
+                    }
+                    else if (groups.ContainsKey(name))
+                    {
+                        pattern = pattern.Replace(substitution.Value, groups[name]);
+                    }
+                    else
+                    {
+                        return "'" + value + "' uses " + substitution.Value + ", which is not one of the named regex groups.";
+                    }
+                }
+
+                try
+                {
+                    new Regex(ExactRegex(pattern));
+                }
+                catch (ArgumentException e)
+                {
+                    return "'" + value + "' is not a valid pattern: " + e.Message;
+                }
+            }
+
+            return null;
+        }
+
         internal string replaceRegex(string value, bool escape = false)
         {
             string returnVal = value;
