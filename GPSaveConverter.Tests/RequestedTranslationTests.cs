@@ -269,15 +269,24 @@ namespace GPSaveConverter.Tests
 
         private static TranslationSimulator InfiniteWealth()
         {
-            var xboxFiles = new[]
+            // Container Name 2 is a long value that differs for every save.
+            var slots = new Dictionary<string, string>
             {
-                new XboxFile("save/save001/data.sav", InfiniteWealthSave001, "data"),
-                new XboxFile("save/save001/data.sav", InfiniteWealthSave001, "icon"),
-                new XboxFile("save/save002/data.sav", InfiniteWealthSave002, "data"),
-                new XboxFile("save/save002/data.sav", InfiniteWealthSave002, "icon"),
-                new XboxFile("save/system/data.sys", "displayName", "data")
+                { "save001", InfiniteWealthSave001 },
+                { "save002", InfiniteWealthSave002 },
+                { "save003", "5802342cef3d04000a2cda0595006604630504040614010c15090a0d1300020423170724050306220000010100000100" },
+                { "save031", "5802342cf03d04000a2cda0595006604630504040614010c15090a0d1300020423170724050306220000010100000100" },
+                { "save032", "5802352cda2104005aa2d8047200de030e0204010a15090c000000000000170324050700000000000000000101010100" },
+                { "save033", "5802342c0a3d0400da33da056d000000630504041406130d000000000000022304220600000000000000000100000100" }
             };
-            var nonXboxFiles = new[] { "steam_autocloud.vdf", "save001\\data.sav", "save001\\save001_icon0.dds", "save031\\data.sav", "save031\\save031_icon0.dds", "system\\data.sys" };
+            var xboxFiles = slots.SelectMany(s => new[] { new XboxFile("save/" + s.Key + "/data.sav", s.Value, "data"), new XboxFile("save/" + s.Key + "/data.sav", s.Value, "icon") })
+                                 .Concat(new[] { new XboxFile("save/system/data.sys", "displayName", "data") })
+                                 .ToArray();
+            var nonXboxFiles = new[]
+            {
+                "steam_autocloud.vdf", "save001\\data.sav", "save001\\save001_icon0.dds", "save031\\data.sav", "save031\\save031_icon0.dds",
+                "save032\\data.sav", "save032\\save032_icon0.dds", "system\\data.sys"
+            };
             return new TranslationSimulator(Profile("LikeADragonInfiniteWealth"), xboxFiles, nonXboxFiles);
         }
 
@@ -310,10 +319,23 @@ namespace GPSaveConverter.Tests
             Assert.Equal(expectedPath, result.PathOnDisk);
         }
 
-        [Fact]
-        public void InfiniteWealth_SteamOnlySlot_CannotBeCopiedToXbox()
+        [Theory]
+        [InlineData("save031\\data.sav", "save/save031/data.sav", "data")]
+        [InlineData("save032\\save032_icon0.dds", "save/save032/data.sav", "icon")]
+        public void InfiniteWealth_HigherSlots_MapToTheirOwnContainer(string steamPath, string container1, string fileID)
         {
-            Assert.Equal(Outcome.NoContainer, InfiniteWealth().ToXbox("save031\\data.sav").Outcome);
+            var result = InfiniteWealth().ToXbox(steamPath);
+
+            Assert.Equal(Outcome.ExistingFile, result.Outcome);
+            Assert.Equal(container1, result.XboxFile.ContainerName1);
+            Assert.Equal(fileID, result.XboxFile.FileID);
+        }
+
+        [Fact]
+        public void InfiniteWealth_SlotWithNoXboxContainer_CannotBeCopiedToXbox()
+        {
+            // Not in the posted tables: a slot saved only on Steam.
+            Assert.Equal(Outcome.NoContainer, InfiniteWealth().ToXbox("save050\\data.sav").Outcome);
         }
 
         #endregion
