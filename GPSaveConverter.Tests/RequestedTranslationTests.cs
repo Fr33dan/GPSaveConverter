@@ -170,14 +170,23 @@ namespace GPSaveConverter.Tests
         }
 
         [Fact]
-        public void RoadCraft_NonXboxToXbox_DoesNotFindTheExistingFile()
+        public void RoadCraft_NonXboxToXbox_FindsTheFileDespiteTheBackslashInItsID()
         {
-            // The Xbox file ID holds a backslash. Going this way the application builds the ID with the
-            // backslash doubled, misses the existing file, and would add a second one under a wrong name.
+            // The Xbox file ID holds a backslash, written "\\" in the translation. This used to miss the
+            // existing file and add a second one under a wrong name.
             var result = RoadCraft().ToXbox("SLOT_0\\CompleteSave");
 
+            Assert.Equal(Outcome.ExistingFile, result.Outcome);
+            Assert.Equal("save\\SLOT_0/CompleteSave", result.XboxFile.FileID);
+        }
+
+        [Fact]
+        public void RoadCraft_NonXboxToXbox_SteamOnlyFileWouldBeAddedUnderTheRightID()
+        {
+            var result = RoadCraft().ToXbox("SLOT_0\\rb_map_01_storm_preparation_terraforming_tile_grid");
+
             Assert.Equal(Outcome.NewFile, result.Outcome);
-            Assert.Equal("save\\\\\\\\SLOT_0/CompleteSave", result.NewFileID);
+            Assert.Equal("save\\SLOT_0/rb_map_01_storm_preparation_terraforming_tile_grid", result.NewFileID);
         }
 
         #endregion
