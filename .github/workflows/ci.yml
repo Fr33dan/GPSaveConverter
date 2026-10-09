@@ -25,9 +25,6 @@ jobs:
         with:
           dotnet-version: '10.x'
 
-      - name: Create Steam API key placeholder
-        run: Set-Content -Path GPSaveConverter/Resources/steamapikey.txt -Value "${{ secrets.STEAM_API_KEY }}"
-
       - name: Restore and Build
         run: dotnet build GPSaveConverter.sln --configuration ${{ matrix.configuration }} --verbosity minimal
 
