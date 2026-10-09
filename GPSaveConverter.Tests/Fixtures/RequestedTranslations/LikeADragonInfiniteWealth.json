@@ -1,0 +1,28 @@
+{
+  "Name": "Like a Dragon: Infinite Wealth",
+  "PackageName": "SEGAofAmericaInc.ProjectElvis_s751p9cej88mt",
+  "BaseNonXboxSaveLocation": "%APPDATA%\\Sega\\LikeADragon8\\Steam\\167147583\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Slot}\\\\data.sav",
+      "XboxFileID": "data",
+      "ContainerName1": "save/${Slot}/data.sav",
+      "ContainerName2": ".*",
+      "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "${Slot}\\\\${Slot}_icon0.dds",
+      "XboxFileID": "icon",
+      "ContainerName1": "save/${Slot}/data.sav",
+      "ContainerName2": ".*",
+      "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "system\\\\data.sys",
+      "XboxFileID": "data",
+      "ContainerName1": "save/system/data.sys",
+      "ContainerName2": "displayName",
+      "NamedRegexGroups": []
+    }
+  ]
+}

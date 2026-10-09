@@ -24,6 +24,22 @@ namespace GPSaveConverter.Tests
             return JsonSerializer.Deserialize<GameInfo>(File.ReadAllText(file)).FileTranslations;
         }
 
+        [Theory]
+        [InlineData("Persona3Portable")]
+        [InlineData("RoadCraft")]
+        [InlineData("Palworld")]
+        [InlineData("Disgaea4Complete")]
+        [InlineData("LikeADragonInfiniteWealth")]
+        [InlineData("GenerationZero")]
+        public void Profile_PassesTheLibraryChecks(string game)
+        {
+            foreach (FileTranslation translation in Profile(game))
+            {
+                string problem = translation.FindProblem();
+                Assert.True(problem == null, problem);
+            }
+        }
+
         private static FileTranslation Translation(string containerName1, string containerName2, string xboxFileID, string nonXboxFilename, params string[] namedRegexGroups)
         {
             return new FileTranslation
@@ -162,6 +178,175 @@ namespace GPSaveConverter.Tests
 
             Assert.Equal(Outcome.NewFile, result.Outcome);
             Assert.Equal("save\\\\\\\\SLOT_0/CompleteSave", result.NewFileID);
+        }
+
+        #endregion
+
+        #region Disgaea 4 Complete+ (#150)
+
+        private const string Disgaea4Container2 = "Disgaea 4 Complete+";
+
+        private static TranslationSimulator Disgaea4()
+        {
+            var xboxFiles = new[] { "save.001", "save.002", "save.003", "save.004", "save.005", "save.lst" }
+                .Select(c => new XboxFile(c, Disgaea4Container2, "data"))
+                .Concat(new[] { new XboxFile("SystemSave", "SystemSave", "data") })
+                .ToArray();
+            var nonXboxFiles = new[] { "Save_002.sav", "Save_003.sav", "Save_004.sav", "Save_005.sav", "Save_006.sav", "steam_autocloud.vdf", "SystemSave.sav" };
+            return new TranslationSimulator(Profile("Disgaea4Complete"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("002")]
+        [InlineData("003")]
+        [InlineData("004")]
+        [InlineData("005")]
+        public void Disgaea4_SaveOnBothSides_MapsBothWaysByNumber(string slot)
+        {
+            TranslationSimulator game = Disgaea4();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("save." + slot, Disgaea4Container2, "data"));
+            var toXbox = game.ToXbox("Save_" + slot + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("Save_" + slot + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("save." + slot, toXbox.XboxFile.ContainerName1);
+        }
+
+        [Fact]
+        public void Disgaea4_SystemSave_MapsBothWays()
+        {
+            TranslationSimulator game = Disgaea4();
+
+            Assert.Equal("SystemSave.sav", game.ToNonXbox(new XboxFile("SystemSave", "SystemSave", "data")).RelativePath);
+            Assert.Equal("SystemSave", game.ToXbox("SystemSave.sav").XboxFile.ContainerName1);
+        }
+
+        [Fact]
+        public void Disgaea4_XboxOnlySave_IsCreatedUnderTheSameNumber()
+        {
+            var result = Disgaea4().ToNonXbox(new XboxFile("save.001", Disgaea4Container2, "data"));
+
+            Assert.Equal(Outcome.NewFile, result.Outcome);
+            Assert.Equal("Save_001.sav", result.PathOnDisk);
+        }
+
+        [Theory]
+        [InlineData("save.lst")]
+        public void Disgaea4_SaveList_IsLeftAlone(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, Disgaea4().ToNonXbox(new XboxFile(container, Disgaea4Container2, "data")).Outcome);
+        }
+
+        [Fact]
+        public void Disgaea4_SteamOnlyFiles_AreNotSentToXbox()
+        {
+            TranslationSimulator game = Disgaea4();
+
+            Assert.Equal(Outcome.NoContainer, game.ToXbox("Save_006.sav").Outcome);
+            Assert.Equal(Outcome.NoTranslation, game.ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        [Fact]
+        public void Disgaea4_PlusSignTypedAsIs_NeverMatchesTheContainer()
+        {
+            // "+" means "one or more of the previous character" in a pattern, so the container name
+            // typed as it is shown matches nothing. It has to be written "Complete\+".
+            var typedAsShown = new[] { Translation("save.${Slot}", Disgaea4Container2, "data", "Save_${Slot}.sav", "(?<Slot>[0-9]{3})") };
+            var game = new TranslationSimulator(typedAsShown, new[] { new XboxFile("save.002", Disgaea4Container2, "data") }, new[] { "Save_002.sav" });
+
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("save.002", Disgaea4Container2, "data")).Outcome);
+            Assert.Equal(Outcome.NoContainer, game.ToXbox("Save_002.sav").Outcome);
+        }
+
+        #endregion
+
+        #region Like a Dragon: Infinite Wealth (#145)
+
+        private const string InfiniteWealthSave001 = "5802100a19b60000bac801008f0010050505040401141300000000000000021723220000000000000000000000000100";
+        private const string InfiniteWealthSave002 = "5802362d6f2d04005aca7206280017050e0104010a150c09000000000000170324070500000000000000000101010100";
+
+        private static TranslationSimulator InfiniteWealth()
+        {
+            var xboxFiles = new[]
+            {
+                new XboxFile("save/save001/data.sav", InfiniteWealthSave001, "data"),
+                new XboxFile("save/save001/data.sav", InfiniteWealthSave001, "icon"),
+                new XboxFile("save/save002/data.sav", InfiniteWealthSave002, "data"),
+                new XboxFile("save/save002/data.sav", InfiniteWealthSave002, "icon"),
+                new XboxFile("save/system/data.sys", "displayName", "data")
+            };
+            var nonXboxFiles = new[] { "steam_autocloud.vdf", "save001\\data.sav", "save001\\save001_icon0.dds", "save031\\data.sav", "save031\\save031_icon0.dds", "system\\data.sys" };
+            return new TranslationSimulator(Profile("LikeADragonInfiniteWealth"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("save/save001/data.sav", InfiniteWealthSave001, "data", "save001\\data.sav")]
+        [InlineData("save/save001/data.sav", InfiniteWealthSave001, "icon", "save001\\save001_icon0.dds")]
+        [InlineData("save/system/data.sys", "displayName", "data", "system\\data.sys")]
+        public void InfiniteWealth_FileOnBothSides_MapsBothWays(string container1, string container2, string fileID, string steamPath)
+        {
+            TranslationSimulator game = InfiniteWealth();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container1, container2, fileID));
+            var toXbox = game.ToXbox(steamPath);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(steamPath, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container1, toXbox.XboxFile.ContainerName1);
+            Assert.Equal(fileID, toXbox.XboxFile.FileID);
+        }
+
+        [Theory]
+        [InlineData("data", "save002\\data.sav")]
+        [InlineData("icon", "save002\\save002_icon0.dds")]
+        public void InfiniteWealth_XboxOnlySlot_IsCreatedInItsOwnFolder(string fileID, string expectedPath)
+        {
+            var result = InfiniteWealth().ToNonXbox(new XboxFile("save/save002/data.sav", InfiniteWealthSave002, fileID));
+
+            Assert.Equal(Outcome.NewFile, result.Outcome);
+            Assert.Equal(expectedPath, result.PathOnDisk);
+        }
+
+        [Fact]
+        public void InfiniteWealth_SteamOnlySlot_CannotBeCopiedToXbox()
+        {
+            Assert.Equal(Outcome.NoContainer, InfiniteWealth().ToXbox("save031\\data.sav").Outcome);
+        }
+
+        #endregion
+
+        #region Generation Zero (#144)
+
+        private static TranslationSimulator GenerationZero()
+        {
+            var xboxFiles = new[] { new XboxFile("GenerationZero", "GenerationZero", "savegame") };
+            var nonXboxFiles = new[] { "savegame", "savegame.bac", "steam_autocloud.vdf" };
+            return new TranslationSimulator(Profile("GenerationZero"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void GenerationZero_SaveGame_MapsBothWays()
+        {
+            TranslationSimulator game = GenerationZero();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("GenerationZero", "GenerationZero", "savegame"));
+            var toXbox = game.ToXbox("savegame");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("savegame", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("savegame", toXbox.XboxFile.FileID);
+        }
+
+        [Theory]
+        [InlineData("savegame.bac")]
+        [InlineData("steam_autocloud.vdf")]
+        public void GenerationZero_OtherSteamFiles_AreNotSentToXbox(string file)
+        {
+            Assert.Equal(Outcome.NoTranslation, GenerationZero().ToXbox(file).Outcome);
         }
 
         #endregion
