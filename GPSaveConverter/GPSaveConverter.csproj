@@ -3,6 +3,9 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net472</TargetFramework>
+    <!-- Every release so far runs as a 32-bit process. Left unset, the SDK builds an exe that runs 64-bit. -->
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>true</Prefer32Bit>
     <RootNamespace>GPSaveConverter</RootNamespace>
     <AssemblyName>GPSaveConverter</AssemblyName>
     <UseWindowsForms>true</UseWindowsForms>
