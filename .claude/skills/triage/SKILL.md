@@ -69,11 +69,23 @@ The app produces all four. The reporter selects the game, then chooses **File â–
 With the data in hand:
 
 1. Write the translation. `CLAUDE.md` explains how the templates and groups work. Prefer one rule with a named group over one rule per file.
-2. Check it. `FileTranslation.FindProblem()` catches patterns that do not compile and `${Name}` references with no group. Then confirm by hand, or with a test, that every pasted Xbox row maps to exactly one pasted PC file and back again.
-3. Reply with the translation as a Game Profile the reporter can load, and label `translation-provided`. Use the snippet below.
+2. Check it with the test harness, not by eye:
+   - Save the translation as a Game Profile file in `GPSaveConverter.Tests/Fixtures/RequestedTranslations/`.
+   - Add a section for the game to `GPSaveConverter.Tests/RequestedTranslationTests.cs` holding the tables exactly as posted, and assert where each file goes in both directions. `TranslationSimulator` replays the application's own matching steps on those tables.
+   - Run `dotnet test GPSaveConverter.Tests/GPSaveConverter.Tests.csproj -c Release --filter RequestedTranslationTests`.
+   - Open a pull request with the file and the tests.
+3. Reply with the translation as a Game Profile the reporter can load, and label `translation-provided`. Use the snippet below. Paste the profile file's exact contents; do not retype it.
 4. When the reporter confirms it works, open a pull request that adds the entry to `GPSaveConverter/Resources/GameLibrary.json`, bumps `Version` to today's date, and says `Closes #N`. Ask the maintainer to merge it.
 
 If the thread already holds a translation someone says works, treat it as step 2 onward: check it, then ask its author or the reporter to confirm before it goes in the library.
+
+Traps the harness has caught. Each has a test in `RequestedTranslationTests.cs`:
+
+- **The fields are patterns.** A `+`, `(`, `[` or similar in a real name has to be written with a backslash in front. A container named `Disgaea 4 Complete+` only matches `Disgaea 4 Complete\+`.
+- **Subfolders on the non-Xbox side.** The non-Xbox name must cover the whole relative path, with each backslash doubled: `SLOT_0\\CompleteSave`. In a profile file that is four backslashes, because JSON doubles them again. A name without its folder matches starting from the Xbox side only.
+- **A backslash in an Xbox blob ID.** Copying to Xbox misses the existing blob and would add a wrongly named one. Until that defect is fixed, say the translation is for Xbox to PC only.
+- **Loading a profile replaces the save location.** Include `BaseNonXboxSaveLocation` when the reporter posted theirs. Otherwise tell them to click **Select non-Xbox Location** again after loading.
+- **Slots that exist on one side only.** A file with no Xbox container cannot be copied to Xbox. Say so when the posted tables show one.
 
 ### "It transferred but the game says the save is corrupt" or "the game ignores it"
 
@@ -82,6 +94,8 @@ There are two different causes. Do not assume which.
 - **The mapping is wrong.** A file landed under the wrong name or in the wrong container. Ask for the tables and the translation used, and check them against each other.
 - **The save format differs between stores.** Some games encrypt saves or tie them to the account. If the mapping is right and the game still refuses the file, no translation can fix it. Say that plainly and label `incompatible-save`.
 
+When a result is settled either way, add the game to the Game Compatibility table in the wiki, with a link to the issue it comes from. The wiki is its own repository, `Fr33dan/GPSaveConverter.wiki`. Keep the table alphabetical and keep the file's CRLF line endings.
+
 ### Copying to Xbox does nothing or fails
 
 Check these before anything else:
@@ -89,6 +103,12 @@ Check these before anything else:
 - The app cannot create an Xbox container. The container the file belongs in must already exist, which usually means starting the Xbox version and saving once in the slot to be replaced.
 - A game only appears in the list when its package folder holds local save data: `%LOCALAPPDATA%\Packages\<package>\SystemAppData\wgs` with at least two subfolders.
 - If the user wrote several translations for the game, the first one that matches is used. Old attempts sitting earlier in the list hide newer ones.
+
+### Pull requests from contributors
+
+- Continuous integration does not start by itself on a first-time contributor's pull request. The run waits with the conclusion `action_required`. Read the diff first. If it changes only data such as `GameLibrary.json`, approve the run with `gh api -X POST repos/Fr33dan/GPSaveConverter/actions/runs/<run id>/approve`. If it changes code or workflows, leave the approval to the maintainer.
+- A library pull request rarely bumps `Version`. Add the bump as a commit on the contributor's branch before merging, or users never receive the change.
+- Merging is the maintainer's call. When it is approved, merge with `--match-head-commit` set to the commit that was checked.
 
 ### Bug reports
 
