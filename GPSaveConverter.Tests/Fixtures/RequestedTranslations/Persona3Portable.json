@@ -1,0 +1,13 @@
+{
+  "Name": "Persona 3 Portable",
+  "PackageName": "SEGAofAmericaInc.M0cb6b3aet_s751p9cej88mt",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${FileName}",
+      "XboxFileID": "progress",
+      "ContainerName1": "${FileName}",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<FileName>[\\w.]+)" ]
+    }
+  ]
+}

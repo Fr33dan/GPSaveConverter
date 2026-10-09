@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Xunit;
 using GPSaveConverter.Library;
 using Outcome = GPSaveConverter.Tests.TranslationSimulator.Outcome;
@@ -10,9 +13,17 @@ namespace GPSaveConverter.Tests
     /// <summary>
     /// Translations written for games people asked about, checked against the file tables they posted.
     /// The issue number is on each game. These also pin down how the matching behaves on real names.
+    /// Each game's translations are read from Fixtures\RequestedTranslations, a Game Profile file
+    /// in the form File > Load Game Profile accepts, so the text given to a user is the text tested.
     /// </summary>
     public class RequestedTranslationTests
     {
+        private static IList<FileTranslation> Profile(string game)
+        {
+            string file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "RequestedTranslations", game + ".json");
+            return JsonSerializer.Deserialize<GameInfo>(File.ReadAllText(file)).FileTranslations;
+        }
+
         private static FileTranslation Translation(string containerName1, string containerName2, string xboxFileID, string nonXboxFilename, params string[] namedRegexGroups)
         {
             return new FileTranslation
@@ -29,7 +40,7 @@ namespace GPSaveConverter.Tests
 
         private static TranslationSimulator Persona3Portable()
         {
-            var translations = new[] { Translation("${FileName}", "", "progress", "${FileName}", "(?<FileName>[\\w.]+)") };
+            IList<FileTranslation> translations = Profile("Persona3Portable");
             var xboxFiles = new[]
             {
                 new XboxFile("P3P.ini", "", "progress"),
@@ -108,7 +119,7 @@ namespace GPSaveConverter.Tests
 
         private static TranslationSimulator RoadCraft()
         {
-            var translations = new[] { Translation("MainSave", "MainSave", "save\\\\SLOT_${SlotNumber}/${FileName}", "SLOT_${SlotNumber}\\\\${FileName}", "(?<SlotNumber>\\d+)", "(?<FileName>.*)") };
+            IList<FileTranslation> translations = Profile("RoadCraft");
             var xboxFiles = RoadCraftSaveFiles.Concat(new[] { "CompleteSaveBackup", "rb_map_01_storm_preparation_extrusion_tile_grid" })
                                               .Select(f => new XboxFile("MainSave", "MainSave", "save\\SLOT_0/" + f))
                                               .Concat(new[] { new XboxFile("MainConfig", "MainConfig", "config\\user_profile.cfg") })
@@ -163,12 +174,7 @@ namespace GPSaveConverter.Tests
 
         private static TranslationSimulator Palworld()
         {
-            var translations = new[]
-            {
-                Translation(PalworldXboxWorld + "-Level-01", PalworldXboxWorld + "-Level-01", "Data", PalworldSteamWorld + "\\\\Level01.sav"),
-                Translation(PalworldXboxWorld + "-${File}", PalworldXboxWorld + "-${File}", "Data", PalworldSteamWorld + "\\\\${File}.sav", "(?<File>LevelMeta|LocalData|WorldOption)"),
-                Translation(PalworldXboxWorld + "-Players-${Player}", PalworldXboxWorld + "-Players-${Player}", "Data", PalworldSteamWorld + "\\\\Players\\\\${Player}.sav", "(?<Player>[0-9A-F]{32})")
-            };
+            IList<FileTranslation> translations = Profile("Palworld");
             var xboxFiles = new[] { "-Level-01", "-LevelMeta", "-LocalData", "-Players-" + PalworldPlayer, "-WorldOption" }
                 .Select(c => new XboxFile(PalworldXboxWorld + c, PalworldXboxWorld + c, "Data"))
                 .Concat(new[]
