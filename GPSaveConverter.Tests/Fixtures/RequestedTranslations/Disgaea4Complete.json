@@ -1,0 +1,21 @@
+{
+  "Name": "Disgaea 4 Complete+",
+  "PackageName": "NISAmericaInc.Disgaea4Complete_f6hsb3tktby1t",
+  "BaseNonXboxSaveLocation": "%APPDATA%\\Nippon Ichi Software, Inc\\Disgaea 4 Complete+\\166964273\\SaveData\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "Save_${Slot}.sav",
+      "XboxFileID": "data",
+      "ContainerName1": "save.${Slot}",
+      "ContainerName2": "Disgaea 4 Complete\\+",
+      "NamedRegexGroups": [ "(?<Slot>[0-9]{3})" ]
+    },
+    {
+      "NonXboxFilename": "SystemSave.sav",
+      "XboxFileID": "data",
+      "ContainerName1": "SystemSave",
+      "ContainerName2": "SystemSave",
+      "NamedRegexGroups": []
+    }
+  ]
+}

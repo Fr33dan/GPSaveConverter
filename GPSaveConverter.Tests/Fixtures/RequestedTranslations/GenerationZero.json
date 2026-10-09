@@ -1,0 +1,14 @@
+{
+  "Name": "Generation Zero",
+  "PackageName": "AvalancheStudios.GenerationZero_m0byj0nmrybdr",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\Avalanche Studios\\GenerationZero\\Saves\\76561198134554977\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "savegame",
+      "XboxFileID": "savegame",
+      "ContainerName1": "GenerationZero",
+      "ContainerName2": "GenerationZero",
+      "NamedRegexGroups": []
+    }
+  ]
+}
