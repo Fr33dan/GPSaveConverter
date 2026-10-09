@@ -15,8 +15,7 @@ namespace GPSaveConverter
     {
         internal ProfileType profileType;
 
-        internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
-        internal static IHttpClient HttpClient { get; set; } = new DefaultHttpClient();
+        internal static IRegistry Registry { get; set; } = new DefaultRegistry();
         internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
 
 
@@ -153,15 +152,15 @@ namespace GPSaveConverter
 
         internal async Task FetchProfileInformation()
         {
-            if (Settings.AllowWebDataFetch)
+            if (profileType == ProfileType.Steam)
             {
-                if (profileType == ProfileType.Steam)
+                var steam = new Library.Steam(FileSystem, Registry);
+                await Task.Run(() =>
                 {
-                    var steam = new Library.Steam(HttpClient);
-                    await steam.GetUserInformation(this);
+                    steam.GetUserInformation(this);
 
-                    this.userIcon = await steam.LoadIcon(this);
-                }
+                    this.userIcon = steam.LoadIcon(this);
+                });
             }
         }
     }

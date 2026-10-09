@@ -144,14 +144,5 @@ namespace GPSaveConverter.Properties {
                 return ResourceManager.GetString("nlog_config", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up the Steam API Key.
-        /// </summary>
-        internal static string SteamAPIKey {
-            get {
-                return ResourceManager.GetString("SteamAPIKey", resourceCulture);
-            }
-        }
     }
 }

@@ -1,52 +1,116 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
+using System.IO;
+using System.Text.RegularExpressions;
 using GPSaveConverter.Interfaces;
 
 namespace GPSaveConverter.Library
 {
     internal class Steam
     {
+        private static NLog.Logger logger = LogHelper.getClassLogger();
+
         private const ulong SteamID64IndividualProfile = 0x0110000100000000;
 
-        private readonly IHttpClient httpClient;
+        // A 64-bit process only sees a 32-bit Steam install under WOW6432Node.
+        private static readonly string[] InstallRegistryKeys = new string[] { @"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam"
+                                                                           , @"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam" };
 
-        internal Steam(IHttpClient httpClient)
+        private readonly IFileSystem fileSystem;
+        private readonly IRegistry registry;
+
+        internal Steam(IFileSystem fileSystem, IRegistry registry)
         {
-            this.httpClient = httpClient;
+            this.fileSystem = fileSystem;
+            this.registry = registry;
         }
 
-        internal async Task GetUserInformation(NonXboxProfile profile)
+        /// <summary>
+        /// Gets the folder Steam is installed in.
+        /// </summary>
+        /// <returns>Null if Steam is not installed.</returns>
+        internal static string GetInstallPath(IRegistry registry)
+        {
+            foreach (string key in InstallRegistryKeys)
+            {
+                string installPath = registry.GetValue(key, "InstallPath", null) as string;
+                if (!string.IsNullOrEmpty(installPath))
+                {
+                    return installPath;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Looks up the profile's display name and avatar in the files Steam keeps for accounts
+        /// that have signed in on this PC. A profile Steam has no record of keeps its ID as its name.
+        /// </summary>
+        internal void GetUserInformation(NonXboxProfile profile)
         {
             try
             {
-                ulong steamID64 = profile.IDType == NonXboxProfile.UserIDType.steamID3 ? GetSteamID64(profile.UserID) : ulong.Parse(profile.UserID);
-                string url = String.Format(@"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={0}&steamids={1}"
-                                            , GPSaveConverter.Properties.Resources.SteamAPIKey
-                                            , steamID64);
-                string queryJson = await httpClient.DownloadStringAsync(url);
-                JsonNode queryRoot = JsonValue.Parse(queryJson);
+                string steamFolder = GetInstallPath(registry);
+                if (steamFolder == null) return;
 
-                profile.UserName = queryRoot["response"]["players"][0]["personaname"].GetValue<string>();
-                profile.UserIconLocation = queryRoot["response"]["players"][0]["avatar"].GetValue<string>();
+                ulong steamID64 = profile.IDType == NonXboxProfile.UserIDType.steamID3 ? GetSteamID64(profile.UserID) : ulong.Parse(profile.UserID);
+
+                string loginUsersFile = Path.Combine(steamFolder, "config", "loginusers.vdf");
+                if (fileSystem.FileExists(loginUsersFile))
+                {
+                    string personaName = ParsePersonaName(fileSystem.ReadAllText(loginUsersFile), steamID64);
+                    if (personaName != null)
+                    {
+                        profile.UserName = personaName;
+                    }
+                }
+
+                string avatarFile = Path.Combine(steamFolder, "config", "avatarcache", steamID64 + ".png");
+                if (fileSystem.FileExists(avatarFile))
+                {
+                    profile.UserIconLocation = avatarFile;
+                }
             }
-            catch (Exception e) { }
+            catch (Exception e)
+            {
+                logger.Debug(e, "Unable to read Steam profile information");
+            }
         }
 
-        internal async Task<System.Drawing.Bitmap> LoadIcon(NonXboxProfile profile)
+        internal System.Drawing.Bitmap LoadIcon(NonXboxProfile profile)
         {
             System.Drawing.Bitmap returnVal = null;
+            if (profile.UserIconLocation == null) return returnVal;
+
             try
             {
-                byte[] imageData = await httpClient.DownloadDataAsync(profile.UserIconLocation);
+                // Load from a copy in memory so Steam's own file is not left locked.
+                byte[] imageData = fileSystem.ReadAllBytes(profile.UserIconLocation);
 
                 returnVal = new System.Drawing.Bitmap(new System.IO.MemoryStream(imageData));
             }
-            catch (Exception e) { }
+            catch (Exception e)
+            {
+                logger.Debug(e, "Unable to load Steam profile icon");
+                profile.UserIconLocation = null;
+            }
             return returnVal;
+        }
+
+        /// <summary>
+        /// Finds a user's display name in the contents of Steam's loginusers.vdf.
+        /// </summary>
+        /// <returns>Null if the user is not listed or has no name.</returns>
+        internal static string ParsePersonaName(string loginUsers, ulong steamID64)
+        {
+            // Quoted values are matched whole so a brace inside a name does not end the block early.
+            Match user = Regex.Match(loginUsers, "\"" + steamID64 + "\"\\s*\\{(?<Properties>(\"(\\\\.|[^\"\\\\])*\"|[^{}\"])*)\\}");
+            if (!user.Success) return null;
+
+            Match name = Regex.Match(user.Groups["Properties"].Value, "\"PersonaName\"\\s+\"(?<Name>(\\\\.|[^\"\\\\])*)\"", RegexOptions.IgnoreCase);
+            if (!name.Success || name.Groups["Name"].Length == 0) return null;
+
+            // Steam writes quotes and backslashes with a leading backslash.
+            return Regex.Replace(name.Groups["Name"].Value, @"\\(.)", "$1");
         }
 
         /// <summary>

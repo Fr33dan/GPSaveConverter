@@ -72,7 +72,6 @@
     <Content Include="Resources\Icon-32.png" />
     <Content Include="Resources\Icon-48.png" />
     <Content Include="Resources\Icon.ico" />
-    <Content Include="Resources\SteamAPIKey.txt" />
   </ItemGroup>
 
   <ItemGroup>

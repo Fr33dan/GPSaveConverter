@@ -13,6 +13,8 @@ namespace GPSaveConverter.Tests
         {
             _fileSystem = Substitute.For<IFileSystem>();
             NonXboxProfile.FileSystem = _fileSystem;
+            // Keep the Steam profile lookup away from the real registry
+            NonXboxProfile.Registry = Substitute.For<IRegistry>();
         }
 
         [Fact]
@@ -24,11 +26,6 @@ namespace GPSaveConverter.Tests
             _fileSystem.GetDirectories("C:\\Saves\\").Returns(new[] { "C:\\Saves\\12345", "C:\\Saves\\67890" });
             // Each expanded path must also exist
             _fileSystem.DirectoryExists(Arg.Is<string>(s => s.StartsWith("C:\\Saves\\") && s != "C:\\Saves\\")).Returns(true);
-
-            // Mock HttpClient to avoid real network calls during FetchProfileInformation
-            var httpClient = Substitute.For<IHttpClient>();
-            httpClient.DownloadStringAsync(Arg.Any<string>()).Returns(Task.FromResult("{}"));
-            NonXboxProfile.HttpClient = httpClient;
 
             NonXboxProfile[] result = await profile.getProfileOptions("C:\\Saves\\<user-id>\\game.dat");
 
@@ -57,10 +54,6 @@ namespace GPSaveConverter.Tests
             _fileSystem.DirectoryExists("C:\\Saves\\").Returns(true);
             _fileSystem.GetDirectories("C:\\Saves\\").Returns(new[] { "C:\\Saves\\255" });
             _fileSystem.DirectoryExists(Arg.Is<string>(s => s != "C:\\Saves\\")).Returns(true);
-
-            var httpClient = Substitute.For<IHttpClient>();
-            httpClient.DownloadStringAsync(Arg.Any<string>()).Returns(Task.FromResult("{}"));
-            NonXboxProfile.HttpClient = httpClient;
 
             NonXboxProfile[] result = await profile.getProfileOptions("C:\\Saves\\<user-id_XboxInt>\\game.dat");
 

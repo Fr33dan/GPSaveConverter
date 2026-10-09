@@ -243,7 +243,7 @@ namespace GPSaveConverter.Library
 
             if (returnVal.Contains(SteamInstallMarker))
             {
-                string steamLocation = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null);
+                string steamLocation = Steam.GetInstallPath(Registry);
                 if(steamLocation == null)
                 {
                     returnVal = null;
