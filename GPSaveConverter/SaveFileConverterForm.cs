@@ -736,6 +736,12 @@ namespace GPSaveConverter
                 this.viewXboxFilesButton.Enabled = true;
                 //this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
                 this.xboxFilesTable.DataSource = currentContainer.getFileList();
+
+                int notOnThisPC = currentContainer.ContainersNotOnDisk;
+                if (notOnThisPC > 0)
+                {
+                    logger.Info("{0} of the {1} Xbox containers are listed but not on this PC, so their files are not shown.", notOnThisPC, currentContainer.Children.Length);
+                }
             }
             catch (Exception ex)
             {

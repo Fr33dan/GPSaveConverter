@@ -515,6 +515,81 @@ namespace GPSaveConverter.Tests
         }
 
         [Fact]
+        public void OpenProfile_ContainerListedButNotOnThisPC_ListsTheOthers()
+        {
+            // Issues #19 and #50, Forza Horizon 5: "Could not find a part of the path ...\container.0".
+            // The index lists a container, version 0, that has no folder on disk. Reading it used to
+            // fail, which left the whole save unusable until the folder and file were made by hand.
+            save.WithXboxFile("User_9000000000001", "User_9000000000001", "ProfileData", "xbox profile")
+                .WithContainerNotOnDisk("RallyAdventure", "RallyAdventure")
+                .WithXboxFile("Livery_0001", "Livery_0001", "header", "xbox livery")
+                .Build();
+
+            XboxContainerIndex index = new XboxContainerIndex(Game(), FakeXboxSave.ProfileID);
+
+            Assert.Equal(new[] { "ProfileData", "header" }, index.getFileList().Select(file => file.FileID));
+            Assert.Equal(3, index.Children.Length);
+        }
+
+        [Fact]
+        public async Task CopyToXbox_WithAContainerNotOnThisPC_LeavesWhatTheIndexSaysOfItAlone()
+        {
+            // The index is rewritten after a transfer. For a container the tool cannot see, the only
+            // safe thing to write back is what was there: a time and size worked out from an empty
+            // folder would tell the Xbox app the container is empty.
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "old xbox progress")
+                .WithContainerNotOnDisk("RallyAdventure", "RallyAdventure")
+                .WithNonXboxFile("saveFile0.sav", "steam progress")
+                .Build();
+            GameInfo game = Game(Translation("SaveGame", "", "SaveSlot${FileSlot}", "saveFile${FileSlot}.sav", "(?<FileSlot>[0-9]+)"));
+            string before = save.ReadIndexEntry("RallyAdventure", "RallyAdventure");
+
+            await CopyToXbox(game, "saveFile0.sav");
+
+            Assert.Equal(new KeyValuePair<string, string>("SaveSlot0", "steam progress"), Assert.Single(save.ReadContainer("SaveGame", "")));
+            Assert.Equal(before, save.ReadIndexEntry("RallyAdventure", "RallyAdventure"));
+            Assert.False(save.ContainerFolderExists("RallyAdventure", "RallyAdventure"));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_IntoAContainerNotOnThisPC_IsRefused()
+        {
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress")
+                .WithContainerNotOnDisk("RallyAdventure", "RallyAdventure")
+                .WithNonXboxFile("rally.sav", "steam rally progress")
+                .Build();
+            GameInfo game = Game(Translation("RallyAdventure", "RallyAdventure", "Data", "rally.sav"));
+            string before = save.ReadIndexEntry("RallyAdventure", "RallyAdventure");
+
+            Exception refused = await Assert.ThrowsAnyAsync<Exception>(() => CopyToXbox(game, "rally.sav"));
+
+            Assert.Contains("not on this PC", refused.Message);
+            Assert.False(save.ContainerFolderExists("RallyAdventure", "RallyAdventure"));
+            Assert.Equal(before, save.ReadIndexEntry("RallyAdventure", "RallyAdventure"));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("not a guid")]
+        [InlineData("{5B1F9C0A-7E44-4C0B-9E63-0F3D2A1B4C5D}")]
+        [InlineData("5B1F9C0A7E444C0B9E630F3D2A1B4C5D")]
+        public async Task OpenProfile_IndexIDInAnotherForm_IsReadAndWrittenBackUnchanged(string indexID)
+        {
+            // Issue #21, Forza Horizon 5: "Unrecognized Guid format." The tool does nothing with this
+            // ID but write it back, so it has no reason to insist on a form, or to rewrite it in its own.
+            save.IndexID = indexID;
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "old xbox progress")
+                .WithNonXboxFile("saveFile0.sav", "steam progress")
+                .Build();
+            GameInfo game = Game(Translation("SaveGame", "", "SaveSlot${FileSlot}", "saveFile${FileSlot}.sav", "(?<FileSlot>[0-9]+)"));
+
+            await CopyToXbox(game, "saveFile0.sav");
+
+            Assert.Equal(new KeyValuePair<string, string>("SaveSlot0", "steam progress"), Assert.Single(save.ReadContainer("SaveGame", "")));
+            Assert.Equal(indexID, save.ReadIndexID());
+        }
+
+        [Fact]
         public void OpenProfile_NoFolderForTheProfile_SaysSo()
         {
             save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress").Build();

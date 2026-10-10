@@ -11,6 +11,7 @@ namespace GPSaveConverter.Xbox
     internal class XboxFileContainer
     {
         internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
+        private static readonly NLog.Logger logger = LogHelper.getClassLogger();
 
         private XboxContainerIndex parent;
 
@@ -27,12 +28,31 @@ namespace GPSaveConverter.Xbox
         private byte containerVersion;
         internal uint unknown1;
         internal ulong unknown2;
+
+        /// <summary>
+        /// The modified time the index gave the container, as it was written there.
+        /// </summary>
+        internal long IndexModifiedTime { get; private set; }
+
+        /// <summary>
+        /// The size the index gave the container.
+        /// </summary>
+        internal ulong IndexSize { get; private set; }
+
+        /// <summary>
+        /// False for a container the index lists but whose files are not on this PC: the Xbox app
+        /// knows of it and has not put it here. Nothing can be read from it, and nothing is added to it.
+        /// </summary>
+        internal bool IsOnDisk { get { return FileSystem.FileExists(containerPath); } }
+
         public XboxFileContainer(XboxContainerIndex parent
                                , Guid containerGuid
                                , byte containerVer
                                , string[] containerID
                                , uint u1
-                               , ulong u2)
+                               , ulong u2
+                               , long indexModifiedTime
+                               , ulong indexSize)
         {
             this.parent = parent;
             this.ContainerGuid = containerGuid;
@@ -41,6 +61,8 @@ namespace GPSaveConverter.Xbox
 
             this.unknown1 = u1;
             this.unknown2 = u2;
+            this.IndexModifiedTime = indexModifiedTime;
+            this.IndexSize = indexSize;
 
 
             initPaths();
@@ -55,7 +77,7 @@ namespace GPSaveConverter.Xbox
         internal long getSize()
         {
             long returnVal = 0;
-            foreach(XboxFileInfo f in fileList)
+            foreach(XboxFileInfo f in getFileList())
             {
                 FileInfo fi = new FileInfo(f.getFilePath());
                 returnVal += fi.Length;
@@ -85,8 +107,15 @@ namespace GPSaveConverter.Xbox
 
         private void parseContainer()
         {
-            containerData = FileSystem.ReadAllBytes(containerPath);
             this.fileList = new List<XboxFileInfo>();
+            if (!IsOnDisk)
+            {
+                // Shown as empty. Failing here would make every other container unusable as well.
+                logger.Debug("Xbox container {0} is listed but its files are not on this PC ({1})", ContainerID[0], containerPath);
+                return;
+            }
+
+            containerData = FileSystem.ReadAllBytes(containerPath);
             for(int j = ContainerHeaderLength; j < containerData.Length;j += XboxHelper.EntryByteLength)
             {
                 fileList.Add(new XboxFileInfo(this,containerData, j));
@@ -111,6 +140,11 @@ namespace GPSaveConverter.Xbox
 
         public XboxFileInfo AddFile(NonXboxFileInfo info, string xboxFileID)
         {
+            if (!IsOnDisk)
+            {
+                throw new InvalidOperationException("The Xbox save lists the container " + ContainerID[0] + ", but its files are not on this PC, so nothing can be added to it.");
+            }
+
             XboxFileInfo returnVal = new XboxFileInfo(this, info.FilePath, xboxFileID);
             this.fileList.Add(returnVal);
             this.SaveContainer();

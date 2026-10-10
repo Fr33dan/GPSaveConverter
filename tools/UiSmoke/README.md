@@ -34,6 +34,8 @@ it out.
 
 ## What it covers
 
+- A save with a container that the index lists but that is not on the PC: the rest is listed, the
+  status line says so, and what the index says of that container survives a transfer.
 - Copying everything from Xbox, and everything to Xbox, with a backup made first.
 - A backup that cannot be made, answered with No: nothing is copied.
 - **File ▸ Backups**: both backups listed, each restored, both folders back byte for byte, the file

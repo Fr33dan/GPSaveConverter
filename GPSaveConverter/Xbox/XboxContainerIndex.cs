@@ -31,7 +31,11 @@ namespace GPSaveConverter.Xbox
         private uint unknown2;
         private ulong unknown3;
 
-        private Guid containerGuid;
+        /// <summary>
+        /// The ID the index gives the whole save: a GUID, as text. It is only ever written back, so it
+        /// is kept exactly as it was read.
+        /// </summary>
+        private string indexID;
 
         internal XboxFileContainer[] Children { get; private set; }
         internal XboxContainerIndex(GameInfo info, string id)
@@ -86,8 +90,7 @@ namespace GPSaveConverter.Xbox
             int stringLength = BitConverter.ToInt32(containerData, currentByte);
             currentByte += 4;
 
-            string indexGUID = Encoding.Unicode.GetString(containerData, currentByte, stringLength * 2);
-            this.containerGuid = Guid.Parse(indexGUID);
+            this.indexID = Encoding.Unicode.GetString(containerData, currentByte, stringLength * 2);
             currentByte += stringLength * 2;
 
             
@@ -118,7 +121,7 @@ namespace GPSaveConverter.Xbox
 
                 Guid containerGuid = new Guid(tempGuidArray);
 
-                DateTime containerTimestamp = DateTime.FromFileTime(BitConverter.ToInt64(containerData, currentByte));
+                long containerTimestamp = BitConverter.ToInt64(containerData, currentByte);
                 currentByte += 8;
 
                 ulong containerUnknown2 = BitConverter.ToUInt64(containerData, currentByte);
@@ -132,8 +135,10 @@ namespace GPSaveConverter.Xbox
                                                   , containerVersion
                                                   , containerStrings
                                                   , containerUnknown1
-                                                  , containerUnknown2);
-                
+                                                  , containerUnknown2
+                                                  , containerTimestamp
+                                                  , containerSize);
+
             }
         }
 
@@ -143,20 +148,29 @@ namespace GPSaveConverter.Xbox
 
             foreach(XboxFileInfo[] files in this.Children.Select(c => c.getFileList()).ToArray())
             {
-                returnVal.AddRange(files); 
+                returnVal.AddRange(files);
             }
 
             return returnVal.ToArray();
         }
 
+        /// <summary>
+        /// How many containers the index lists that have no files on this PC. Their files are in
+        /// nobody's list, which is worth telling the user.
+        /// </summary>
+        internal int ContainersNotOnDisk { get { return this.Children.Count(c => !c.IsOnDisk); } }
+
         internal void UpdateIndex()
         {
             DateTime saveTime = DateTime.Now;
-            BinaryWriter writer = new BinaryWriter(FileSystem.OpenWrite(this.indexPath), Encoding.Unicode);
+
+            // Put together in memory first. A failure part way must not leave half an index on disk.
+            MemoryStream index = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(index, Encoding.Unicode);
             writer.Write(0x00000000E);
 
             writer.Write(this.Children.Length);
-            
+
             writer.Write(unknown1);
 
             writer.Write(containerPackageID.Length);
@@ -166,9 +180,8 @@ namespace GPSaveConverter.Xbox
 
             writer.Write(unknown2);
 
-            string guidString = containerGuid.ToString();
-            writer.Write(guidString.Length);
-            writer.Write(Encoding.Unicode.GetBytes(guidString));
+            writer.Write(indexID.Length);
+            writer.Write(Encoding.Unicode.GetBytes(indexID));
 
             writer.Write(unknown3);
 
@@ -182,14 +195,29 @@ namespace GPSaveConverter.Xbox
                 writer.Write(container.ContainerVersion);
                 writer.Write(container.unknown1);
 
-                writer.BaseStream.Write(container.ContainerGuid.ToByteArray(), 0, XboxHelper.GuidLength);
+                writer.Write(container.ContainerGuid.ToByteArray(), 0, XboxHelper.GuidLength);
 
-                writer.Write(container.getModifiedTime().ToFileTime());
-                writer.Write(container.unknown2);
-                writer.Write(container.getSize());
+                if (container.IsOnDisk)
+                {
+                    writer.Write(container.getModifiedTime().ToFileTime());
+                    writer.Write(container.unknown2);
+                    writer.Write(container.getSize());
+                }
+                else
+                {
+                    // There is nothing on this PC to measure. A time and size worked out from a missing
+                    // folder would tell the Xbox app the container is empty, so what it said is kept.
+                    writer.Write(container.IndexModifiedTime);
+                    writer.Write(container.unknown2);
+                    writer.Write(container.IndexSize);
+                }
             }
             writer.Flush();
-            writer.Close();
+
+            using (FileStream file = FileSystem.OpenWrite(this.indexPath))
+            {
+                file.Write(index.GetBuffer(), 0, (int)index.Length);
+            }
             FileSystem.SetFileLastWriteTime(this.indexPath, saveTime);
 
         }
