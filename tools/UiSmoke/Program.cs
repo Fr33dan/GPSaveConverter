@@ -621,6 +621,7 @@ namespace GPSaveConverter.UiSmoke
 
             // The application's own start-up has to finish first: it fills the package list.
             await WaitUntil(() => packages.DataSource != null, "the package list");
+            CheckEqual(package, string.Join(", ", packages.Rows.Cast<DataGridViewRow>().Select(r => ((GameInfo)r.DataBoundItem).PackageName)), "the package list holds the made-up game, and nothing from this PC");
             Check(!backupsMenu.Enabled, "File > Backups is off until a game is selected");
 
             Say("== Select the game");
