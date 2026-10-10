@@ -532,6 +532,7 @@ namespace GPSaveConverter.UiSmoke
             {
                 save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox slot 0")
                     .WithXboxFile("SaveGame", "", "SaveSlot3", "xbox slot 3")
+                    .WithContainerNotOnDisk("NotDownloaded", "NotDownloaded")
                     .WithNonXboxFile("saveFile0.sav", "steam slot 0")
                     .WithNonXboxFile("saveFile7.sav", "steam slot 7")
                     .Build();
@@ -630,6 +631,8 @@ namespace GPSaveConverter.UiSmoke
             form.GetType().GetMethod("packagesDataGridView_Click", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(form, new object[] { packages, EventArgs.Empty });
             await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 2, "both file lists");
             Check(backupsMenu.Enabled, "File > Backups is on once a game is selected");
+            CheckEqual("1 of the 2 Xbox containers are listed but not on this PC, so their files are not shown.", status.Text, "the status line says a container is not on this PC, and the rest of the save is listed all the same");
+            string notDownloaded = save.ReadIndexEntry("NotDownloaded", "NotDownloaded");
 
             SortedDictionary<string, string> xboxAtStart = FolderContents.Read(save.ProfileFolder);
             SortedDictionary<string, string> filesAtStart = FolderContents.Read(save.NonXboxFolder);
@@ -672,6 +675,7 @@ namespace GPSaveConverter.UiSmoke
             CheckEqual("Transfer complete. To undo it, choose File > Backups.", status.Text, "the status line says how to undo");
             List<KeyValuePair<string, string>> blobs = save.ReadContainer("SaveGame", "");
             CheckEqual("SaveSlot0=edited on steam, SaveSlot3=xbox slot 3, SaveSlot7=steam slot 7", string.Join(", ", blobs.Select(b => b.Key + "=" + b.Value)), "the container holds the Steam files");
+            CheckEqual(notDownloaded, save.ReadIndexEntry("NotDownloaded", "NotDownloaded"), "what the index says of the container that is not on this PC was left as it was");
             backups = store.List(package);
             CheckEqual(2, backups.Count, "two backups exist");
             CheckEqual(BackupSide.Xbox, backups[0].Side, "the newest is a backup of the Xbox save");

@@ -33,6 +33,12 @@ namespace GPSaveConverter.Tests
             public string Name2;
             public Guid Guid = Guid.NewGuid();
             public List<Blob> Blobs = new List<Blob>();
+
+            // What the index says about the container. A container that is on disk has version 1.
+            public bool OnDisk = true;
+            public byte Version = ContainerVersion;
+            public long IndexTime = DateTime.Now.ToFileTime();
+            public ulong IndexSize;
         }
 
         private readonly string root;
@@ -69,6 +75,11 @@ namespace GPSaveConverter.Tests
         /// </summary>
         internal string IndexPackageID { get; set; } = PackageName + "!App";
 
+        /// <summary>
+        /// The ID the index gives the whole save. The Xbox app writes a GUID here.
+        /// </summary>
+        internal string IndexID { get; set; } = Guid.NewGuid().ToString();
+
         internal FakeXboxSave()
         {
             root = Path.Combine(Path.GetTempPath(), "gpsc", Guid.NewGuid().ToString("N").Substring(0, 8));
@@ -85,8 +96,26 @@ namespace GPSaveConverter.Tests
             Directory.CreateDirectory(LeftoverProfileFolder);
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(LeftoverProfileFolder, "containers.index"))))
             {
-                WriteIndexHeader(writer, 0, indexPackageID);
+                WriteIndexHeader(writer, 0, indexPackageID, Guid.NewGuid().ToString());
             }
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a container that the index lists but that has no folder on disk, as happens with a
+        /// container the Xbox app knows of and has not downloaded. The index gives it version 0.
+        /// </summary>
+        internal FakeXboxSave WithContainerNotOnDisk(string containerName1, string containerName2)
+        {
+            containers.Add(new Container
+            {
+                Name1 = containerName1,
+                Name2 = containerName2,
+                OnDisk = false,
+                Version = 0,
+                IndexTime = new DateTime(2023, 4, 4, 12, 18, 44, DateTimeKind.Utc).ToFileTimeUtc(),
+                IndexSize = 123456
+            });
             return this;
         }
 
@@ -129,7 +158,7 @@ namespace GPSaveConverter.Tests
         /// </summary>
         internal FakeXboxSave Build()
         {
-            foreach (Container container in containers)
+            foreach (Container container in containers.Where(c => c.OnDisk))
             {
                 using (BinaryWriter writer = new BinaryWriter(File.Create(ContainerFile(container))))
                 {
@@ -148,22 +177,82 @@ namespace GPSaveConverter.Tests
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(ProfileFolder, "containers.index"))))
             {
-                WriteIndexHeader(writer, containers.Count, IndexPackageID);
+                WriteIndexHeader(writer, containers.Count, IndexPackageID, IndexID);
 
                 foreach (Container container in containers)
                 {
                     WriteString(writer, container.Name1);
                     WriteString(writer, container.Name2);
                     WriteString(writer, "\"0x1\"");
-                    writer.Write(ContainerVersion);
+                    writer.Write(container.Version);
                     writer.Write(0u);
                     writer.Write(container.Guid.ToByteArray());
-                    writer.Write(DateTime.Now.ToFileTime());
+                    writer.Write(container.IndexTime);
                     writer.Write(0ul);
-                    writer.Write(0ul);
+                    writer.Write(container.IndexSize);
                 }
             }
             return this;
+        }
+
+        /// <summary>
+        /// Reads back, without the application's parser, what the index says about one container.
+        /// </summary>
+        /// <returns>Its version, modified time and size as "version time size".</returns>
+        internal string ReadIndexEntry(string containerName1, string containerName2)
+        {
+            byte[] data = File.ReadAllBytes(Path.Combine(ProfileFolder, "containers.index"));
+            int count = BitConverter.ToInt32(data, 4);
+            int position = 12;
+            ReadString(data, ref position);
+            position += 8 + 4;
+            ReadString(data, ref position);
+            position += 8;
+
+            for (int entry = 0; entry < count; entry++)
+            {
+                string name1 = ReadString(data, ref position);
+                string name2 = ReadString(data, ref position);
+                ReadString(data, ref position);
+                byte version = data[position];
+                long time = BitConverter.ToInt64(data, position + 1 + 4 + 16);
+                ulong size = BitConverter.ToUInt64(data, position + 1 + 4 + 16 + 8 + 8);
+                position += 1 + 4 + 16 + 8 + 8 + 8;
+
+                if (name1 == containerName1 && name2 == containerName2)
+                {
+                    return version + " " + time + " " + size;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Reads back the ID the index of <see cref="ProfileFolder"/> gives the whole save.
+        /// </summary>
+        internal string ReadIndexID()
+        {
+            byte[] data = File.ReadAllBytes(Path.Combine(ProfileFolder, "containers.index"));
+            int position = 12;
+            ReadString(data, ref position);
+            position += 8 + 4;
+            return ReadString(data, ref position);
+        }
+
+        /// <summary>
+        /// Tells whether a container has a folder on disk.
+        /// </summary>
+        internal bool ContainerFolderExists(string containerName1, string containerName2)
+        {
+            return Directory.Exists(ContainerFolder(containers.First(c => c.Name1 == containerName1 && c.Name2 == containerName2)));
+        }
+
+        private static string ReadString(byte[] data, ref int position)
+        {
+            int length = BitConverter.ToInt32(data, position);
+            string value = Encoding.Unicode.GetString(data, position + 4, length * 2);
+            position += 4 + length * 2;
+            return value;
         }
 
         /// <summary>
@@ -229,7 +318,7 @@ namespace GPSaveConverter.Tests
             return Encoding.Unicode.GetString(data, 16, BitConverter.ToInt32(data, 12) * 2);
         }
 
-        private static void WriteIndexHeader(BinaryWriter writer, int containerCount, string packageID)
+        private static void WriteIndexHeader(BinaryWriter writer, int containerCount, string packageID, string indexID)
         {
             writer.Write(0x0000000E);
             writer.Write(containerCount);
@@ -237,7 +326,7 @@ namespace GPSaveConverter.Tests
             WriteString(writer, packageID);
             writer.Write(DateTime.Now.ToFileTime());
             writer.Write(0u);
-            WriteString(writer, Guid.NewGuid().ToString());
+            WriteString(writer, indexID);
             writer.Write(0ul);
         }
 
