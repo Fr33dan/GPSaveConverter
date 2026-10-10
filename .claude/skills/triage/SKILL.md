@@ -94,6 +94,8 @@ There are two different causes. Do not assume which.
 - **The mapping is wrong.** A file landed under the wrong name or in the wrong container. Ask for the tables and the translation used, and check them against each other.
 - **The save format differs between stores.** Some games encrypt saves or tie them to the account. If the mapping is right and the game still refuses the file, no translation can fix it. Say that plainly and label `incompatible-save`.
 
+Either way, the save they had before can be put back with **File ▸ Backups**, if the transfer was made with v.0.4.12 or later. Say so: it is usually what they want first.
+
 When a result is settled either way, add the game to the Game Compatibility table in the wiki, with a link to the issue it comes from. The wiki is its own repository, `Fr33dan/GPSaveConverter.wiki`. Keep the table alphabetical and keep the file's CRLF line endings.
 
 ### Copying to Xbox does nothing or fails
@@ -104,6 +106,13 @@ Check these before anything else:
 - A game only appears in the list when its package folder holds local save data: `%LOCALAPPDATA%\Packages\<package>\SystemAppData\wgs` with at least two subfolders.
 - If the user wrote several translations for the game, the first one that matches is used. Old attempts sitting earlier in the list hide newer ones.
 
+### The Xbox file list is empty, or selecting the game fails
+
+Ask which version they use before anything else. Two causes were fixed in v.0.4.12:
+
+- The Xbox app can leave several folders for one profile under `wgs`, and only one holds the save. Older versions opened the first one, which showed no Xbox files or failed outright (#29, #113, #114). People used to work around it by deleting the folders that held only a `containers.index`. They no longer need to.
+- A page on pcgamingwiki.com that the tool could not read stopped the game from being selected (#77).
+
 ### Pull requests from contributors
 
 - Continuous integration does not start by itself on a first-time contributor's pull request. The run waits with the conclusion `action_required`. Read the diff first. If it changes only data such as `GameLibrary.json`, approve the run with `gh api -X POST repos/Fr33dan/GPSaveConverter/actions/runs/<run id>/approve`. If it changes code or workflows, leave the approval to the maintainer.
@@ -113,6 +122,8 @@ Check these before anything else:
 ### Bug reports
 
 Find the code from the stack trace. Reproduce the failure in a test, fix it on a branch, open a pull request, and link it in the issue. Label `bug`. If a later release already fixed it, say which version and ask the reporter to retry.
+
+From v.0.4.12 an error opens the tool's own window, which has a **Copy Details** button. Ask for that text. It names the version, the Windows build and the selected game, which a screenshot of the old .NET dialog did not.
 
 In the pull request write `Refs #N`. `Fixes #N` and `Closes #N` close the issue the moment the pull request merges, and closing is the maintainer's decision. Tell the reporter once the fix is in a release, not when it merges: until then there is nothing for them to download.
 
@@ -130,7 +141,7 @@ Age alone is not a reason to close anything. If an old issue has a concrete answ
 
 - Open with the answer or the next step, not with thanks or an apology.
 - Give steps as a short numbered list the reporter can follow exactly. Use the app's real menu names.
-- Before any instruction that copies files, tell them to back up both save folders.
+- Before any instruction that copies files, tell them to use v.0.4.12 or later. From that version the tool backs up what a transfer changes, and **File ▸ Backups** puts it back. Only someone who cannot update needs telling to back up both save folders by hand. The wiki's Backups page explains it for users.
 - One reply per issue per pass. Do not post again to an issue that is waiting on the reporter.
 - Do not state a fact about a particular game's save format unless the thread or the code shows it.
 
@@ -147,7 +158,7 @@ Age alone is not a reason to close anything. If an old issue has a concrete answ
 
 > Here is a translation to try. I checked it against the file tables you pasted; I have not been able to test it with the game itself.
 >
-> 1. Back up both save folders first.
+> 1. Use v.0.4.12 or later. It backs up what a transfer changes, and **File ▸ Backups** puts it back if the game does not accept the save.
 > 2. Save the block below as `GameName.json`.
 > 3. In the app, select the game. If you added translations of your own earlier, open **View ▸ Show File Translations** and remove them, because the first matching translation is the one used.
 > 4. Choose **File ▸ Load Game Profile** and pick the file.
