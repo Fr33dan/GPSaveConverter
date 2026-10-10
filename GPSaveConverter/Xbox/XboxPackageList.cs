@@ -15,8 +15,16 @@ namespace GPSaveConverter.Xbox
         internal static IEnvironment Environment { get; set; } = new DefaultEnvironment();
         internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
 
-        private static Library.GameInfo[] internalList;
-        static XboxPackageList()
+        /// <summary>
+        /// Looks through the Packages folder and lists the games that have a save there.
+        /// </summary>
+        /// <remarks>
+        /// The folder is read when the list is asked for. It used to be read once, the first time
+        /// anything touched this class, and a test touches it just to put a stand-in in place. That
+        /// read the real Packages folder, and a game found there started the game library loading
+        /// behind the test's back.
+        /// </remarks>
+        public static Library.GameInfo[] GetList()
         {
             logger.Info("Loading Xbox Package List...");
             string packageFolder = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "Packages");
@@ -37,8 +45,7 @@ namespace GPSaveConverter.Xbox
                     }
                 }
             }
-            internalList = list.ToArray();
-            if (internalList.Length > 0)
+            if (list.Count > 0)
             {
                 logger.Info("Xbox packages loaded!");
             }
@@ -46,15 +53,12 @@ namespace GPSaveConverter.Xbox
             {
                 logger.Info("No Xbox packages found.");
             }
+            return list.ToArray();
         }
+
         internal static string getWGSFolder(string packageName)
         {
             return Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "Packages", packageName, "SystemAppData", "wgs") + "\\";
-        }
-
-        public static Library.GameInfo[] GetList()
-        {
-            return internalList.ToArray();
         }
     }
 }
