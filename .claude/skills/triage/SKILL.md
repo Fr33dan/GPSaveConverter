@@ -89,7 +89,7 @@ Traps the harness has caught. Each has a test in `RequestedTranslationTests.cs`:
 - **Subfolders on the non-Xbox side.** The non-Xbox name must cover the whole relative path, with each backslash doubled: `SLOT_0\\CompleteSave`. In a profile file that is four backslashes, because JSON doubles them again. A name without its folder matches starting from the Xbox side only.
 - **A backslash in an Xbox blob ID.** Before v.0.4.11, copying to Xbox missed the existing blob and added a wrongly named one. Tell anyone on an older version to update before copying in that direction.
 - **Loading a profile replaces the save location.** Include `BaseNonXboxSaveLocation` when the reporter posted theirs. Otherwise tell them to click **Select non-Xbox Location** again after loading.
-- **Slots that exist on one side only.** A file with no Xbox container cannot be copied to Xbox. Say so when the posted tables show one.
+- **Slots that exist on one side only.** Versions up to v.0.4.12 refuse a file with no Xbox container. Later versions ask whether to create the container. Say which applies when the posted tables show such a file, and check that the container names in the translation spell out one name: a pattern such as `Save.*` cannot name a new container.
 
 ### "It transferred but the game says the save is corrupt" or "the game ignores it"
 
@@ -106,7 +106,8 @@ When a result is settled either way, add the game to the Game Compatibility tabl
 
 Check these before anything else:
 
-- The app cannot create an Xbox container. The container the file belongs in must already exist, which usually means starting the Xbox version and saving once in the slot to be replaced.
+- Versions up to v.0.4.12 cannot create an Xbox container. There the container the file belongs in must already exist, which usually means starting the Xbox version and saving once in the slot to be replaced. Later versions ask, name the containers, and create them on a yes. That was tried on one game, DOOM Eternal, on 2026-10-10: the game loaded the new slot and the Xbox app uploaded it. For any other game it is untried, so ask the reporter to say how it went, and add the result to the Game Compatibility table.
+- A container the tool created cannot be taken out of the cloud by the tool. Deleting that save in the game does it.
 - A game only appears in the list when its package folder holds local save data: `%LOCALAPPDATA%\Packages\<package>\SystemAppData\wgs` with a profile folder in it. The game does not have to be installed. Versions up to v.0.4.12 also wanted a second folder beside the profile folder, so a game that had been uninstalled could be missing from the list (#79).
 - If the user wrote several translations for the game, the first one that matches is used. Old attempts sitting earlier in the list hide newer ones.
 

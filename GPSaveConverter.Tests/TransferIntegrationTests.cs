@@ -85,14 +85,26 @@ namespace GPSaveConverter.Tests
         }
 
         /// <summary>Copies one non-Xbox file to the Xbox save the way the "˄" button does.</summary>
-        private async Task CopyToXbox(GameInfo game, string relativePath)
+        private Task CopyToXbox(GameInfo game, string relativePath)
+        {
+            return CopyToXbox(game, false, relativePath);
+        }
+
+        /// <summary>
+        /// Copies non-Xbox files to the Xbox save in one transfer, the way the "˄" button does.
+        /// </summary>
+        /// <param name="createContainers">What the user answered when asked whether to make the containers that are missing.</param>
+        private async Task CopyToXbox(GameInfo game, bool createContainers, params string[] relativePaths)
         {
             await game.refreshNonXboxSaveFiles();
             XboxContainerIndex index = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
             index.getFileList();
-            NonXboxFileInfo file = GameLibrary.nonXboxFiles.Single(f => f.RelativePath == relativePath);
 
-            game.getXboxFileVersion(index, file, true);
+            foreach (string relativePath in relativePaths)
+            {
+                NonXboxFileInfo file = GameLibrary.nonXboxFiles.Single(f => f.RelativePath == relativePath);
+                game.getXboxFileVersion(index, file, true, createContainers);
+            }
             index.UpdateIndex();
         }
 
@@ -138,16 +150,18 @@ namespace GPSaveConverter.Tests
         }
 
         [Fact]
-        public async Task CopyToXbox_ContainerMissing_IsRefused()
+        public async Task CopyToXbox_ContainerMissing_IsRefusedUnlessMakingItWasAskedFor()
         {
             save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress")
                 .WithNonXboxFile("other.sav", "steam progress")
                 .Build();
             GameInfo game = Game(Translation("OtherContainer", "", "Data", "other.sav"));
+            SortedDictionary<string, string> before = FolderContents.Read(save.ProfileFolder);
 
             Exception refused = await Assert.ThrowsAnyAsync<Exception>(() => CopyToXbox(game, "other.sav"));
 
-            Assert.Contains("container creation is not supported", refused.Message);
+            Assert.Contains("Target Xbox container does not exist", refused.Message);
+            Assert.Equal(before, FolderContents.Read(save.ProfileFolder));
         }
 
         [Fact]
@@ -384,7 +398,7 @@ namespace GPSaveConverter.Tests
 
             Assert.Null(game.getXboxFileVersion(index, file));
             Exception refused = Assert.ThrowsAny<Exception>(() => game.getXboxFileVersion(index, file, true));
-            Assert.Contains("container creation is not supported", refused.Message);
+            Assert.Contains("Target Xbox container does not exist", refused.Message);
         }
 
         [Fact]
@@ -597,6 +611,241 @@ namespace GPSaveConverter.Tests
             Exception failure = Assert.Throws<System.IO.DirectoryNotFoundException>(() => new XboxContainerIndex(Game(), "000900000000FFFF"));
 
             Assert.Contains("000900000000FFFF", failure.Message);
+        }
+
+        #endregion
+
+        #region Creating a container
+
+        // What these tests expect of a new container is what DOOM Eternal wrote when it made one
+        // for a new save slot, recorded from a real save on 2026-10-10: marked 5, no mark from the
+        // cloud, "container.1", blobs with no copy in the cloud, and the save as a whole marked 2.
+        private const uint ContainerCreated = 5;
+        private const uint IndexModified = 2;
+
+        /// <summary>
+        /// The game keeps each save slot in a container named after it, and its Steam version keeps
+        /// each in a folder of that name.
+        /// </summary>
+        private static FileTranslation SlotFolders()
+        {
+            return Translation("${Slot}", "${Slot}", "${File}", "${Slot}\\\\${File}", "(?<Slot>[\\w\\-]+)", "(?<File>[\\w\\-.]+)");
+        }
+
+        private static string Describe(FakeXboxSave.IndexEntry entry)
+        {
+            return string.Join(" | ", entry.Name1, entry.Name2, entry.CloudTag, entry.Number, entry.SyncState, entry.Folder, entry.Time, entry.Size);
+        }
+
+        [Fact]
+        public async Task CopyToXbox_NoContainerForTheFile_MakesOneTheWayTheGameDoes()
+        {
+            save.WithXboxFile("GAME-AUTOSAVE0", "GAME-AUTOSAVE0", "game.details", "xbox slot 0")
+                .WithXboxFile("PROFILE", "PROFILE", "profile.bin", "xbox profile")
+                .WithNonXboxFile("GAME-AUTOSAVE1\\game.details", "steam slot 1")
+                .Build();
+            GameInfo game = Game(SlotFolders());
+            DateTime started = DateTime.Now.AddSeconds(-2);
+
+            await CopyToXbox(game, true, "GAME-AUTOSAVE1\\game.details");
+
+            // In order of name, so between the two that were there.
+            List<FakeXboxSave.IndexEntry> entries = save.ReadIndexEntries();
+            Assert.Equal(new[] { "GAME-AUTOSAVE0", "GAME-AUTOSAVE1", "PROFILE" }, entries.Select(entry => entry.Name1));
+
+            FakeXboxSave.IndexEntry made = entries[1];
+            Assert.Equal("GAME-AUTOSAVE1", made.Name2);
+            Assert.Equal(ContainerCreated, made.SyncState);
+            Assert.Equal(string.Empty, made.CloudTag);
+            Assert.Equal(1, made.Number);
+            Assert.Equal((ulong)"steam slot 1".Length, made.Size);
+            Assert.NotEqual(Guid.Empty, made.Folder);
+            Assert.InRange(DateTime.FromFileTime(made.Time), started, DateTime.Now.AddSeconds(2));
+
+            FakeXboxSave.BlobEntry blob = Assert.Single(save.ReadContainerFile(made));
+            Assert.Equal("game.details", blob.FileID);
+            Assert.Equal("steam slot 1", blob.Content);
+            Assert.Equal(Guid.Empty, blob.CloudCopy);
+
+            // The save as a whole now says there is something to upload.
+            Assert.Equal(IndexModified, save.ReadIndexSyncState());
+            Assert.Equal(FakeXboxSave.IndexFooter, save.ReadIndexFooter());
+        }
+
+        [Fact]
+        public async Task CopyToXbox_MakingAContainer_LeavesWhatTheIndexSaysOfTheOthersAlone()
+        {
+            save.WithXboxFile("GAME-AUTOSAVE0", "GAME-AUTOSAVE0", "game.details", "xbox slot 0")
+                .WithXboxFile("PROFILE", "PROFILE", "profile.bin", "xbox profile")
+                .WithNonXboxFile("GAME-AUTOSAVE1\\game.details", "steam slot 1")
+                .Build();
+            GameInfo game = Game(SlotFolders());
+            string[] before = save.ReadIndexEntries().Select(Describe).ToArray();
+
+            await CopyToXbox(game, true, "GAME-AUTOSAVE1\\game.details");
+
+            // Still marked as synced, each with the mark the cloud gave it, and with the time and size
+            // it had: nothing about a container that was not touched is worked out again.
+            Assert.Equal(before, save.ReadIndexEntries().Where(entry => entry.Name1 != "GAME-AUTOSAVE1").Select(Describe));
+            Assert.Equal("xbox slot 0", Assert.Single(save.ReadContainer("GAME-AUTOSAVE0", "GAME-AUTOSAVE0")).Value);
+        }
+
+        [Fact]
+        public async Task CopyToXbox_SeveralFilesForOneMissingContainer_MakesItOnce()
+        {
+            save.WithXboxFile("PROFILE", "PROFILE", "profile.bin", "xbox profile")
+                .WithNonXboxFile("GAME-AUTOSAVE0\\game.details", "steam details")
+                .WithNonXboxFile("GAME-AUTOSAVE0\\game_duration.dat", "steam duration")
+                .Build();
+            GameInfo game = Game(SlotFolders());
+
+            await CopyToXbox(game, true, "GAME-AUTOSAVE0\\game.details", "GAME-AUTOSAVE0\\game_duration.dat");
+
+            List<FakeXboxSave.IndexEntry> entries = save.ReadIndexEntries();
+            Assert.Equal(new[] { "GAME-AUTOSAVE0", "PROFILE" }, entries.Select(entry => entry.Name1));
+            Assert.Equal(new[] { "game.details=steam details", "game_duration.dat=steam duration" }, save.ReadContainerFile(entries[0]).Select(blob => blob.FileID + "=" + blob.Content));
+            Assert.Equal((ulong)("steam details".Length + "steam duration".Length), entries[0].Size);
+        }
+
+        [Fact]
+        public async Task CopyToXbox_ContainerThatWasMade_IsReadAndWrittenLikeAnyOtherAfterwards()
+        {
+            save.WithXboxFile("GAME-AUTOSAVE0", "GAME-AUTOSAVE0", "game.details", "xbox slot 0")
+                .WithXboxFile("PROFILE", "PROFILE", "profile.bin", "xbox profile")
+                .WithNonXboxFile("GAME-AUTOSAVE1\\game.details", "steam slot 1")
+                .Build();
+            GameInfo game = Game(SlotFolders());
+            await CopyToXbox(game, true, "GAME-AUTOSAVE1\\game.details");
+
+            XboxContainerIndex index = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
+            Assert.Equal(new[] { "GAME-AUTOSAVE0/game.details", "GAME-AUTOSAVE1/game.details", "PROFILE/profile.bin" }, index.getFileList().Select(file => file.ContainerName1 + "/" + file.FileID));
+
+            // Copying the file again replaces the blob. Nothing has to be made this time.
+            System.IO.File.WriteAllText(System.IO.Path.Combine(save.NonXboxFolder, "GAME-AUTOSAVE1\\game.details"), "steam slot 1, later");
+            await CopyToXbox(game, false, "GAME-AUTOSAVE1\\game.details");
+
+            FakeXboxSave.IndexEntry made = save.ReadIndexEntries()[1];
+            Assert.Equal("steam slot 1, later", Assert.Single(save.ReadContainerFile(made)).Content);
+            // The cloud still has not seen it, and the index goes on saying so.
+            Assert.Equal(ContainerCreated, made.SyncState);
+            Assert.Equal(string.Empty, made.CloudTag);
+            Assert.Equal(IndexModified, save.ReadIndexSyncState());
+        }
+
+        [Theory]
+        // The name in a translation is a pattern. The container gets the name the pattern stands for.
+        [InlineData("Disgaea 4 Complete\\+", "Disgaea 4 Complete+")]
+        [InlineData("User_${XboxProfileID}", "User_9000000000001")]
+        [InlineData("save.${File}", "save.slot1")]
+        [InlineData("save\\\\${File}", "save\\slot1")]
+        public async Task CopyToXbox_NameOfTheContainerInTheTranslation_IsWhatTheNewContainerIsCalled(string containerName, string expected)
+        {
+            save.WithXboxFile("Other", "Other", "Data", "xbox data")
+                .WithNonXboxFile("slot1", "steam save")
+                .Build();
+            GameInfo game = Game(Translation(containerName, "", "Data", "${File}", "(?<File>[\\w]+)"));
+
+            await CopyToXbox(game, true, "slot1");
+
+            FakeXboxSave.IndexEntry made = save.ReadIndexEntries().Single(entry => entry.Name1 != "Other");
+            Assert.Equal(expected, made.Name1);
+            Assert.Equal(string.Empty, made.Name2);
+            Assert.Equal("steam save", Assert.Single(save.ReadContainerFile(made)).Content);
+        }
+
+        [Theory]
+        [InlineData("Alpha", "Alpha,Beta,beta")]
+        // Capital letters come before small ones, as in every file table posted in an issue.
+        [InlineData("Zeta", "Beta,Zeta,beta")]
+        [InlineData("alpha", "Beta,alpha,beta")]
+        [InlineData("zeta", "Beta,beta,zeta")]
+        public async Task CopyToXbox_NewContainer_GoesInAtItsPlaceInTheOrderOfNames(string name, string expectedOrder)
+        {
+            save.WithXboxFile("Beta", "Beta", "Data", "xbox beta")
+                .WithXboxFile("beta", "beta", "Data", "xbox small beta")
+                .WithNonXboxFile(name + "\\Data", "steam save")
+                .Build();
+            GameInfo game = Game(SlotFolders());
+
+            await CopyToXbox(game, true, name + "\\Data");
+
+            Assert.Equal(expectedOrder, string.Join(",", save.ReadIndexEntries().Select(entry => entry.Name1)));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_NameOfTheContainerIsAPatternForMany_IsRefusedAndNothingIsMade()
+        {
+            save.WithXboxFile("Other", "Other", "Data", "xbox data")
+                .WithNonXboxFile("slot1", "steam save")
+                .Build();
+            // "Save.*" finds a container that exists. It does not say what a new one is called.
+            GameInfo game = Game(Translation("Save.*", "", "Data", "${File}", "(?<File>[\\w]+)"));
+            SortedDictionary<string, string> before = FolderContents.Read(save.ProfileFolder);
+
+            Exception refused = await Assert.ThrowsAnyAsync<Exception>(() => CopyToXbox(game, true, "slot1"));
+
+            Assert.Contains("cannot be created", refused.Message);
+            Assert.Contains("Save.*", refused.Message);
+            Assert.Equal(before, FolderContents.Read(save.ProfileFolder));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_BlobIDCannotBeWorkedOut_MakesNoContainer()
+        {
+            save.WithXboxFile("Other", "Other", "Data", "xbox data")
+                .WithNonXboxFile("slot1", "steam save")
+                .Build();
+            // Nothing in the file's path says what ${Part} is.
+            GameInfo game = Game(Translation("NewContainer", "", "${Part}", "${File}", "(?<File>[\\w]+)", "(?<Part>[\\w]+)"));
+            SortedDictionary<string, string> before = FolderContents.Read(save.ProfileFolder);
+
+            Exception refused = await Assert.ThrowsAnyAsync<Exception>(() => CopyToXbox(game, true, "slot1"));
+
+            Assert.Contains("No substitution data found", refused.Message);
+            Assert.Equal(before, FolderContents.Read(save.ProfileFolder));
+        }
+
+        [Fact]
+        public async Task ContainersToCreate_NamesEachMissingContainerOnceAndWritesNothing()
+        {
+            save.WithXboxFile("GAME-AUTOSAVE0", "GAME-AUTOSAVE0", "game.details", "xbox slot 0")
+                .WithNonXboxFile("GAME-AUTOSAVE0\\game.details", "steam slot 0")
+                .WithNonXboxFile("GAME-AUTOSAVE1\\game.details", "steam slot 1")
+                .WithNonXboxFile("GAME-AUTOSAVE1\\game_duration.dat", "steam slot 1 duration")
+                .WithNonXboxFile("PROFILE\\profile.bin", "steam profile")
+                .Build();
+            GameInfo game = Game(SlotFolders());
+            await game.refreshNonXboxSaveFiles();
+            XboxContainerIndex index = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
+            index.getFileList();
+            SortedDictionary<string, string> before = FolderContents.Read(save.ProfileFolder);
+
+            List<KeyValuePair<string, List<NonXboxFileInfo>>> missing = game.ContainersToCreate(index, GameLibrary.nonXboxFiles);
+
+            Assert.Equal(new[] { "GAME-AUTOSAVE1: GAME-AUTOSAVE1\\game.details, GAME-AUTOSAVE1\\game_duration.dat", "PROFILE: PROFILE\\profile.bin" },
+                         missing.Select(container => container.Key + ": " + string.Join(", ", container.Value.Select(file => file.RelativePath))));
+            Assert.Equal(before, FolderContents.Read(save.ProfileFolder));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_MakingAContainerAfterABackup_CanBeUndone()
+        {
+            save.WithXboxFile("GAME-AUTOSAVE0", "GAME-AUTOSAVE0", "game.details", "xbox slot 0")
+                .WithXboxFile("PROFILE", "PROFILE", "profile.bin", "xbox profile")
+                .WithNonXboxFile("GAME-AUTOSAVE1\\game.details", "steam slot 1")
+                .Build();
+            GameInfo game = Game(SlotFolders());
+            SortedDictionary<string, string> before = FolderContents.Read(save.ProfileFolder);
+            SaveBackupStore store = new SaveBackupStore(save.BackupFolder);
+            store.BackUpXboxSave(game.PackageName, game.Name, new XboxContainerIndex(game, FakeXboxSave.ProfileID).xboxProfileFolder, "copying 1 file to Xbox");
+
+            await CopyToXbox(game, true, "GAME-AUTOSAVE1\\game.details");
+            Assert.Equal(3, save.ReadIndexEntries().Count);
+
+            store.Restore(Assert.Single(store.List(game.PackageName)));
+
+            // The new container's folder is gone, and the index is the one from before.
+            Assert.Equal(before, FolderContents.Read(save.ProfileFolder));
         }
 
         #endregion

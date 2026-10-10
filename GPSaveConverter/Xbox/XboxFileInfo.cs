@@ -82,6 +82,7 @@ namespace GPSaveConverter.Xbox
         internal void Replace(NonXboxFileInfo replacement)
         {
             FileSystem.CopyFile(replacement.FilePath, this.getFilePath(), true);
+            parent.MarkChanged();
         }
 
         /// <summary>

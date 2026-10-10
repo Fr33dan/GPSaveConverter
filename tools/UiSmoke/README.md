@@ -45,6 +45,9 @@ it out.
   picked, and then goes into that profile's folder.
 - A folder picked by hand, and the tool started again after it: the transfer goes ahead, with no
   profile asked for.
+- A file the Xbox save has no container for: the question that names the container, answered No
+  (nothing is written) and then Yes (the container is made the way the game makes one), and the
+  backup that takes it out again.
 - A mistyped pattern in a translation: the status line says so and no window opens.
 - An Xbox save that cannot be read: the error window names the profile, and no profile stays open.
 - An error nothing handles: the error window comes up and the main window survives.

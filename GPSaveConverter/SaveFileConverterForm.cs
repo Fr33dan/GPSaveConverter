@@ -405,6 +405,34 @@ namespace GPSaveConverter
                 return;
             }
 
+            bool createContainers = false;
+            List<KeyValuePair<string, List<NonXboxFileInfo>>> missing = containersToCreate(files);
+            if (missing.Count > 0)
+            {
+                res = MessageBox.Show(this, createContainersQuestion(missing), "Create Xbox containers?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                if (res == DialogResult.Cancel)
+                {
+                    logger.Info("Transfer canceled");
+                    return;
+                }
+
+                createContainers = res == DialogResult.Yes;
+                if (!createContainers)
+                {
+                    // Copied without them. Asking about each of these files again would only repeat the question.
+                    foreach (NonXboxFileInfo skipped in missing.SelectMany(container => container.Value))
+                    {
+                        files.Remove(skipped);
+                    }
+                    logger.Info("{0} left out: no Xbox container to put {1} in", countFiles(missing.Sum(container => container.Value.Count)), missing.Sum(container => container.Value.Count) == 1 ? "it" : "them");
+
+                    if (files.Count == 0)
+                    {
+                        return;
+                    }
+                }
+            }
+
             SaveBackups.SaveBackup backup = null;
             if (backUp)
             {
@@ -430,8 +458,13 @@ namespace GPSaveConverter
                 }
             }
 
+            int copied = 0;
             bool finished = TransferLoop.Run(files,
-                file => ActiveGame.getXboxFileVersion(this.currentContainer, file, true),
+                file =>
+                {
+                    ActiveGame.getXboxFileVersion(this.currentContainer, file, true, createContainers);
+                    copied++;
+                },
                 (file, e) => askAfterError(file.RelativePath, e));
 
             if (backup != null)
@@ -439,19 +472,67 @@ namespace GPSaveConverter
                 pruneBackups();
             }
 
+            if (copied > 0)
+            {
+                // Also when the transfer was aborted part way. What was copied is in the save, and the
+                // index has to say so: a container made for it is not part of the save until it does.
+                currentContainer.UpdateIndex();
+            }
+
             if (!finished)
             {
                 logger.Info(backup != null ? "Transfer aborted. To undo the files already copied, choose File > Backups." : "Transfer aborted");
-                return;
             }
-
-            currentContainer.UpdateIndex();
-
-            logger.Info(backup != null ? "Transfer complete. To undo it, choose File > Backups." : "Transfer complete");
+            else
+            {
+                logger.Info(backup != null ? "Transfer complete. To undo it, choose File > Backups." : "Transfer complete");
+            }
 
             // Reload to refresh UI.
             currentContainer = new Xbox.XboxContainerIndex(ActiveGame, (string)this.xboxProfileListBox.SelectedItem);
             this.xboxFilesTable.DataSource = currentContainer.getFileList();
+        }
+
+        /// <summary>
+        /// The containers a transfer of these files to Xbox would have to make, with the files for each.
+        /// </summary>
+        private List<KeyValuePair<string, List<NonXboxFileInfo>>> containersToCreate(List<NonXboxFileInfo> files)
+        {
+            try
+            {
+                return ActiveGame.ContainersToCreate(this.currentContainer, files);
+            }
+            catch (Exception e)
+            {
+                // A mistake in a translation. The transfer itself reports it, file by file.
+                logger.Debug(e, "The containers to create could not be worked out");
+                return new List<KeyValuePair<string, List<NonXboxFileInfo>>>();
+            }
+        }
+
+        private static string createContainersQuestion(List<KeyValuePair<string, List<NonXboxFileInfo>>> missing)
+        {
+            const int namesShown = 10;
+            int fileCount = missing.Sum(container => container.Value.Count);
+
+            StringBuilder question = new StringBuilder();
+            question.AppendLine("The Xbox save has no container for " + countFiles(fileCount) + ". To copy " + (fileCount == 1 ? "it" : "them") + ", " + (missing.Count == 1 ? "this container has" : "these " + missing.Count + " containers have") + " to be created:");
+            question.AppendLine();
+            foreach (KeyValuePair<string, List<NonXboxFileInfo>> container in missing.Take(namesShown))
+            {
+                question.AppendLine("    " + container.Key);
+            }
+            if (missing.Count > namesShown)
+            {
+                question.AppendLine("    and " + (missing.Count - namesShown) + " more");
+            }
+            question.AppendLine();
+            question.AppendLine("The Xbox app uploads a new container the next time the game runs. This tool cannot remove it from the cloud afterwards, so create one only if the game is meant to have it.");
+            question.AppendLine();
+            question.AppendLine("Yes: create " + (missing.Count == 1 ? "it" : "them") + " and copy every file.");
+            question.AppendLine("No: copy only the files that have a container.");
+            question.Append("Cancel: copy nothing.");
+            return question.ToString();
         }
 
         private async Task moveFilesFromXbox(System.Collections.IEnumerable rows)
