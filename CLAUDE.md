@@ -25,6 +25,8 @@ The release exe is `GPSaveConverter/bin/Release/net472/GPSaveConverter.exe`.
 | `GPSaveConverter/TransferLoop.cs` | Copies a list of files, with abort, retry or skip after a failure |
 | `GPSaveConverter/SaveFileConverterForm.cs` | The one main window |
 | `GPSaveConverter/BackupsForm.cs` | The **File ▸ Backups** window |
+| `GPSaveConverter/ErrorReport.cs` | Shows an error nothing handled in a window with details to copy into an issue |
+| `GPSaveConverter/Library/PCGameWiki.cs` | Looks up a game's save folder on pcgamingwiki.com when the library has none |
 | `GPSaveConverter/Interfaces/` | Seams for file system, registry, HTTP, settings and PowerShell |
 | `GPSaveConverter/Resources/GameLibrary.json` | The game library |
 | `GPSaveConverter.Tests/` | xUnit and NSubstitute tests |
