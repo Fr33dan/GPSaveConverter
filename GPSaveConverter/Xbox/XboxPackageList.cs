@@ -24,7 +24,7 @@ namespace GPSaveConverter.Xbox
             foreach(string package in FileSystem.GetDirectories(packageFolder))
             {
                 string wgsFolder = Path.Combine(package, "SystemAppData", "wgs");
-                if(FileSystem.DirectoryExists(wgsFolder) && FileSystem.GetDirectories(wgsFolder).Length >= 2)
+                if(FileSystem.DirectoryExists(wgsFolder) && XboxHelper.HoldsSaves(FileSystem.GetDirectories(wgsFolder)))
                 {
                     try
                     {

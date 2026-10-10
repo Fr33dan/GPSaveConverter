@@ -103,7 +103,7 @@ When a result is settled either way, add the game to the Game Compatibility tabl
 Check these before anything else:
 
 - The app cannot create an Xbox container. The container the file belongs in must already exist, which usually means starting the Xbox version and saving once in the slot to be replaced.
-- A game only appears in the list when its package folder holds local save data: `%LOCALAPPDATA%\Packages\<package>\SystemAppData\wgs` with at least two subfolders.
+- A game only appears in the list when its package folder holds local save data: `%LOCALAPPDATA%\Packages\<package>\SystemAppData\wgs` with a profile folder in it. The game does not have to be installed. Versions up to v.0.4.12 also wanted a second folder beside the profile folder, so a game that had been uninstalled could be missing from the list (#79).
 - If the user wrote several translations for the game, the first one that matches is used. Old attempts sitting earlier in the list hide newer ones.
 
 ### The Xbox file list is empty, or selecting the game fails
