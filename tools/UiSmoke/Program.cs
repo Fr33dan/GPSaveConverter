@@ -846,6 +846,7 @@ namespace GPSaveConverter.UiSmoke
             CheckEqual(string.Empty, await MatchOnXbox(nonXboxFiles, xboxFiles, "quick.dat"), "before: nothing on the Xbox side matches quick.dat");
 
             await SavePreferences(form, true);
+            CheckEqual(string.Empty, preferencesLayout, "nothing in the Preferences window sticks out of it or overlaps");
             await WaitUntil(() => form.ActiveGame.PreviewTranslations.Count == 1 && xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 4, "the translation being tested");
             Check(status.Text.Contains("still being tested"), "ticked: the status line says a translation being tested is in use: \"" + status.Text + "\"");
             CheckEqual("File Translations: (1 being tested is tried first)", translationsLabel.Text, "and so does the translations panel");
@@ -947,6 +948,36 @@ namespace GPSaveConverter.UiSmoke
             return string.Join(", ", xboxFiles.SelectedRows.Cast<DataGridViewRow>().Select(r => ((XboxFileInfo)r.DataBoundItem).FileID));
         }
 
+        /// <summary>What <see cref="LayoutProblems"/> found the last time the Preferences window was opened.</summary>
+        private static string preferencesLayout;
+
+        /// <summary>
+        /// Lists the controls of a window that stick out of it or lie on top of one another. The
+        /// windows are laid out by hand in code, and nobody looks at them on the hidden desktop.
+        /// </summary>
+        /// <returns>What is wrong, or an empty text.</returns>
+        private static string LayoutProblems(Form window)
+        {
+            List<string> problems = new List<string>();
+            Control[] controls = window.Controls.Cast<Control>().Where(c => c.Visible).ToArray();
+            for (int i = 0; i < controls.Length; i++)
+            {
+                Rectangle bounds = controls[i].Bounds;
+                if (bounds.Left < 0 || bounds.Top < 0 || bounds.Right > window.ClientSize.Width || bounds.Bottom > window.ClientSize.Height)
+                {
+                    problems.Add(controls[i].Name + " sticks out of the window");
+                }
+                for (int j = i + 1; j < controls.Length; j++)
+                {
+                    if (bounds.IntersectsWith(controls[j].Bounds))
+                    {
+                        problems.Add(controls[i].Name + " overlaps " + controls[j].Name);
+                    }
+                }
+            }
+            return string.Join("; ", problems);
+        }
+
         /// <summary>
         /// Opens Preferences from the menu, allows internet access, sets the option for translations
         /// that are being tested, and presses Save.
@@ -957,6 +988,7 @@ namespace GPSaveConverter.UiSmoke
             await WaitUntil(() => Application.OpenForms.OfType<PreferencesForm>().Any(f => f.Visible), "the Preferences window");
 
             PreferencesForm preferences = Application.OpenForms.OfType<PreferencesForm>().Single();
+            preferencesLayout = LayoutProblems(preferences);
             Field<CheckBox>(preferences, "allowNetworkCheckbox").Checked = true;
             Field<CheckBox>(preferences, "previewTranslationsCheckbox").Checked = useTranslationsBeingTested;
             Field<Button>(preferences, "saveButton").PerformClick();
