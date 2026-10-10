@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Runs the real windows of GPSaveConverter against a made-up save and presses the real buttons.
+    See README.md. Not in the solution: build it by its own path.
+    The assembly is signed with the same key as the application, which names it in an
+    InternalsVisibleTo attribute, so that it can reach the application's internals as the tests do.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>GPSaveConverter.UiSmoke</AssemblyName>
+    <RootNamespace>GPSaveConverter.UiSmoke</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- A 32-bit process, like the application itself. -->
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>true</Prefer32Bit>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\GPSaveConverter\GPSaveConverterUnprotected.snk</AssemblyOriginatorKeyFile>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <!-- The made-up save the tests use. -->
+    <Compile Include="..\..\GPSaveConverter.Tests\FakeXboxSave.cs" Link="FakeXboxSave.cs" />
+    <Compile Include="..\..\GPSaveConverter.Tests\FolderContents.cs" Link="FolderContents.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\GPSaveConverter\GPSaveConverter.csproj" />
+    <!-- ISettingsProvider mentions NLog.LogLevel. The application embeds the same version. -->
+    <PackageReference Include="NLog" Version="5.3.4" />
+  </ItemGroup>
+
+</Project>
