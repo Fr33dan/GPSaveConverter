@@ -220,6 +220,71 @@ namespace GPSaveConverter.Library
             return found;
         }
 
+        /// <summary>
+        /// Works out what to call the container a non-Xbox file belongs in, for when the Xbox save
+        /// has no such container and one has to be made.
+        /// </summary>
+        /// <param name="problem">The reason, in words for the user, if the names cannot be worked out.</param>
+        /// <returns>The container's two names, or null.</returns>
+        internal string[] NewContainerNames(string nonXboxRelativePath, string xboxProfileID, out string problem)
+        {
+            problem = null;
+            Match nonXboxMatch = Regex.Match(nonXboxRelativePath, NonXboxFilenameRegex);
+
+            string[] templates = new string[] { ContainerName1, ContainerName2 };
+            string[] names = new string[templates.Length];
+            for (int i = 0; i < templates.Length; i++)
+            {
+                // A name can only come from a template that spells one out. "Save.*" finds a container
+                // that exists. It does not say what a new one is called.
+                if (IsPatternForSeveralNames(templates[i]))
+                {
+                    problem = "The file translation has a pattern, \"" + templates[i] + "\", where the name of the new container is needed.";
+                    return null;
+                }
+
+                bool complete;
+                names[i] = Fill(templates[i],
+                                name => ProfileValue(name, xboxProfileID) ?? GroupValue(name, nonXboxMatch),
+                                text => TemplateText(text, false),
+                                value => value,
+                                out complete);
+                if (!complete)
+                {
+                    problem = "The file's path gives no value for part of the container name \"" + templates[i] + "\".";
+                    return null;
+                }
+            }
+            return names;
+        }
+
+        /// <summary>
+        /// True if the text of a template, outside its ${Name} parts, uses the pattern syntax for more
+        /// than spelling out one name: a "*", a "[", a "\d". A "." counts as a plain dot, which is how
+        /// the game library writes one, and so does a character with a backslash in front of it.
+        /// </summary>
+        private static bool IsPatternForSeveralNames(string template)
+        {
+            string text = Regex.Replace(template, @"\$\{\w+\}", String.Empty);
+            for (int position = 0; position < text.Length; position++)
+            {
+                if (text[position] == '\\')
+                {
+                    // "\+" is a plus sign. "\d" is any digit.
+                    position++;
+                    if (position < text.Length && char.IsLetterOrDigit(text[position]))
+                    {
+                        return true;
+                    }
+                }
+                else if ("*+?()[]{}|^$".IndexOf(text[position]) != -1)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private string FillContainerPattern(string containerName, Match nonXboxMatch, string xboxProfileID)
         {
             // The container name in a translation is a pattern already. Only the values going into it are escaped.

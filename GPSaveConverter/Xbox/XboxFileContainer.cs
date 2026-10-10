@@ -16,6 +16,12 @@ namespace GPSaveConverter.Xbox
         private XboxContainerIndex parent;
 
         internal XboxContainerIndex Parent { get { return parent; } }
+
+        /// <summary>
+        /// The three texts the index holds for the container: its name, a second name that is usually
+        /// the same, and the mark the cloud gave the copy it has. That mark looks like "0x8DF26F0B0826728"
+        /// with the quotes, and is empty for a container the cloud has never seen.
+        /// </summary>
         internal string[] ContainerID { get; private set; }
         internal Guid ContainerGuid { get; private set; }
         public byte ContainerVersion { get => containerVersion; }
@@ -26,7 +32,19 @@ namespace GPSaveConverter.Xbox
         private byte[] containerData;
         private List<XboxFileInfo> fileList;
         private byte containerVersion;
-        internal uint unknown1;
+
+        /// <summary>
+        /// The number a new container's file starts with: "container.1". The game counts it up each
+        /// time it writes the container.
+        /// </summary>
+        private const byte FirstContainerNumber = 1;
+
+        /// <summary>
+        /// Whether the container has changes the cloud has not seen. One of the Container values of <see cref="XboxSyncState"/>.
+        /// </summary>
+        internal uint SyncState;
+
+        // Zero in every save seen.
         internal ulong unknown2;
 
         /// <summary>
@@ -45,11 +63,23 @@ namespace GPSaveConverter.Xbox
         /// </summary>
         internal bool IsOnDisk { get { return FileSystem.FileExists(containerPath); } }
 
+        /// <summary>
+        /// True once a blob of the container has been replaced or added, or the container itself was
+        /// made. Only then does the index get a new time and size for it. A container that was not
+        /// touched keeps exactly what the index said of it.
+        /// </summary>
+        internal bool Changed { get; private set; }
+
+        internal void MarkChanged()
+        {
+            this.Changed = true;
+        }
+
         public XboxFileContainer(XboxContainerIndex parent
                                , Guid containerGuid
                                , byte containerVer
                                , string[] containerID
-                               , uint u1
+                               , uint syncState
                                , ulong u2
                                , long indexModifiedTime
                                , ulong indexSize)
@@ -59,13 +89,39 @@ namespace GPSaveConverter.Xbox
             this.ContainerID = containerID;
             this.containerVersion = containerVer;
 
-            this.unknown1 = u1;
+            this.SyncState = syncState;
             this.unknown2 = u2;
             this.IndexModifiedTime = indexModifiedTime;
             this.IndexSize = indexSize;
 
 
             initPaths();
+        }
+
+        /// <summary>
+        /// Makes a new, empty container on disk: a folder of its own and the file that lists its blobs.
+        /// </summary>
+        /// <remarks>
+        /// It is written the way a container is that the game has made and the Xbox app has not
+        /// uploaded yet: marked as created, with no mark from the cloud. The Xbox services upload it
+        /// the next time the game starts.
+        /// </remarks>
+        internal static XboxFileContainer Create(XboxContainerIndex parent, string name1, string name2)
+        {
+            XboxFileContainer created = new XboxFileContainer(parent
+                                                            , Guid.NewGuid()
+                                                            , FirstContainerNumber
+                                                            , new string[] { name1, name2, String.Empty }
+                                                            , XboxSyncState.ContainerCreated
+                                                            , 0
+                                                            , DateTime.Now.ToFileTime()
+                                                            , 0);
+
+            FileSystem.CreateDirectory(created.saveFilePath);
+            created.fileList = new List<XboxFileInfo>();
+            created.SaveContainer();
+            created.Changed = true;
+            return created;
         }
 
         internal DateTime getModifiedTime()
@@ -135,6 +191,9 @@ namespace GPSaveConverter.Xbox
             {
                 file.Write(s);
             }
+
+            // Opening for writing keeps what was in the file. Nothing may be left of it past the end.
+            s.SetLength(s.Position);
             s.Close();
         }
 
@@ -148,6 +207,7 @@ namespace GPSaveConverter.Xbox
             XboxFileInfo returnVal = new XboxFileInfo(this, info.FilePath, xboxFileID);
             this.fileList.Add(returnVal);
             this.SaveContainer();
+            this.Changed = true;
             return returnVal;
         }
     }

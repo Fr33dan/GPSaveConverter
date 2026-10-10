@@ -530,9 +530,10 @@ namespace GPSaveConverter.UiSmoke
 
             using (FakeXboxSave save = new FakeXboxSave())
             {
-                save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox slot 0")
+                // In order of name, as the Xbox app keeps the containers.
+                save.WithContainerNotOnDisk("NotDownloaded", "NotDownloaded")
+                    .WithXboxFile("SaveGame", "", "SaveSlot0", "xbox slot 0")
                     .WithXboxFile("SaveGame", "", "SaveSlot3", "xbox slot 3")
-                    .WithContainerNotOnDisk("NotDownloaded", "NotDownloaded")
                     .WithNonXboxFile("saveFile0.sav", "steam slot 0")
                     .WithNonXboxFile("saveFile7.sav", "steam slot 7")
                     .Build();
@@ -755,6 +756,53 @@ namespace GPSaveConverter.UiSmoke
             CheckEqual("xbox slot 0", save.ReadNonXboxFile("saveFile0.sav"), "the files are in the folder picked by hand");
             form.ActiveGame.TargetProfileTypes = null;
             form.ActiveGame.TargetProfiles = null;
+
+            Say("== A file the Xbox save has no container for: asked about first, and made only on a yes");
+            Button selectionToXbox = Field<Button>(form, "moveSelectionToXboxButton");
+            FileTranslation settingsTranslation = new FileTranslation { ContainerName1 = "Profile", ContainerName2 = "Profile", XboxFileID = "settings", NonXboxFilename = "settings\\.ini", NamedRegexGroups = new string[0] };
+            form.ActiveGame.FileTranslations.Add(settingsTranslation);
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "settings.ini"), "steam settings");
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 4, "the lists with the new file in them");
+            foreach (DataGridViewRow row in nonXboxFiles.Rows)
+            {
+                row.Selected = ((NonXboxFileInfo)row.DataBoundItem).RelativePath == "settings.ini";
+            }
+            SortedDictionary<string, string> withoutTheContainer = FolderContents.Read(save.ProfileFolder);
+            int backupsBefore = store.List(package).Count;
+
+            responder.AnswerByTitle["Create Xbox containers?"] = Answer.No;
+            int boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            selectionToXbox.PerformClick();
+            await WaitUntil(() => status.Text.Contains("left out") && !responder.AnyOpen(), "the file to be left out");
+            string question = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Create Xbox containers?]")) ?? string.Empty;
+            Check(question.Contains("    Profile") && question.Contains("no container for 1 file"), "the question names the container and says how many files need it");
+            CheckSame(withoutTheContainer, FolderContents.Read(save.ProfileFolder), "answered No: the Xbox save is untouched");
+            CheckEqual(backupsBefore, store.List(package).Count, "and no backup was made, as nothing was going to be copied");
+
+            responder.AnswerByTitle["Create Xbox containers?"] = Answer.Yes;
+            status.Text = string.Empty;
+            selectionToXbox.PerformClick();
+            await WaitUntil(() => status.Text.StartsWith("Transfer complete"), "the transfer that makes the container");
+            await WaitUntil(() => xboxFiles.RowCount == 3, "the Xbox list to show the new blob");
+            responder.AnswerByTitle.Remove("Create Xbox containers?");
+            List<FakeXboxSave.IndexEntry> entries = save.ReadIndexEntries();
+            CheckEqual("NotDownloaded, Profile, SaveGame", string.Join(", ", entries.Select(e => e.Name1)), "answered Yes: the index lists the new container, at its place in the order of names");
+            FakeXboxSave.IndexEntry made = entries.Single(e => e.Name1 == "Profile");
+            CheckEqual("state 5, mark '', container.1", "state " + made.SyncState + ", mark '" + made.CloudTag + "', container." + made.Number, "it is marked as made here and never uploaded");
+            CheckEqual("settings=steam settings", string.Join(", ", save.ReadContainerFile(made).Select(b => b.FileID + "=" + b.Content)), "it holds the file");
+            CheckEqual(2u, save.ReadIndexSyncState(), "the save as a whole is marked as having something to upload");
+            Check(xboxFiles.Rows.Cast<DataGridViewRow>().Any(r => ((XboxFileInfo)r.DataBoundItem).ContainerName1 == "Profile"), "the Xbox list shows the new container's file");
+            SaveBackup beforeTheContainer = store.List(package)[0];
+            CheckSame(withoutTheContainer, FolderContents.Read(beforeTheContainer.FilesFolder), "the backup made first holds the save without the container");
+
+            store.Restore(beforeTheContainer);
+            form.ActiveGame.FileTranslations.Remove(settingsTranslation);
+            File.Delete(Path.Combine(save.NonXboxFolder, "settings.ini"));
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both lists after the undo");
+            CheckSame(withoutTheContainer, FolderContents.Read(save.ProfileFolder), "restoring that backup takes the container out again");
 
             Say("== A translation with a mistyped pattern, then a click in each file list");
             FileTranslation mistyped = new FileTranslation { ContainerName1 = "SaveGame", ContainerName2 = "", XboxFileID = "${Slot}", NonXboxFilename = "${Slot}", NamedRegexGroups = new[] { "(?<Slot>[0-9" } };

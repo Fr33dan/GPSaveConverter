@@ -27,8 +27,15 @@ namespace GPSaveConverter.Xbox
         /// </summary>
         internal string PackageName { get { return packageName; } }
 
+        // Zero in every save seen.
         private uint unknown1;
-        private uint unknown2;
+
+        /// <summary>
+        /// Whether the save has changes the cloud has not seen. One of the Index values of <see cref="XboxSyncState"/>.
+        /// </summary>
+        private uint syncState;
+
+        // 0x10000000 in every save seen, which is 256 MB. Probably the room a game is given.
         private ulong unknown3;
 
         /// <summary>
@@ -83,7 +90,7 @@ namespace GPSaveConverter.Xbox
             DateTime timestamp = DateTime.FromFileTimeUtc(BitConverter.ToInt64(containerData, currentByte));
             currentByte += 8;
 
-            unknown2 = BitConverter.ToUInt32(containerData, currentByte);
+            syncState = BitConverter.ToUInt32(containerData, currentByte);
             currentByte += 4;
 
             Children = new XboxFileContainer[count];
@@ -111,8 +118,8 @@ namespace GPSaveConverter.Xbox
 
                 byte containerVersion = containerData[currentByte];
                 currentByte++;
-                
-                uint containerUnknown1 = BitConverter.ToUInt32(containerData, currentByte);
+
+                uint containerSyncState = BitConverter.ToUInt32(containerData, currentByte);
                 currentByte+= 4;
 
                 byte[] tempGuidArray = new byte[XboxHelper.GuidLength];
@@ -134,7 +141,7 @@ namespace GPSaveConverter.Xbox
                                                   , containerGuid
                                                   , containerVersion
                                                   , containerStrings
-                                                  , containerUnknown1
+                                                  , containerSyncState
                                                   , containerUnknown2
                                                   , containerTimestamp
                                                   , containerSize);
@@ -160,6 +167,26 @@ namespace GPSaveConverter.Xbox
         /// </summary>
         internal int ContainersNotOnDisk { get { return this.Children.Count(c => !c.IsOnDisk); } }
 
+        /// <summary>
+        /// Adds a new, empty container to the save. It is on disk at once. The index lists it once
+        /// <see cref="UpdateIndex"/> has run.
+        /// </summary>
+        internal XboxFileContainer CreateContainer(string name1, string name2)
+        {
+            XboxFileContainer created = XboxFileContainer.Create(this, name1, name2);
+
+            // The index is kept in order of name, capital letters first. A container the game makes
+            // itself goes in at its place in that order, not at the end, and so does this one.
+            List<XboxFileContainer> children = this.Children.ToList();
+            int place = children.FindIndex(c => String.CompareOrdinal(c.ContainerID[0], name1) > 0);
+            children.Insert(place < 0 ? children.Count : place, created);
+            this.Children = children.ToArray();
+
+            // Without this the Xbox services have no reason to look for something to upload.
+            this.syncState = XboxSyncState.IndexModified;
+            return created;
+        }
+
         internal void UpdateIndex()
         {
             DateTime saveTime = DateTime.Now;
@@ -178,7 +205,7 @@ namespace GPSaveConverter.Xbox
 
             writer.Write(saveTime.ToFileTime());
 
-            writer.Write(unknown2);
+            writer.Write(syncState);
 
             writer.Write(indexID.Length);
             writer.Write(Encoding.Unicode.GetBytes(indexID));
@@ -193,11 +220,11 @@ namespace GPSaveConverter.Xbox
                     writer.Write(Encoding.Unicode.GetBytes(containerName));
                 }
                 writer.Write(container.ContainerVersion);
-                writer.Write(container.unknown1);
+                writer.Write(container.SyncState);
 
                 writer.Write(container.ContainerGuid.ToByteArray(), 0, XboxHelper.GuidLength);
 
-                if (container.IsOnDisk)
+                if (container.Changed && container.IsOnDisk)
                 {
                     writer.Write(container.getModifiedTime().ToFileTime());
                     writer.Write(container.unknown2);
@@ -205,8 +232,9 @@ namespace GPSaveConverter.Xbox
                 }
                 else
                 {
-                    // There is nothing on this PC to measure. A time and size worked out from a missing
-                    // folder would tell the Xbox app the container is empty, so what it said is kept.
+                    // Not touched, so what the index said of it is written back as it was. That goes
+                    // for a container whose files are not on this PC too: a time and size worked out
+                    // from a missing folder would tell the Xbox app the container is empty.
                     writer.Write(container.IndexModifiedTime);
                     writer.Write(container.unknown2);
                     writer.Write(container.IndexSize);
@@ -217,6 +245,9 @@ namespace GPSaveConverter.Xbox
             using (FileStream file = FileSystem.OpenWrite(this.indexPath))
             {
                 file.Write(index.GetBuffer(), 0, (int)index.Length);
+
+                // Opening for writing keeps what was in the file. Nothing may be left of it past the end.
+                file.SetLength(index.Length);
             }
             FileSystem.SetFileLastWriteTime(this.indexPath, saveTime);
 

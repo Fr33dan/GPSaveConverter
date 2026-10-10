@@ -316,7 +316,52 @@ namespace GPSaveConverter.Library
             return returnVal;
         }
 
-        internal Xbox.XboxFileInfo getXboxFileVersion(Xbox.XboxContainerIndex index, NonXboxFileInfo file, bool createOrUpdate = false)
+        /// <summary>
+        /// Works out which containers copying these files to Xbox would have to make, because the
+        /// Xbox save has none for them. Nothing is written.
+        /// </summary>
+        /// <returns>
+        /// Each such container by its first name, in the order met, with the files that would go into
+        /// it. A file whose container cannot be named is left out, and fails when it is copied.
+        /// </returns>
+        internal List<KeyValuePair<string, List<NonXboxFileInfo>>> ContainersToCreate(Xbox.XboxContainerIndex index, IEnumerable<NonXboxFileInfo> files)
+        {
+            List<KeyValuePair<string, List<NonXboxFileInfo>>> containers = new List<KeyValuePair<string, List<NonXboxFileInfo>>>();
+            if (index == null)
+            {
+                return containers;
+            }
+
+            foreach (NonXboxFileInfo file in files)
+            {
+                FileTranslation t = findTranslation(file, index.XboxProfileID);
+                if (t == null || t.FindContainers(index.Children, c => c.ContainerID[0], c => c.ContainerID[1], file.RelativePath, index.XboxProfileID).Count > 0)
+                {
+                    continue;
+                }
+
+                string problem;
+                string[] names = t.NewContainerNames(file.RelativePath, index.XboxProfileID, out problem);
+                if (names == null)
+                {
+                    continue;
+                }
+
+                int known = containers.FindIndex(c => c.Key == names[0]);
+                if (known < 0)
+                {
+                    containers.Add(new KeyValuePair<string, List<NonXboxFileInfo>>(names[0], new List<NonXboxFileInfo>()));
+                    known = containers.Count - 1;
+                }
+                containers[known].Value.Add(file);
+            }
+            return containers;
+        }
+
+        /// <param name="createContainers">
+        /// If the Xbox save has no container for the file, make one. Otherwise such a file is refused.
+        /// </param>
+        internal Xbox.XboxFileInfo getXboxFileVersion(Xbox.XboxContainerIndex index, NonXboxFileInfo file, bool createOrUpdate = false, bool createContainers = false)
         {
             // No Xbox profile is open yet, so there is nothing to match against.
             if (index == null)
@@ -335,7 +380,36 @@ namespace GPSaveConverter.Library
                 {
                     throw new ArgumentException("Ambiguous Xbox container results");
                 }
-                else if (containers.Count == 1)
+
+                if (containers.Count == 0 && createOrUpdate)
+                {
+                    if (!createContainers)
+                    {
+                        throw new Exception("Target Xbox container does not exist, and creating it was not asked for.");
+                    }
+
+                    string problem;
+                    string[] names = t.NewContainerNames(file.RelativePath, index.XboxProfileID, out problem);
+                    if (names == null)
+                    {
+                        throw new Exception("Target Xbox container does not exist and cannot be created. " + problem);
+                    }
+
+                    // Checked before the container is made, so that a file which cannot go into it
+                    // does not leave an empty container behind.
+                    string newFileID;
+                    bool newFileIDComplete;
+                    t.FindXboxFile(new Xbox.XboxFileInfo[0], f => f.FileID, file.RelativePath, index.XboxProfileID, out newFileID, out newFileIDComplete);
+                    if (!newFileIDComplete)
+                    {
+                        throw new Exception("No substitution data found.");
+                    }
+
+                    logger.Info("Creating Xbox container: {0}", names[0]);
+                    containers.Add(index.CreateContainer(names[0], names[1]));
+                }
+
+                if (containers.Count == 1)
                 {
                     Xbox.XboxFileContainer xboxFileContainer = containers[0];
 
@@ -359,13 +433,6 @@ namespace GPSaveConverter.Library
                             logger.Info("Adding Xbox Save file: {0} -> {1}", file.FilePath, xboxFileID);
                             matchedFile = xboxFileContainer.AddFile(file, xboxFileID);
                         }
-                    }
-                }
-                else
-                {
-                    if (createOrUpdate)
-                    {
-                        throw new Exception("Target Xbox container does not exist, container creation is not supported at this time");
                     }
                 }
             } else if (createOrUpdate)

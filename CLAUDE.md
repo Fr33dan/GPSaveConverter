@@ -65,6 +65,12 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 - A restore backs up what it replaces, so it can be undone the same way.
 - The folder is called `SaveBackups` because `.gitignore` ignores any folder named `Backup*`.
 
+**`containers.index` is also the Xbox app's record of what it has uploaded.** The game never reads that file. The Xbox services do, when the game starts and when it closes, and they act on what it says. So what the tool writes there has to be what those services would have written themselves.
+
+- A new container is written as the game writes one: `container.1`, sync state 5 (created), no mark from the cloud, each blob with no cloud copy, entered at its place in the order of names, and the save as a whole marked 2 (modified). `XboxSyncState` has the values. The tests in the "Creating a container" region of `TransferIntegrationTests` hold the ones recorded from a real game; do not change one without a new recording.
+- A container the tool did not touch is written back exactly as it was read, mark, time and size included.
+- The wiki page "Xbox Save Format" has every field and how the values were found. Read it before changing anything in `GPSaveConverter/Xbox/`.
+
 ## How a file translation works
 
 A translation has four templates and a list of named regex groups:
@@ -84,7 +90,7 @@ A translation has four templates and a list of named regex groups:
 - PC to Xbox: `NonXboxFilename` must match the file's path relative to the save folder; the captured values fill in the Xbox templates.
 - `${XboxProfileID}` (hex, leading zeros removed) and `${XboxProfileID_Int}` (decimal) need no group.
 - The first matching translation in a game's list wins.
-- The app cannot create an Xbox container. To copy a file to Xbox, the container it belongs in must already exist.
+- A file whose container the Xbox save does not have can still be copied to Xbox. The app asks first, and on a yes creates the container. Its names come from `ContainerName1` and `ContainerName2`, so those have to spell out one name. A pattern such as `Save.*` finds containers that exist and cannot name a new one.
 
 `BaseNonXboxSaveLocation` takes environment variables, `<Steam-folder>`, and profile markers. `<user-id>` stands for a per-user folder the app lists and lets the user pick; a second level is `<user-id2>`. Each marker needs a matching entry in `TargetProfileTypes` (`Steam` or `Xbox`). For an `Xbox` entry, `<user-id2_XboxInt>` inserts the Xbox profile ID as a decimal number. The logic is in `NonXboxProfile.ExpandSaveLocation` and `getProfileOptions`; read it before using a marker form the library does not already use.
 

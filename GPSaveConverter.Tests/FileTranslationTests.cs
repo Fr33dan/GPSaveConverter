@@ -232,5 +232,65 @@ namespace GPSaveConverter.Tests
             Assert.Equal("save_${Region}", result);
             Assert.False(complete);
         }
+
+        private static FileTranslation ContainerNamed(string containerName1, string containerName2)
+        {
+            return new FileTranslation
+            {
+                NonXboxFilename = "${Slot}\\\\${File}",
+                XboxFileID = "${File}",
+                ContainerName1 = containerName1,
+                ContainerName2 = containerName2,
+                NamedRegexGroups = new[] { "(?<Slot>[\\w\\-]+)", "(?<File>[\\w\\-.]+)", "(?<Region>[\\w]+)" }
+            };
+        }
+
+        [Theory]
+        [InlineData("${Slot}", "${Slot}", "GAME-AUTOSAVE1", "GAME-AUTOSAVE1")]
+        [InlineData("${Slot}", "", "GAME-AUTOSAVE1", "")]
+        [InlineData("Save_${Slot}.dat", "User_${XboxProfileID}", "Save_GAME-AUTOSAVE1.dat", "User_900000000ABCD")]
+        // Written as a pattern, so a plus sign or a backslash in the name has a backslash in front of it.
+        [InlineData("Complete\\+ ${Slot}", "a\\\\b", "Complete+ GAME-AUTOSAVE1", "a\\b")]
+        public void NewContainerNames_TemplateThatSpellsOutAName_GivesThatName(string containerName1, string containerName2, string expected1, string expected2)
+        {
+            string problem;
+
+            string[] names = ContainerNamed(containerName1, containerName2).NewContainerNames("GAME-AUTOSAVE1\\game.details", "000900000000ABCD", out problem);
+
+            Assert.Equal(new[] { expected1, expected2 }, names);
+            Assert.Null(problem);
+        }
+
+        [Theory]
+        // Each finds containers that exist. None says what a new one is called.
+        [InlineData("Save.*")]
+        [InlineData("Slot[0-9]")]
+        [InlineData("(Auto|Manual)Save")]
+        [InlineData("Save\\d")]
+        [InlineData("Save+")]
+        [InlineData("Save_${Slot}?")]
+        public void NewContainerNames_TemplateThatIsAPatternForMany_GivesNoName(string containerName)
+        {
+            string problem;
+
+            string[] first = ContainerNamed(containerName, "${Slot}").NewContainerNames("GAME-AUTOSAVE1\\game.details", "000900000000ABCD", out problem);
+            Assert.Null(first);
+            Assert.Contains(containerName, problem);
+
+            string[] second = ContainerNamed("${Slot}", containerName).NewContainerNames("GAME-AUTOSAVE1\\game.details", "000900000000ABCD", out problem);
+            Assert.Null(second);
+            Assert.Contains(containerName, problem);
+        }
+
+        [Fact]
+        public void NewContainerNames_NameThePathGivesNoValueFor_GivesNoName()
+        {
+            string problem;
+
+            string[] names = ContainerNamed("${Slot}_${Region}", "").NewContainerNames("GAME-AUTOSAVE1\\game.details", "000900000000ABCD", out problem);
+
+            Assert.Null(names);
+            Assert.Contains("${Slot}_${Region}", problem);
+        }
     }
 }

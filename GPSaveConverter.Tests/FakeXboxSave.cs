@@ -21,6 +21,14 @@ namespace GPSaveConverter.Tests
         private const int EntryByteLength = FileIDByteLength + 16 + 16;
         private const byte ContainerVersion = 1;
 
+        // The save is written the way the Xbox app leaves one it has just synced. The values are the
+        // ones in a DOOM Eternal save looked at on 2026-10-10: the save marked 3, each container
+        // marked 1 and carrying the mark the cloud gave it.
+        internal const uint IndexSynced = 3;
+        internal const uint ContainerSynced = 1;
+        internal const string SyncedTag = "\"0x8DF26F0B0826728\"";
+        internal const ulong IndexFooter = 0x10000000;
+
         private class Blob
         {
             public string FileID;
@@ -147,7 +155,11 @@ namespace GPSaveConverter.Tests
             container.Blobs.Add(blob);
 
             Directory.CreateDirectory(ContainerFolder(container));
-            File.WriteAllText(Path.Combine(ContainerFolder(container), FolderName(blob.FileCode)), content);
+            string blobFile = Path.Combine(ContainerFolder(container), FolderName(blob.FileCode));
+            File.WriteAllText(blobFile, content);
+
+            // The index gives each container the total size of its blobs.
+            container.IndexSize += (ulong)new FileInfo(blobFile).Length;
             return this;
         }
 
@@ -186,7 +198,8 @@ namespace GPSaveConverter.Tests
                         byte[] name = new byte[FileIDByteLength];
                         Encoding.Unicode.GetBytes(blob.FileID, 0, blob.FileID.Length, name, 0);
                         writer.Write(name);
-                        writer.Write(Guid.Empty.ToByteArray());
+                        // Once a blob is uploaded, the copy the cloud has and the one on disk are the same.
+                        writer.Write(blob.FileCode.ToByteArray());
                         writer.Write(blob.FileCode.ToByteArray());
                     }
                 }
@@ -200,9 +213,9 @@ namespace GPSaveConverter.Tests
                 {
                     WriteString(writer, container.Name1);
                     WriteString(writer, container.Name2);
-                    WriteString(writer, "\"0x1\"");
+                    WriteString(writer, SyncedTag);
                     writer.Write(container.Version);
-                    writer.Write(0u);
+                    writer.Write(container.OnDisk ? ContainerSynced : 0u);
                     writer.Write(container.Guid.ToByteArray());
                     writer.Write(container.IndexTime);
                     writer.Write(0ul);
@@ -242,6 +255,119 @@ namespace GPSaveConverter.Tests
                 }
             }
             return null;
+        }
+
+        /// <summary>One container as the index describes it.</summary>
+        internal class IndexEntry
+        {
+            public string Name1;
+            public string Name2;
+            public string CloudTag;
+            public byte Number;
+            public uint SyncState;
+            public Guid Folder;
+            public long Time;
+            public ulong Size;
+        }
+
+        /// <summary>One blob as a container file describes it.</summary>
+        internal class BlobEntry
+        {
+            public string FileID;
+            public Guid CloudCopy;
+            public Guid LocalCopy;
+
+            /// <summary>The text of the file on disk, or null if it is not there.</summary>
+            public string Content;
+        }
+
+        /// <summary>
+        /// Reads back, without the application's parser, every container the index lists, in the
+        /// order it lists them.
+        /// </summary>
+        internal List<IndexEntry> ReadIndexEntries()
+        {
+            byte[] data = File.ReadAllBytes(Path.Combine(ProfileFolder, "containers.index"));
+            int count = BitConverter.ToInt32(data, 4);
+            int position = 12;
+            ReadString(data, ref position);
+            position += 8 + 4;
+            ReadString(data, ref position);
+            position += 8;
+
+            List<IndexEntry> entries = new List<IndexEntry>();
+            for (int entry = 0; entry < count; entry++)
+            {
+                IndexEntry read = new IndexEntry();
+                read.Name1 = ReadString(data, ref position);
+                read.Name2 = ReadString(data, ref position);
+                read.CloudTag = ReadString(data, ref position);
+                read.Number = data[position];
+                read.SyncState = BitConverter.ToUInt32(data, position + 1);
+                byte[] folder = new byte[16];
+                Array.Copy(data, position + 1 + 4, folder, 0, 16);
+                read.Folder = new Guid(folder);
+                read.Time = BitConverter.ToInt64(data, position + 1 + 4 + 16);
+                read.Size = BitConverter.ToUInt64(data, position + 1 + 4 + 16 + 8 + 8);
+                position += 1 + 4 + 16 + 8 + 8 + 8;
+                entries.Add(read);
+            }
+            return entries;
+        }
+
+        /// <summary>
+        /// Reads back what the index says of the whole save: whether it has changes the cloud has not seen.
+        /// </summary>
+        internal uint ReadIndexSyncState()
+        {
+            byte[] data = File.ReadAllBytes(Path.Combine(ProfileFolder, "containers.index"));
+            int position = 12;
+            ReadString(data, ref position);
+            return BitConverter.ToUInt32(data, position + 8);
+        }
+
+        /// <summary>
+        /// Reads back the last 8 bytes of the index header, which are the same in every save.
+        /// </summary>
+        internal ulong ReadIndexFooter()
+        {
+            byte[] data = File.ReadAllBytes(Path.Combine(ProfileFolder, "containers.index"));
+            int position = 12;
+            ReadString(data, ref position);
+            position += 8 + 4;
+            ReadString(data, ref position);
+            return BitConverter.ToUInt64(data, position);
+        }
+
+        /// <summary>
+        /// Reads a container file of any container the index lists, straight from disk.
+        /// </summary>
+        internal List<BlobEntry> ReadContainerFile(IndexEntry container)
+        {
+            string folder = Path.Combine(ProfileFolder, FolderName(container.Folder));
+            byte[] data = File.ReadAllBytes(Path.Combine(folder, "container." + container.Number));
+            int count = BitConverter.ToInt32(data, 4);
+
+            List<BlobEntry> blobs = new List<BlobEntry>();
+            for (int entry = 0; entry < count; entry++)
+            {
+                int offset = 8 + entry * EntryByteLength;
+                byte[] cloud = new byte[16];
+                byte[] local = new byte[16];
+                Array.Copy(data, offset + FileIDByteLength, cloud, 0, 16);
+                Array.Copy(data, offset + FileIDByteLength + 16, local, 0, 16);
+
+                BlobEntry blob = new BlobEntry
+                {
+                    FileID = Encoding.Unicode.GetString(data, offset, FileIDByteLength).TrimEnd('\0'),
+                    CloudCopy = new Guid(cloud),
+                    LocalCopy = new Guid(local)
+                };
+                string blobFile = Path.Combine(folder, FolderName(blob.LocalCopy));
+                blob.Content = File.Exists(blobFile) ? File.ReadAllText(blobFile) : null;
+                blobs.Add(blob);
+            }
+            return blobs;
         }
 
         /// <summary>
@@ -342,9 +468,9 @@ namespace GPSaveConverter.Tests
             writer.Write(0u);
             WriteString(writer, packageID);
             writer.Write(DateTime.Now.ToFileTime());
-            writer.Write(0u);
+            writer.Write(IndexSynced);
             WriteString(writer, indexID);
-            writer.Write(0ul);
+            writer.Write(IndexFooter);
         }
 
         private static void WriteString(BinaryWriter writer, string value)
