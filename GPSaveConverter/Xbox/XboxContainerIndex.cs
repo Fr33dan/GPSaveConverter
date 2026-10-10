@@ -22,6 +22,11 @@ namespace GPSaveConverter.Xbox
 
         internal string XboxProfileID { get { return xboxProfileID; } }
 
+        /// <summary>
+        /// The game this index belongs to.
+        /// </summary>
+        internal string PackageName { get { return packageName; } }
+
         private uint unknown1;
         private uint unknown2;
         private ulong unknown3;

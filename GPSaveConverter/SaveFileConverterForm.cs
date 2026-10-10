@@ -321,6 +321,14 @@ namespace GPSaveConverter
                 return false;
             }
 
+            // Selecting a game with several Xbox profiles opens none of them, so the profile left open
+            // is the one of the game selected before it. Its files must not be read or written for this game.
+            if (this.currentContainer.PackageName != ActiveGame.PackageName)
+            {
+                MessageBox.Show(this, "Select an Xbox profile", "Select an Xbox profile");
+                return false;
+            }
+
             if(ActiveGame.BaseNonXboxSaveLocation == null || ActiveGame.BaseNonXboxSaveLocation == String.Empty)
             {
                 MessageBox.Show(this, "Non-Xbox Save location not configured", "Configure non-Xbox Location");
