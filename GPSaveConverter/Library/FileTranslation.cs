@@ -143,6 +143,78 @@ namespace GPSaveConverter.Library
             return null;
         }
 
+        /// <summary>
+        /// Works out the Xbox blob ID for a non-Xbox file from the values its path gave the named groups.
+        /// The text around each ${Name} is written as a pattern, so it is un-escaped to get the real ID.
+        /// </summary>
+        /// <param name="nonXboxMatch">The match of the file's relative path against <see cref="NonXboxFilenameRegex"/>.</param>
+        /// <param name="xboxProfileID">The Xbox profile being written to, as its folder names it.</param>
+        /// <param name="asPattern">True for a pattern that finds the blob, false for the ID itself.</param>
+        /// <param name="complete">False if a ${Name} got no value from the path and was left in place.</param>
+        internal string FillXboxFileID(Match nonXboxMatch, string xboxProfileID, bool asPattern, out bool complete)
+        {
+            complete = true;
+            StringBuilder result = new StringBuilder();
+            int position = 0;
+            foreach (Match substitution in Regex.Matches(XboxFileID, @"\$\{(\w+)\}"))
+            {
+                result.Append(TemplateText(XboxFileID.Substring(position, substitution.Index - position), asPattern));
+
+                string name = substitution.Groups[1].Value;
+                string value = null;
+                if (name == "XboxProfileID")
+                {
+                    value = xboxProfileID.TrimStart('0');
+                }
+                else if (name == "XboxProfileID_Int")
+                {
+                    value = Convert.ToInt64(xboxProfileID, 16).ToString();
+                }
+                else if (nonXboxMatch.Groups[name].Success)
+                {
+                    value = nonXboxMatch.Groups[name].Value;
+                }
+
+                if (value != null)
+                {
+                    result.Append(asPattern ? Regex.Escape(value) : value);
+                }
+                else
+                {
+                    result.Append(substitution.Value);
+                    complete = false;
+                }
+                position = substitution.Index + substitution.Length;
+            }
+            result.Append(TemplateText(XboxFileID.Substring(position), asPattern));
+
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Reads a stretch of template text as the real characters it stands for. Templates are patterns,
+        /// so a backslash or a dot in a real name is written with a backslash in front of it.
+        /// </summary>
+        private static string TemplateText(string text, bool asPattern)
+        {
+            string plainText = text;
+            try
+            {
+                string unescaped = Regex.Unescape(text);
+
+                // A control character means the backslash was not an escape: "save\name" is a name, not a line break.
+                if (!unescaped.Any(char.IsControl))
+                {
+                    plainText = unescaped;
+                }
+            }
+            catch (ArgumentException)
+            {
+                // Not an escape the pattern syntax has, so the text is meant as it is written.
+            }
+            return asPattern ? Regex.Escape(plainText) : plainText;
+        }
+
         internal string replaceRegex(string value, bool escape = false)
         {
             string returnVal = value;

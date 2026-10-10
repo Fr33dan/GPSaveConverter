@@ -310,9 +310,22 @@ namespace GPSaveConverter.Library
                 {
                     Xbox.XboxFileContainer xboxFileContainer = containers.First();
 
-                    string xboxFileID = Regex.Escape(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.XboxFileID));
+                    // First the reading every earlier version used: the blob ID taken exactly as it is written.
+                    string xboxFileIDAsWritten = Regex.Escape(Regex.Replace(file.RelativePath, t.NonXboxFilenameRegex, t.XboxFileID));
 
-                    matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, FileTranslation.ExactRegex(t.replaceRegex(xboxFileID))).Success).FirstOrDefault();
+                    matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, FileTranslation.ExactRegex(t.replaceRegex(xboxFileIDAsWritten))).Success).FirstOrDefault();
+
+                    Match nonXboxMatch = Regex.Match(file.RelativePath, t.NonXboxFilenameRegex);
+                    bool xboxFileIDComplete;
+                    string xboxFileID = t.FillXboxFileID(nonXboxMatch, index.XboxProfileID, false, out xboxFileIDComplete);
+
+                    if (matchedFile == null)
+                    {
+                        // Then as a pattern, where a backslash or dot in the real ID has a backslash in front of it.
+                        string xboxFileIDPattern = t.replaceRegex(t.FillXboxFileID(nonXboxMatch, index.XboxProfileID, true, out xboxFileIDComplete));
+
+                        matchedFile = xboxFileContainer.getFileList().Where(f => Regex.Match(f.FileID, xboxFileIDPattern).Success).FirstOrDefault();
+                    }
 
                     if (createOrUpdate)
                     {
@@ -323,6 +336,10 @@ namespace GPSaveConverter.Library
                         }
                         else
                         {
+                            if (!xboxFileIDComplete)
+                            {
+                                throw new Exception("No substitution data found.");
+                            }
                             logger.Info("Adding Xbox Save file: {0} -> {1}", file.FilePath, xboxFileID);
                             matchedFile = xboxFileContainer.AddFile(file, xboxFileID);
                         }

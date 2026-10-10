@@ -149,13 +149,11 @@ namespace GPSaveConverter.Tests
             Assert.Contains("container creation is not supported", refused.Message);
         }
 
-        #region Defects, recorded as they stand
-
         [Fact]
-        public async Task Defect106_CopyToXbox_NewBlobIsNamedWithRegexEscapes()
+        public async Task CopyToXbox_FileWithNoBlobYet_IsAddedUnderItsPlainName()
         {
-            // Issue #106. A file with no blob yet is added to its container, but under the ID the
-            // application built for matching, which has a backslash in front of the dot.
+            // Issue #106. The new blob used to be named with the escapes the application adds for
+            // matching: "peru_123abc\.dat".
             save.WithXboxFile("Profile", "Profile", "settings.dat", "xbox settings")
                 .WithNonXboxFile("peru_123abc.dat", "steam save")
                 .Build();
@@ -165,14 +163,15 @@ namespace GPSaveConverter.Tests
 
             List<KeyValuePair<string, string>> blobs = save.ReadContainer("Profile", "Profile");
             Assert.Equal(2, blobs.Count);
-            Assert.Equal(new KeyValuePair<string, string>("peru_123abc\\.dat", "steam save"), blobs[1]);
+            Assert.Equal(new KeyValuePair<string, string>("settings.dat", "xbox settings"), blobs[0]);
+            Assert.Equal(new KeyValuePair<string, string>("peru_123abc.dat", "steam save"), blobs[1]);
         }
 
         [Fact]
-        public async Task DefectRoadCraft_CopyToXbox_BlobIDWithBackslashIsMissedAndASecondBlobAdded()
+        public async Task CopyToXbox_BlobIDWithABackslash_ReplacesThatBlob()
         {
-            // Issue #164. The existing blob's ID contains a backslash. The application rebuilds the ID
-            // with the backslashes multiplied, does not find the blob, and adds another one.
+            // Issue #164. The backslash in the blob's ID is written "\\" in the translation. The
+            // application used to miss the blob and add a second one named "save\\\\SLOT_0/CompleteSave".
             save.WithXboxFile("MainSave", "MainSave", "save\\SLOT_0/CompleteSave", "xbox progress")
                 .WithNonXboxFile("SLOT_0\\CompleteSave", "steam progress")
                 .Build();
@@ -181,10 +180,96 @@ namespace GPSaveConverter.Tests
             await CopyToXbox(game, "SLOT_0\\CompleteSave");
 
             List<KeyValuePair<string, string>> blobs = save.ReadContainer("MainSave", "MainSave");
-            Assert.Equal(2, blobs.Count);
-            Assert.Equal(new KeyValuePair<string, string>("save\\SLOT_0/CompleteSave", "xbox progress"), blobs[0]);
-            Assert.Equal(new KeyValuePair<string, string>("save\\\\\\\\SLOT_0/CompleteSave", "steam progress"), blobs[1]);
+            Assert.Equal(new KeyValuePair<string, string>("save\\SLOT_0/CompleteSave", "steam progress"), Assert.Single(blobs));
         }
+
+        [Fact]
+        public async Task CopyToXbox_BlobIDTypedAsTheToolShowsIt_StillReplacesTheBlob()
+        {
+            // People type the ID with its single backslash, as the tool displays it. Going to Xbox that
+            // has always worked, and it has to keep working.
+            save.WithXboxFile("MainConfig", "MainConfig", "config\\achievements_common.cfg", "xbox achievements")
+                .WithNonXboxFile("achievements_common.cfg", "steam achievements")
+                .Build();
+            GameInfo game = Game(Translation("MainConfig", "MainConfig", "config\\achievements_common.cfg", "achievements_common.cfg"));
+
+            await CopyToXbox(game, "achievements_common.cfg");
+
+            Assert.Equal(new KeyValuePair<string, string>("config\\achievements_common.cfg", "steam achievements"), Assert.Single(save.ReadContainer("MainConfig", "MainConfig")));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_BlobIDTypedAsShownThatAlsoReadsAsAnEscape_StillReplacesTheBlob()
+        {
+            // "\." reads as an escaped dot, but here the real ID has the backslash in it. The reading
+            // earlier versions used is tried first, so this keeps matching.
+            save.WithXboxFile("Container", "Container", "saves\\.backup", "xbox backup")
+                .WithNonXboxFile("backup.dat", "steam backup")
+                .Build();
+            GameInfo game = Game(Translation("Container", "Container", "saves\\.backup", "backup.dat"));
+
+            await CopyToXbox(game, "backup.dat");
+
+            Assert.Equal(new KeyValuePair<string, string>("saves\\.backup", "steam backup"), Assert.Single(save.ReadContainer("Container", "Container")));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_NewBlobWithIDTypedAsTheToolShowsIt_IsAddedAsWritten()
+        {
+            save.WithXboxFile("MainConfig", "MainConfig", "config\\user_profile.cfg", "xbox profile")
+                .WithNonXboxFile("achievements_common.cfg", "steam achievements")
+                .Build();
+            GameInfo game = Game(Translation("MainConfig", "MainConfig", "config\\achievements_common.cfg", "achievements_common.cfg"));
+
+            await CopyToXbox(game, "achievements_common.cfg");
+
+            List<KeyValuePair<string, string>> blobs = save.ReadContainer("MainConfig", "MainConfig");
+            Assert.Equal(2, blobs.Count);
+            Assert.Equal(new KeyValuePair<string, string>("config\\achievements_common.cfg", "steam achievements"), blobs[1]);
+        }
+
+        [Fact]
+        public async Task CopyToXbox_EscapedDotInTheBlobID_FindsTheBlob()
+        {
+            // One library entry writes its blob ID as "${MapNumber}\.map".
+            save.WithXboxFile("Maps", "Maps", "3.map", "xbox map")
+                .WithNonXboxFile("3.map\\3.map", "steam map")
+                .Build();
+            GameInfo game = Game(Translation("Maps", "Maps", "${MapNumber}\\.map", "${MapNumber}.map\\\\${MapNumber}.map", "(?<MapNumber>[0-9_]+)"));
+
+            await CopyToXbox(game, "3.map\\3.map");
+
+            Assert.Equal(new KeyValuePair<string, string>("3.map", "steam map"), Assert.Single(save.ReadContainer("Maps", "Maps")));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_BlobIDNeedsAValueThePathDoesNotGive_FindsTheBlobByItsPattern()
+        {
+            save.WithXboxFile("Profile", "Profile", "save_EU", "xbox progress")
+                .WithNonXboxFile("save.dat", "steam progress")
+                .Build();
+            GameInfo game = Game(Translation("Profile", "Profile", "save_${Region}", "save.dat", "(?<Region>[A-Z]+)"));
+
+            await CopyToXbox(game, "save.dat");
+
+            Assert.Equal(new KeyValuePair<string, string>("save_EU", "steam progress"), Assert.Single(save.ReadContainer("Profile", "Profile")));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_BlobIDNeedsAValueThePathDoesNotGive_WillNotInventABlob()
+        {
+            save.WithXboxFile("Profile", "Profile", "something else", "xbox progress")
+                .WithNonXboxFile("save.dat", "steam progress")
+                .Build();
+            GameInfo game = Game(Translation("Profile", "Profile", "save_${Region}", "save.dat", "(?<Region>[A-Z]+)"));
+
+            Exception refused = await Assert.ThrowsAnyAsync<Exception>(() => CopyToXbox(game, "save.dat"));
+
+            Assert.Contains("No substitution data found", refused.Message);
+            Assert.Equal(new KeyValuePair<string, string>("something else", "xbox progress"), Assert.Single(save.ReadContainer("Profile", "Profile")));
+        }
+
+        #region Defects, recorded as they stand
 
         [Fact]
         public async Task Defect115_CopyFromXbox_BlobIDWithAFolderSeparator_Throws()

@@ -64,6 +64,9 @@ namespace GPSaveConverter.Tests
             }
         }
 
+        /// <summary>The Xbox profile the simulated save belongs to.</summary>
+        internal const string XboxProfileID = "0009000000000001";
+
         private readonly IList<FileTranslation> translations;
         private readonly IList<XboxFile> xboxFiles;
         private readonly IList<string> nonXboxFiles;
@@ -126,13 +129,28 @@ namespace GPSaveConverter.Tests
             if (containers.Count == 0) return new Result { Outcome = Outcome.NoContainer };
 
             XboxFile container = containers[0];
-            string xboxFileID = Regex.Escape(Regex.Replace(relativePath, t.NonXboxFilenameRegex, t.XboxFileID));
+            List<XboxFile> containerFiles = xboxFiles.Where(f => f.ContainerName1 == container.ContainerName1 && f.ContainerName2 == container.ContainerName2).ToList();
 
-            XboxFile matchedFile = xboxFiles.Where(f => f.ContainerName1 == container.ContainerName1 && f.ContainerName2 == container.ContainerName2)
-                                            .Where(f => Regex.Match(f.FileID, FileTranslation.ExactRegex(t.replaceRegex(xboxFileID))).Success)
-                                            .FirstOrDefault();
+            string xboxFileIDAsWritten = Regex.Escape(Regex.Replace(relativePath, t.NonXboxFilenameRegex, t.XboxFileID));
+
+            XboxFile matchedFile = containerFiles.Where(f => Regex.Match(f.FileID, FileTranslation.ExactRegex(t.replaceRegex(xboxFileIDAsWritten))).Success).FirstOrDefault();
+
+            Match nonXboxMatch = Regex.Match(relativePath, t.NonXboxFilenameRegex);
+            bool xboxFileIDComplete;
+            string xboxFileID = t.FillXboxFileID(nonXboxMatch, XboxProfileID, false, out xboxFileIDComplete);
+
+            if (matchedFile == null)
+            {
+                string xboxFileIDPattern = t.replaceRegex(t.FillXboxFileID(nonXboxMatch, XboxProfileID, true, out xboxFileIDComplete));
+
+                matchedFile = containerFiles.Where(f => Regex.Match(f.FileID, xboxFileIDPattern).Success).FirstOrDefault();
+            }
 
             if (matchedFile != null) return new Result { Outcome = Outcome.ExistingFile, XboxFile = matchedFile };
+            if (!xboxFileIDComplete)
+            {
+                throw new Exception("No substitution data found.");
+            }
             return new Result { Outcome = Outcome.NewFile, XboxFile = container, NewFileID = xboxFileID };
         }
     }
