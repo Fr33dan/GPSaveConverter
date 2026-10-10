@@ -54,6 +54,10 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 
 **The exe runs as a 32-bit process.** Keep `PlatformTarget` `AnyCPU` and `Prefer32Bit` `true` in the csproj. Left unset, the SDK builds an exe that runs 64-bit, which changes registry and environment-variable lookups.
 
+**The tool moves save files. It does not change what is in them.** Some games store a save differently on each store: several files stitched into one, or encrypted with a key tied to the account. Converting those is out of scope. The maintainer looked into it on 2026-10-10 and decided to leave the scope where it is. Creating an Xbox container is packaging, not conversion, and is in scope.
+
+**Nothing in `GameLibrary.json` is ever run.** Every copy of the app downloads that file from `master`. Anything executable in it, a script or a plugin to load, would run on every user's PC.
+
 **Nothing secret goes in the exe.** A resource or constant in a released binary is public. A Steam Web API key shipped that way once and had to be revoked.
 
 **Test classes share static seams.** Classes take their dependencies from static properties (`GameLibrary.Registry`, `NonXboxProfile.FileSystem`, and so on) and xUnit runs test classes in parallel. A new test class must not assign a static that another test class assigns.
