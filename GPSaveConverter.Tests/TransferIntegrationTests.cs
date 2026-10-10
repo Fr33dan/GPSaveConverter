@@ -269,23 +269,176 @@ namespace GPSaveConverter.Tests
             Assert.Equal(new KeyValuePair<string, string>("something else", "xbox progress"), Assert.Single(save.ReadContainer("Profile", "Profile")));
         }
 
-        #region Defects, recorded as they stand
-
         [Fact]
-        public async Task Defect115_CopyFromXbox_BlobIDWithAFolderSeparator_Throws()
+        public async Task CopyFromXbox_BlobIDWithAFolderSeparator_ReplacesTheFileInThatFolder()
         {
-            // The default pattern for ${FileName} allows a backslash. The path built from the Xbox
-            // names is then used as a pattern when looking for an existing file, and "\L" is not one.
+            // The path built from the Xbox names used to be read as a pattern when looking for an
+            // existing file. "\L" is not a valid pattern, so this threw "Unrecognized escape sequence".
             save.WithXboxFile("Container", "Container", "Saves\\Level.sav", "xbox progress")
                 .WithNonXboxFile("Saves\\Level.sav", "old steam progress")
                 .Build();
             GameInfo game = Game(Translation("Container", "Container", "${FileName}", "${FileName}", "(?<FileName>[\\w\\-. \\\\]+)"));
 
-            ArgumentException thrown = await Assert.ThrowsAnyAsync<ArgumentException>(() => CopyFromXbox(game, "Container", "Saves\\Level.sav"));
+            await CopyFromXbox(game, "Container", "Saves\\Level.sav");
 
-            Assert.Contains("Unrecognized escape sequence", thrown.Message);
+            Assert.Equal("xbox progress", save.ReadNonXboxFile("Saves\\Level.sav"));
         }
 
-        #endregion
+        [Fact]
+        public async Task CopyFromXbox_AnotherFileNameContainsTheTarget_OnlyTheTargetIsReplaced()
+        {
+            // The lookup matched anywhere in a name, and "autoprofile.sav" is listed before "profile.sav".
+            save.WithXboxFile("Profile", "Profile", "profile", "xbox profile")
+                .WithNonXboxFile("autoprofile.sav", "steam autosave")
+                .WithNonXboxFile("profile.sav", "old steam profile")
+                .Build();
+            GameInfo game = Game(Translation("Profile", "Profile", "${FileName}", "${FileName}.sav", "(?<FileName>[\\w]+)"));
+
+            await CopyFromXbox(game, "Profile", "profile");
+
+            Assert.Equal("xbox profile", save.ReadNonXboxFile("profile.sav"));
+            Assert.Equal("steam autosave", save.ReadNonXboxFile("autoprofile.sav"));
+        }
+
+        [Fact]
+        public async Task CopyFromXbox_ProfileIDInTheFileName_IsFilledIn()
+        {
+            // Issue #90, with the first Forza Horizon 5 translation from the library. The file used to
+            // be created as "User_${XboxProfileID}.ProfileData".
+            save.WithXboxFile("User_9000000000001", "User_9000000000001", "ProfileData", "xbox profile").Build();
+            GameInfo game = Game(Translation("User_${XboxProfileID}", "User_${XboxProfileID}", "${FileExtension}", "User_${XboxProfileID}.${FileExtension}", "(?<FileExtension>[\\w]+)"));
+
+            await CopyFromXbox(game, "User_9000000000001", "ProfileData");
+
+            Assert.Equal("xbox profile", save.ReadNonXboxFile("User_9000000000001.ProfileData"));
+            Assert.Null(save.ReadNonXboxFile("User_${XboxProfileID}.ProfileData"));
+        }
+
+        [Fact]
+        public async Task CopyFromXbox_ProfileIDInTheFileName_ReplacesTheExistingFile()
+        {
+            save.WithXboxFile("User_9000000000001", "User_9000000000001", "ProfileData", "xbox profile")
+                .WithNonXboxFile("User_9000000000001.ProfileData", "old steam profile")
+                .Build();
+            GameInfo game = Game(Translation("User_${XboxProfileID}", "User_${XboxProfileID}", "${FileExtension}", "User_${XboxProfileID}.${FileExtension}", "(?<FileExtension>[\\w]+)"));
+
+            await CopyFromXbox(game, "User_9000000000001", "ProfileData");
+
+            Assert.Equal("xbox profile", save.ReadNonXboxFile("User_9000000000001.ProfileData"));
+        }
+
+        [Fact]
+        public async Task CopyFromXbox_NewFileWithBracketsInItsName_IsCreated()
+        {
+            // Brackets in the name were counted as unfilled named groups: "No substitution data found."
+            save.WithXboxFile("Saves", "Saves", "Save (1)", "xbox progress").Build();
+            GameInfo game = Game(Translation("Saves", "Saves", "${FileName}", "${FileName}.sav", "(?<FileName>[\\w ()]+)"));
+
+            await CopyFromXbox(game, "Saves", "Save (1)");
+
+            Assert.Equal("xbox progress", save.ReadNonXboxFile("Save (1).sav"));
+        }
+
+        [Fact]
+        public async Task CopyFromXbox_EscapedSeparatorInTheFileName_WritesIntoTheSubfolder()
+        {
+            // How the library writes a subfolder: "Save${FileSlot}\\EscapeAcademyProfile.json".
+            save.WithXboxFile("Save0", "Save", "Profile", "xbox profile").Build();
+            GameInfo game = Game(Translation("Save${FileSlot}", "Save", "Profile", "Save${FileSlot}\\\\EscapeAcademyProfile.json", "(?<FileSlot>[0-9]+)"));
+
+            await CopyFromXbox(game, "Save0", "Profile");
+
+            Assert.Equal("xbox profile", save.ReadNonXboxFile("Save0\\EscapeAcademyProfile.json"));
+        }
+
+        [Fact]
+        public async Task CopyFromXbox_NameWithoutItsFolder_StillFindsTheFileAsEarlierVersionsDid()
+        {
+            // Not a correct translation, but it has always found the file going this way, and people
+            // have translations like it saved.
+            save.WithXboxFile("World-Level", "World-Level", "Data", "xbox world")
+                .WithNonXboxFile("9FD2\\Level01.sav", "old steam world")
+                .Build();
+            GameInfo game = Game(Translation("World-Level", "World-Level", "Data", "Level01.sav"));
+
+            await CopyFromXbox(game, "World-Level", "Data");
+
+            Assert.Equal("xbox world", save.ReadNonXboxFile("9FD2\\Level01.sav"));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_FileInASubfolderWithTheDefaultTranslation_IsRefusedWithoutAPatternError()
+        {
+            // Issue #115. The file's own path went into the container pattern unescaped, and "\L" is not
+            // a valid pattern: selecting the file threw "Unrecognized escape sequence".
+            save.WithXboxFile("84C9-Level", "84C9-Level", "Data", "xbox world")
+                .WithNonXboxFile("84C9\\Level.sav", "steam world")
+                .Build();
+            GameInfo game = Game(FileTranslation.getDefaultInstance());
+
+            await game.refreshNonXboxSaveFiles();
+            XboxContainerIndex index = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
+            index.getFileList();
+            NonXboxFileInfo file = GameLibrary.nonXboxFiles.Single();
+
+            Assert.Null(game.getXboxFileVersion(index, file));
+            Exception refused = Assert.ThrowsAny<Exception>(() => game.getXboxFileVersion(index, file, true));
+            Assert.Contains("container creation is not supported", refused.Message);
+        }
+
+        [Fact]
+        public async Task CopyToXbox_ContainerNamedAfterAFileWithBracketsAndAPlus_IsFound()
+        {
+            save.WithXboxFile("Save (1)+.sav", "Save (1)+.sav", "Save (1)+.sav", "xbox progress")
+                .WithNonXboxFile("Save (1)+.sav", "steam progress")
+                .Build();
+            GameInfo game = Game(Translation("${FileName}", "${FileName}", "${FileName}", "${FileName}", "(?<FileName>[\\w ()+.]+)"));
+
+            await CopyToXbox(game, "Save (1)+.sav");
+
+            Assert.Equal(new KeyValuePair<string, string>("Save (1)+.sav", "steam progress"), Assert.Single(save.ReadContainer("Save (1)+.sav", "Save (1)+.sav")));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_ContainerOnlyTheOldReadingMatches_IsStillFound()
+        {
+            // Earlier versions put the file's name into the container pattern unescaped, so the dot in
+            // "a.c" matched any character. Nothing sensible relies on that, but it is kept as a fallback.
+            save.WithXboxFile("abc", "abc", "abc", "xbox progress")
+                .WithNonXboxFile("a.c", "steam progress")
+                .Build();
+            GameInfo game = Game(Translation("${FileName}", "${FileName}", "${FileName}", "${FileName}", "(?<FileName>[\\w.]+)"));
+
+            await CopyToXbox(game, "a.c");
+
+            List<KeyValuePair<string, string>> blobs = save.ReadContainer("abc", "abc");
+            Assert.Equal(2, blobs.Count);
+            Assert.Equal(new KeyValuePair<string, string>("a.c", "steam progress"), blobs[1]);
+        }
+
+        [Fact]
+        public async Task CopyToXbox_NoXboxProfileOpen_FindsNothingInsteadOfFailing()
+        {
+            save.WithNonXboxFile("save.dat", "steam progress").Build();
+            GameInfo game = Game(FileTranslation.getDefaultInstance());
+            await game.refreshNonXboxSaveFiles();
+
+            Assert.Null(game.getXboxFileVersion(null, GameLibrary.nonXboxFiles.Single()));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_ProfileIDInTheContainerName_ComesFromTheProfileBeingWrittenTo()
+        {
+            // The second Forza Horizon 5 direction. This used to depend on an Xbox file having been
+            // selected first, and failed without one.
+            save.WithXboxFile("User_9000000000001", "User_9000000000001", "ProfileData", "xbox profile")
+                .WithNonXboxFile("User_9000000000001.ProfileData", "steam profile")
+                .Build();
+            GameInfo game = Game(Translation("User_${XboxProfileID}", "User_${XboxProfileID}", "${FileExtension}", "${Group}.${FileExtension}", "(?<Group>[\\w_]+)", "(?<FileExtension>[\\w_.]+)"));
+
+            await CopyToXbox(game, "User_9000000000001.ProfileData");
+
+            Assert.Equal(new KeyValuePair<string, string>("ProfileData", "steam profile"), Assert.Single(save.ReadContainer("User_9000000000001", "User_9000000000001")));
+        }
     }
 }

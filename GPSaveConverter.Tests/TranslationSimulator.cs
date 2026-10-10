@@ -9,8 +9,8 @@ namespace GPSaveConverter.Tests
     /// <summary>
     /// Follows the same steps as GameInfo.getNonXboxFileVersion and GameInfo.getXboxFileVersion,
     /// but on plain file tables, so a translation can be checked without a game's save containers.
-    /// It copies what the application does today, quirks included. If GameInfo changes, change this to match.
-    /// Translations that use ${XboxProfileID} are not supported: resolving it needs a real container.
+    /// The matching itself is the application's own code in FileTranslation. Only the few lines that
+    /// string those calls together are repeated here; if GameInfo changes them, change this to match.
     /// </summary>
     internal class TranslationSimulator
     {
@@ -50,7 +50,7 @@ namespace GPSaveConverter.Tests
         internal class Result
         {
             public Outcome Outcome;
-            /// <summary>Non-Xbox side: the relative path exactly as the application builds it.</summary>
+            /// <summary>Non-Xbox side: the relative path of the file read or written.</summary>
             public string RelativePath;
             /// <summary>Xbox side: the existing file that matched, or the container a new file goes in.</summary>
             public XboxFile XboxFile;
@@ -84,25 +84,28 @@ namespace GPSaveConverter.Tests
         /// </summary>
         internal Result ToNonXbox(XboxFile file)
         {
-            FileTranslation t = translations.FirstOrDefault(c => Regex.Match(file.ContainerName1, c.ContainerName1Regex).Success
-                                                              && Regex.Match(file.ContainerName2, c.ContainerName2Regex).Success
-                                                              && Regex.Match(file.FileID, c.XboxFileIDRegex).Success);
-            if (t == null) return new Result { Outcome = Outcome.NoTranslation };
-
-            string relativePath = Regex.Replace(file.FileID, t.XboxFileIDRegex, t.NonXboxFilename);
-            relativePath = Regex.Replace(file.ContainerName1, t.ContainerName1Regex, relativePath);
-            relativePath = Regex.Replace(file.ContainerName2, t.ContainerName2Regex, relativePath);
-
-            foreach (string existing in nonXboxFiles)
+            FileTranslation t = null;
+            foreach (FileTranslation candidate in translations)
             {
-                if (Regex.Match(existing, relativePath).Success)
+                candidate.XboxProfileID = XboxProfileID;
+                if (Regex.Match(file.ContainerName1, candidate.ContainerName1Regex).Success
+                    && Regex.Match(file.ContainerName2, candidate.ContainerName2Regex).Success
+                    && Regex.Match(file.FileID, candidate.XboxFileIDRegex).Success)
                 {
-                    return new Result { Outcome = Outcome.ExistingFile, RelativePath = existing };
+                    t = candidate;
+                    break;
                 }
             }
+            if (t == null) return new Result { Outcome = Outcome.NoTranslation };
 
-            Regex r = new Regex(t.replaceRegex(relativePath));
-            if (r.GetGroupNames().Length > 1)
+            bool pathComplete;
+            string relativePath = t.FillNonXboxFilename(file.ContainerName1, file.ContainerName2, file.FileID, XboxProfileID, out pathComplete);
+            string pathAsWritten = t.NonXboxFilenameAsWritten(file.ContainerName1, file.ContainerName2, file.FileID);
+
+            string existingPath = FileTranslation.FindNonXboxFile(nonXboxFiles, relativePath, pathAsWritten);
+            if (existingPath != null) return new Result { Outcome = Outcome.ExistingFile, RelativePath = existingPath };
+
+            if (!pathComplete)
             {
                 throw new Exception("No substitution data found.");
             }
@@ -114,16 +117,20 @@ namespace GPSaveConverter.Tests
         /// </summary>
         internal Result ToXbox(string relativePath)
         {
-            FileTranslation t = translations.FirstOrDefault(c => c.NonXboxFilenameRegex != null && Regex.Match(relativePath, c.NonXboxFilenameRegex).Success);
+            FileTranslation t = null;
+            foreach (FileTranslation candidate in translations)
+            {
+                candidate.XboxProfileID = XboxProfileID;
+                if (candidate.NonXboxFilenameRegex != null && Regex.Match(relativePath, candidate.NonXboxFilenameRegex).Success)
+                {
+                    t = candidate;
+                    break;
+                }
+            }
             if (t == null) return new Result { Outcome = Outcome.NoTranslation };
 
-            string container1Name = t.replaceRegex(FileTranslation.ExactRegex(Regex.Replace(relativePath, t.NonXboxFilenameRegex, t.ContainerName1)));
-            string container2Name = t.replaceRegex(FileTranslation.ExactRegex(Regex.Replace(relativePath, t.NonXboxFilenameRegex, t.ContainerName2)));
-
-            List<XboxFile> containers = xboxFiles.GroupBy(f => new { f.ContainerName1, f.ContainerName2 })
-                                                 .Select(g => g.First())
-                                                 .Where(c => Regex.Match(c.ContainerName1, container1Name).Success && Regex.Match(c.ContainerName2, container2Name).Success)
-                                                 .ToList();
+            List<XboxFile> allContainers = xboxFiles.GroupBy(f => new { f.ContainerName1, f.ContainerName2 }).Select(g => g.First()).ToList();
+            List<XboxFile> containers = t.FindContainers(allContainers, c => c.ContainerName1, c => c.ContainerName2, relativePath, XboxProfileID);
 
             if (containers.Count > 1) return new Result { Outcome = Outcome.AmbiguousContainer };
             if (containers.Count == 0) return new Result { Outcome = Outcome.NoContainer };
@@ -131,20 +138,9 @@ namespace GPSaveConverter.Tests
             XboxFile container = containers[0];
             List<XboxFile> containerFiles = xboxFiles.Where(f => f.ContainerName1 == container.ContainerName1 && f.ContainerName2 == container.ContainerName2).ToList();
 
-            string xboxFileIDAsWritten = Regex.Escape(Regex.Replace(relativePath, t.NonXboxFilenameRegex, t.XboxFileID));
-
-            XboxFile matchedFile = containerFiles.Where(f => Regex.Match(f.FileID, FileTranslation.ExactRegex(t.replaceRegex(xboxFileIDAsWritten))).Success).FirstOrDefault();
-
-            Match nonXboxMatch = Regex.Match(relativePath, t.NonXboxFilenameRegex);
+            string xboxFileID;
             bool xboxFileIDComplete;
-            string xboxFileID = t.FillXboxFileID(nonXboxMatch, XboxProfileID, false, out xboxFileIDComplete);
-
-            if (matchedFile == null)
-            {
-                string xboxFileIDPattern = t.replaceRegex(t.FillXboxFileID(nonXboxMatch, XboxProfileID, true, out xboxFileIDComplete));
-
-                matchedFile = containerFiles.Where(f => Regex.Match(f.FileID, xboxFileIDPattern).Success).FirstOrDefault();
-            }
+            XboxFile matchedFile = t.FindXboxFile(containerFiles, f => f.FileID, relativePath, XboxProfileID, out xboxFileID, out xboxFileIDComplete);
 
             if (matchedFile != null) return new Result { Outcome = Outcome.ExistingFile, XboxFile = matchedFile };
             if (!xboxFileIDComplete)
