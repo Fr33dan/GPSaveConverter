@@ -80,6 +80,18 @@ namespace GPSaveConverter
             return "<user-id" + (index >= 1 ? (index + 1).ToString() : ""); 
         }
 
+        /// <summary>
+        /// Tells whether a save location has a place for this profile's ID.
+        /// </summary>
+        internal bool HasPlaceIn(string baseLocation)
+        {
+            // The marker closes right after the number, as in "<user-id2>", or carries on with the
+            // form the ID is written in, as in "<user-id2_XboxInt>". "<user-id2>" is no place for
+            // the first profile, although it starts the same way.
+            return baseLocation != null
+                && (baseLocation.Contains(ProfileMarkerPrefix() + ">") || baseLocation.Contains(ProfileMarkerPrefix() + "_"));
+        }
+
         internal string ExpandSaveLocation(string baseLocation)
         {
             return ExpandSaveLocation(baseLocation, this.UserID);

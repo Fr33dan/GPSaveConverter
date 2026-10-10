@@ -102,5 +102,88 @@ namespace GPSaveConverter.Tests
             Assert.Equal(NonXboxProfile.ProfileType.Xbox, target.TargetProfileTypes[1]);
             Assert.Equal(2, target.TargetProfiles.Length);
         }
+
+        // Forza Horizon 5 in the game library: a Steam profile, and below it the Xbox profile.
+        private const string TwoProfileLocation = "<Steam-folder>\\userdata\\<user-id>\\1551360\\remote\\<user-id2_XboxInt>\\";
+
+        private static GameInfo GameWithTwoProfiles(string location)
+        {
+            var game = new GameInfo();
+            game.ApplyDeserializedInfo(new GameInfo
+            {
+                BaseNonXboxSaveLocation = location,
+                TargetProfileTypes = new[] { NonXboxProfile.ProfileType.Steam, NonXboxProfile.ProfileType.Xbox }
+            });
+            return game;
+        }
+
+        [Fact]
+        public void WaitingForProfile_NoneOfTheLocationsProfilesPicked_IsWaiting()
+        {
+            GameInfo game = GameWithTwoProfiles(TwoProfileLocation);
+
+            Assert.True(game.WaitingForProfile);
+        }
+
+        [Fact]
+        public void WaitingForProfile_OnlyTheFirstPicked_IsStillWaiting()
+        {
+            GameInfo game = GameWithTwoProfiles(TwoProfileLocation);
+            game.TargetProfiles[0] = new NonXboxProfile("12345678", 0, NonXboxProfile.ProfileType.Steam);
+
+            Assert.True(game.WaitingForProfile);
+        }
+
+        [Fact]
+        public void WaitingForProfile_EveryProfilePicked_IsNotWaiting()
+        {
+            GameInfo game = GameWithTwoProfiles(TwoProfileLocation);
+            game.TargetProfiles[0] = new NonXboxProfile("12345678", 0, NonXboxProfile.ProfileType.Steam);
+            game.TargetProfiles[1] = new NonXboxProfile("901F0976E2B74", 1, NonXboxProfile.ProfileType.Xbox);
+
+            Assert.False(game.WaitingForProfile);
+        }
+
+        [Fact]
+        public void WaitingForProfile_LocationHasNoPlaceForTheLibrarysProfiles_IsNotWaiting()
+        {
+            // Issues #5 and #133. The folder was picked by hand, and the library entry of the game
+            // still names two profiles. There is nowhere to pick them and nothing they would change.
+            GameInfo game = GameWithTwoProfiles("D:\\SteamLibrary\\steamapps\\common\\ForzaHorizon5\\");
+
+            Assert.False(game.WaitingForProfile);
+        }
+
+        [Fact]
+        public void WaitingForProfile_LocationHasAPlaceForTheFirstProfileOnly_WaitsForThatOne()
+        {
+            GameInfo game = GameWithTwoProfiles("C:\\Saves\\<user-id>\\");
+
+            Assert.True(game.WaitingForProfile);
+
+            game.TargetProfiles[0] = new NonXboxProfile("12345678", 0, NonXboxProfile.ProfileType.Steam);
+
+            Assert.False(game.WaitingForProfile);
+        }
+
+        [Fact]
+        public void WaitingForProfile_GameWithoutProfiles_IsNotWaiting()
+        {
+            var game = new GameInfo { BaseNonXboxSaveLocation = "%APPDATA%\\Hades\\" };
+
+            Assert.False(game.WaitingForProfile);
+        }
+
+        [Fact]
+        public void UsePickedSaveLocation_TakesTheFolderAsItIsAndDropsTheProfiles()
+        {
+            GameInfo game = GameWithTwoProfiles(TwoProfileLocation);
+
+            game.UsePickedSaveLocation("D:\\Saves\\Forza");
+
+            Assert.Equal("D:\\Saves\\Forza\\", game.BaseNonXboxSaveLocation);
+            Assert.Null(game.TargetProfiles);
+            Assert.False(game.WaitingForProfile);
+        }
     }
 }

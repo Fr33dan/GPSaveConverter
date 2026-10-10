@@ -70,16 +70,37 @@ namespace GPSaveConverter
             DialogResult res = dialog.ShowDialog();
             if (res == DialogResult.OK)
             {
-                ActiveGame.BaseNonXboxSaveLocation = dialog.SelectedPath + "\\";
-
-                // Clear profiles when manual save file location is used.
-                ActiveGame.TargetProfiles = null;
-
-                setNonXboxSaveLocationError(string.Empty);
-                await fetchNonXboxSaveFiles();
+                await useNonXboxSaveLocation(dialog.SelectedPath);
                 return true;
             }
             else return false;
+        }
+
+        /// <summary>
+        /// Takes a folder the user picked as the non-Xbox save location and lists the files in it.
+        /// </summary>
+        internal async Task useNonXboxSaveLocation(string folder)
+        {
+            // Clear profiles when manual save file location is used.
+            ActiveGame.UsePickedSaveLocation(folder);
+
+            // The profile lists belong to the location this one replaces. A click in one would have
+            // no profile left to set.
+            removeProfileTabs();
+
+            setNonXboxSaveLocationError(string.Empty);
+            await fetchNonXboxSaveFiles();
+        }
+
+        private void removeProfileTabs()
+        {
+            if (profileTabs != null)
+            {
+                foreach (TabPage p in this.profileTabs)
+                {
+                    this.tabControl1.Controls.Remove(p);
+                }
+            }
         }
 
         private async Task fetchXboxProfiles()
@@ -198,6 +219,9 @@ namespace GPSaveConverter
 
 
             profileDataGrid = targetTab.Controls[0] as DataGridView;
+            // The list is turned off when it finds no profiles, and it is used again for the next
+            // game, or for this one once a profile has a folder.
+            profileDataGrid.Enabled = true;
             BindingList<NonXboxProfile> profileList = profileDataGrid.DataSource as BindingList<NonXboxProfile>;
             profileList.Clear();
             foreach(NonXboxProfile p in await ActiveGame.getProfileOptions(index))
@@ -341,16 +365,10 @@ namespace GPSaveConverter
                 return false;
             }
 
-            if (ActiveGame.TargetProfiles != null) 
+            if (ActiveGame.WaitingForProfile)
             {
-                foreach (NonXboxProfile p in ActiveGame.TargetProfiles)
-                {
-                    if (p.UserID == null)
-                    {
-                        MessageBox.Show(this, "Select non-Xbox Profile(s) (or select save file location manually)", "Configure Profile");
-                        return false;
-                    }
-                }
+                MessageBox.Show(this, "Select non-Xbox Profile(s) (or select save file location manually)", "Configure Profile");
+                return false;
             }
 
             if (!FileSystem.DirectoryExists(ActiveGame.NonXboxSaveLocation))
@@ -627,14 +645,7 @@ namespace GPSaveConverter
                 }
                 else
                 {
-                    if (profileTabs != null)
-                    {
-                        foreach (TabPage p in this.profileTabs)
-                        {
-                            this.tabControl1.Controls.Remove(p);
-                        }
-                    }
-
+                    removeProfileTabs();
 
                     if (FileSystem.DirectoryExists(ActiveGame.NonXboxSaveLocation))
                     {

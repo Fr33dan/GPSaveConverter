@@ -56,6 +56,12 @@ namespace GPSaveConverter.Tests
         /// <summary>A folder for backups, outside both save folders.</summary>
         internal string BackupFolder { get { return Path.Combine(root, "B"); } }
 
+        /// <summary>
+        /// Where the non-Xbox save folders of a game that keeps one per profile go, with a trailing
+        /// separator. A save location for such a game is this followed by "&lt;user-id&gt;\".
+        /// </summary>
+        internal string NonXboxProfilesFolder { get { return Path.Combine(root, "P") + "\\"; } }
+
         internal string ProfileFolder
         {
             get { return Path.Combine(LocalAppData, "Packages", PackageName, "SystemAppData", "wgs", ProfileID + "_0001"); }
@@ -151,6 +157,17 @@ namespace GPSaveConverter.Tests
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllText(path, content);
             return this;
+        }
+
+        /// <summary>
+        /// Adds an empty save folder for one profile under <see cref="NonXboxProfilesFolder"/>.
+        /// </summary>
+        /// <returns>The folder, with a trailing separator.</returns>
+        internal string AddNonXboxProfile(string profileID)
+        {
+            string folder = Path.Combine(NonXboxProfilesFolder, profileID) + "\\";
+            Directory.CreateDirectory(folder);
+            return folder;
         }
 
         /// <summary>
