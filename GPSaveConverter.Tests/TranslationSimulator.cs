@@ -41,7 +41,7 @@ namespace GPSaveConverter.Tests
             ExistingFile,
             /// <summary>The file maps to a name that does not exist on the other side. A transfer creates it.</summary>
             NewFile,
-            /// <summary>The Xbox container the file belongs in does not exist. A transfer stops; containers cannot be created.</summary>
+            /// <summary>The Xbox container the file belongs in does not exist. A transfer asks whether to make it, and stops for this file on a no.</summary>
             NoContainer,
             /// <summary>More than one Xbox container matches. A transfer stops with "Ambiguous Xbox container results".</summary>
             AmbiguousContainer

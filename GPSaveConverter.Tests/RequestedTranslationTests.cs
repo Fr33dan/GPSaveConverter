@@ -31,6 +31,7 @@ namespace GPSaveConverter.Tests
         [InlineData("Disgaea4Complete")]
         [InlineData("LikeADragonInfiniteWealth")]
         [InlineData("GenerationZero")]
+        [InlineData("FinalFantasyVIIRemakeIntergrade")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -452,6 +453,65 @@ namespace GPSaveConverter.Tests
 
             Assert.Equal(Outcome.ExistingFile, game.ToNonXbox(new XboxFile(PalworldXboxWorld + "-Level-01", PalworldXboxWorld + "-Level-01", "Data")).Outcome);
             Assert.Equal(Outcome.NoTranslation, game.ToXbox(PalworldSteamWorld + "\\Level01.sav").Outcome);
+        }
+
+        #endregion
+
+        #region Final Fantasy VII Remake Intergrade (#180)
+
+        private static TranslationSimulator FinalFantasyVIIRemake()
+        {
+            // The Xbox table as pasted in the issue: a container for each of fourteen slots, and one more.
+            var xboxFiles = Enumerable.Range(0, 14).Select(slot => "ff7remake" + slot.ToString("D3")).Concat(new[] { "ff7remakecommon" })
+                                      .Select(container => new XboxFile(container, container, "Data")).ToArray();
+
+            // The Steam files in the reporter's screenshot. The list went on below what it shows.
+            var nonXboxFiles = Enumerable.Range(0, 8).Select(slot => "ff7remake" + slot.ToString("D3") + ".sav")
+                                         .Concat(new[] { "ff7remakecommon.sav", "ff7remakedevice.sav", "ff7remakeplus000.sav" }).ToArray();
+
+            return new TranslationSimulator(Profile("FinalFantasyVIIRemakeIntergrade"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("000")]
+        [InlineData("003")]
+        [InlineData("007")]
+        [InlineData("common")]
+        public void FinalFantasyVIIRemake_SaveOnBothSides_MapsBothWays(string slot)
+        {
+            TranslationSimulator game = FinalFantasyVIIRemake();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("ff7remake" + slot, "ff7remake" + slot, "Data"));
+            var toXbox = game.ToXbox("ff7remake" + slot + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("ff7remake" + slot + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("ff7remake" + slot + " | ff7remake" + slot + " | Data", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("008")]
+        [InlineData("013")]
+        public void FinalFantasyVIIRemake_XboxOnlySlot_IsCreatedUnderTheSameNumber(string slot)
+        {
+            var toNonXbox = FinalFantasyVIIRemake().ToNonXbox(new XboxFile("ff7remake" + slot, "ff7remake" + slot, "Data"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("ff7remake" + slot + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("ff7remakedevice.sav", "ff7remakedevice")]
+        [InlineData("ff7remakeplus000.sav", "ff7remakeplus000")]
+        public void FinalFantasyVIIRemake_SteamFileWithNoXboxContainer_NeedsOneOfItsOwnName(string file, string container)
+        {
+            // Versions up to v.0.4.12 refuse these two. Later ones ask whether to make the container.
+            Assert.Equal(Outcome.NoContainer, FinalFantasyVIIRemake().ToXbox(file).Outcome);
+
+            string problem;
+            string[] names = Profile("FinalFantasyVIIRemakeIntergrade").Single().NewContainerNames(file, TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { container, container }, names);
         }
 
         #endregion

@@ -1,0 +1,13 @@
+{
+  "Name": "FINAL FANTASY VII REMAKE INTERGRADE",
+  "PackageName": "39EA002F.EXED1_n746a19ndrrjg",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "ff7remake${Slot}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "ff7remake${Slot}",
+      "ContainerName2": "ff7remake${Slot}",
+      "NamedRegexGroups": [ "(?<Slot>[a-z0-9]+)" ]
+    }
+  ]
+}
