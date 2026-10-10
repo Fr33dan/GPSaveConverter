@@ -40,7 +40,15 @@ namespace GPSaveConverter.Xbox
             this.xboxProfileID = id;
 
             wgsFolder = XboxPackageList.getWGSFolder(packageName);
-            xboxProfileFolder = FileSystem.GetDirectories(wgsFolder, xboxProfileID + "_*" + (info.WGSProfileSuffix != null ? info.WGSProfileSuffix : "")).First();
+            string[] profileFolders = FileSystem.GetDirectories(wgsFolder, xboxProfileID + "_*" + (info.WGSProfileSuffix != null ? info.WGSProfileSuffix : ""));
+            if (profileFolders.Length == 0)
+            {
+                throw new DirectoryNotFoundException("No Xbox save folder was found for profile " + xboxProfileID + ".");
+            }
+
+            // The Xbox app can leave several folders for one profile. Only one holds the containers.
+            // The others have an index and nothing else, and opening one of those shows no files.
+            xboxProfileFolder = profileFolders.FirstOrDefault(folder => FileSystem.GetDirectories(folder).Length > 0) ?? profileFolders[0];
             indexPath = Path.Combine(xboxProfileFolder, "containers.index");
             byte[] containerData = FileSystem.ReadAllBytes(indexPath);
 
@@ -60,7 +68,10 @@ namespace GPSaveConverter.Xbox
             containerPackageID = Encoding.Unicode.GetString(containerData, currentByte, nameLength * 2);
             currentByte += (nameLength * 2);
 
-            if(containerPackageID.Substring(0, containerPackageID.IndexOf('!')) != packageName)
+            // Usually the package name, "!" and an app ID. Issue #113 met an index with no "!" in it.
+            int appIDStart = containerPackageID.IndexOf('!');
+            string indexPackageName = appIDStart < 0 ? containerPackageID : containerPackageID.Substring(0, appIDStart);
+            if (indexPackageName != packageName)
             {
                 throw new FileFormatException("Container Index package name mismatch.");
             }

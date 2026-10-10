@@ -55,11 +55,48 @@ namespace GPSaveConverter.Tests
             get { return Path.Combine(LocalAppData, "Packages", PackageName, "SystemAppData", "wgs", ProfileID + "_0001"); }
         }
 
+        /// <summary>
+        /// A second folder of the same profile, of the kind the Xbox app leaves behind: an index and
+        /// nothing else. Its name sorts before <see cref="ProfileFolder"/>, so it is the one found first.
+        /// </summary>
+        internal string LeftoverProfileFolder
+        {
+            get { return Path.Combine(LocalAppData, "Packages", PackageName, "SystemAppData", "wgs", ProfileID + "_0000"); }
+        }
+
+        /// <summary>
+        /// What the index says the package is. The Xbox app writes the package name, "!" and an app ID.
+        /// </summary>
+        internal string IndexPackageID { get; set; } = PackageName + "!App";
+
         internal FakeXboxSave()
         {
             root = Path.Combine(Path.GetTempPath(), "gpsc", Guid.NewGuid().ToString("N").Substring(0, 8));
             Directory.CreateDirectory(ProfileFolder);
             Directory.CreateDirectory(NonXboxFolder);
+        }
+
+        /// <summary>
+        /// Adds <see cref="LeftoverProfileFolder"/>, holding an index that lists no containers.
+        /// </summary>
+        /// <param name="indexPackageID">What that index says the package is.</param>
+        internal FakeXboxSave WithLeftoverProfileFolder(string indexPackageID)
+        {
+            Directory.CreateDirectory(LeftoverProfileFolder);
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(LeftoverProfileFolder, "containers.index"))))
+            {
+                WriteIndexHeader(writer, 0, indexPackageID);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Removes the folder that holds the save, leaving whatever else was added.
+        /// </summary>
+        internal FakeXboxSave WithoutProfileFolder()
+        {
+            Directory.Delete(ProfileFolder, true);
+            return this;
         }
 
         internal FakeXboxSave WithXboxFile(string containerName1, string containerName2, string fileID, string content)
@@ -111,14 +148,7 @@ namespace GPSaveConverter.Tests
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(ProfileFolder, "containers.index"))))
             {
-                writer.Write(0x0000000E);
-                writer.Write(containers.Count);
-                writer.Write(0u);
-                WriteString(writer, PackageName + "!App");
-                writer.Write(DateTime.Now.ToFileTime());
-                writer.Write(0u);
-                WriteString(writer, Guid.NewGuid().ToString());
-                writer.Write(0ul);
+                WriteIndexHeader(writer, containers.Count, IndexPackageID);
 
                 foreach (Container container in containers)
                 {
@@ -188,6 +218,27 @@ namespace GPSaveConverter.Tests
         private static string FolderName(Guid guid)
         {
             return guid.ToString().ToUpper().Replace("-", "");
+        }
+
+        /// <summary>
+        /// Reads back what the index of <see cref="ProfileFolder"/> says the package is.
+        /// </summary>
+        internal string ReadIndexPackageID()
+        {
+            byte[] data = File.ReadAllBytes(Path.Combine(ProfileFolder, "containers.index"));
+            return Encoding.Unicode.GetString(data, 16, BitConverter.ToInt32(data, 12) * 2);
+        }
+
+        private static void WriteIndexHeader(BinaryWriter writer, int containerCount, string packageID)
+        {
+            writer.Write(0x0000000E);
+            writer.Write(containerCount);
+            writer.Write(0u);
+            WriteString(writer, packageID);
+            writer.Write(DateTime.Now.ToFileTime());
+            writer.Write(0u);
+            WriteString(writer, Guid.NewGuid().ToString());
+            writer.Write(0ul);
         }
 
         private static void WriteString(BinaryWriter writer, string value)

@@ -442,6 +442,90 @@ namespace GPSaveConverter.Tests
             Assert.Equal(new KeyValuePair<string, string>("ProfileData", "steam profile"), Assert.Single(save.ReadContainer("User_9000000000001", "User_9000000000001")));
         }
 
+        #region Opening an Xbox profile
+
+        [Fact]
+        public void OpenProfile_LeftoverFolderBesideTheSave_ReadsTheFolderThatHoldsTheSave()
+        {
+            // Issues #29 and #114. The Xbox app can leave several folders for one profile, and only
+            // one of them has containers in it. The first one found used to be opened whatever it
+            // held, which showed no Xbox files at all.
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress")
+                .WithLeftoverProfileFolder(FakeXboxSave.PackageName + "!App")
+                .Build();
+
+            XboxContainerIndex index = new XboxContainerIndex(Game(), FakeXboxSave.ProfileID);
+
+            Assert.Equal(save.ProfileFolder, index.xboxProfileFolder.TrimEnd('\\'));
+            Assert.Equal("SaveSlot0", Assert.Single(index.getFileList()).FileID);
+        }
+
+        [Fact]
+        public void OpenProfile_LeftoverFolderWhoseIndexNamesNoPackage_ReadsTheFolderThatHoldsTheSave()
+        {
+            // Issue #113, Forza Horizon 4: "Length cannot be less than zero" on selecting the game.
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress")
+                .WithLeftoverProfileFolder(string.Empty)
+                .Build();
+
+            XboxContainerIndex index = new XboxContainerIndex(Game(), FakeXboxSave.ProfileID);
+
+            Assert.Equal("SaveSlot0", Assert.Single(index.getFileList()).FileID);
+        }
+
+        [Fact]
+        public void OpenProfile_OnlyALeftoverFolder_OpensItWithNoFiles()
+        {
+            save.WithLeftoverProfileFolder(FakeXboxSave.PackageName + "!App")
+                .WithoutProfileFolder();
+
+            XboxContainerIndex index = new XboxContainerIndex(Game(), FakeXboxSave.ProfileID);
+
+            Assert.Empty(index.getFileList());
+        }
+
+        [Fact]
+        public async Task OpenProfile_IndexNamesThePackageWithoutAnAppID_IsReadAndWrittenBackUnchanged()
+        {
+            // The other way to get "Length cannot be less than zero": no "!" after the package name.
+            save.IndexPackageID = FakeXboxSave.PackageName;
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "old xbox progress")
+                .WithNonXboxFile("saveFile0.sav", "steam progress")
+                .Build();
+            GameInfo game = Game(Translation("SaveGame", "", "SaveSlot${FileSlot}", "saveFile${FileSlot}.sav", "(?<FileSlot>[0-9]+)"));
+
+            await CopyToXbox(game, "saveFile0.sav");
+
+            Assert.Equal(new KeyValuePair<string, string>("SaveSlot0", "steam progress"), Assert.Single(save.ReadContainer("SaveGame", "")));
+            Assert.Equal(FakeXboxSave.PackageName, save.ReadIndexPackageID());
+        }
+
+        [Theory]
+        [InlineData("Another.Game_xyz789!App")]
+        [InlineData("Another.Game_xyz789")]
+        public void OpenProfile_IndexOfAnotherPackage_IsRefused(string indexPackageID)
+        {
+            save.IndexPackageID = indexPackageID;
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress").Build();
+
+            Exception refused = Assert.ThrowsAny<Exception>(() => new XboxContainerIndex(Game(), FakeXboxSave.ProfileID));
+
+            Assert.Equal("FileFormatException", refused.GetType().Name);
+            Assert.Contains("package name mismatch", refused.Message);
+        }
+
+        [Fact]
+        public void OpenProfile_NoFolderForTheProfile_SaysSo()
+        {
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress").Build();
+
+            Exception failure = Assert.Throws<System.IO.DirectoryNotFoundException>(() => new XboxContainerIndex(Game(), "000900000000FFFF"));
+
+            Assert.Contains("000900000000FFFF", failure.Message);
+        }
+
+        #endregion
+
         #region Backups
 
         [Fact]
