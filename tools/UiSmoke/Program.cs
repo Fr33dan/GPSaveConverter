@@ -626,9 +626,7 @@ namespace GPSaveConverter.UiSmoke
             // An installed game gets its name from its package manifest. This one is not installed.
             GameInfo game = GameLibrary.getGameInfo(package);
             game.Name = "Test Game";
-            packages.DataSource = new[] { game };
-            packages.Rows[0].Selected = true;
-            form.GetType().GetMethod("packagesDataGridView_Click", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(form, new object[] { packages, EventArgs.Empty });
+            Select(form, packages, game);
             await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 2, "both file lists");
             Check(backupsMenu.Enabled, "File > Backups is on once a game is selected");
             CheckEqual("1 of the 2 Xbox containers are listed but not on this PC, so their files are not shown.", status.Text, "the status line says a container is not on this PC, and the rest of the save is listed all the same");
@@ -711,12 +709,51 @@ namespace GPSaveConverter.UiSmoke
             CheckEqual(4, store.List(package).Count, "no backup was added");
             settings.BackupBeforeTransfer = true;
 
-            Say("== A profile demanded that the location has no place for, as the wiki lookup used to set up for a Steam row");
-            form.ActiveGame.TargetProfiles = new[] { new NonXboxProfile(0, NonXboxProfile.ProfileType.Steam) };
-            int boxesBefore = responder.Transcript.Count;
-            allFromXbox.PerformClick();
-            await WaitUntil(() => responder.Transcript.Count > boxesBefore && !responder.AnyOpen(), "the refusal");
-            Check(responder.Transcript.Last().Contains("[Configure Profile]") && responder.Transcript.Last().Contains("Select non-Xbox Profile(s)"), "a transfer is refused, and there is no profile list to pick from");
+            Say("== A save location with a place for a profile, before any profile has a folder");
+            TabControl profileTabs = Field<TabControl>(form, "tabControl1");
+            string pickedByHand = form.ActiveGame.BaseNonXboxSaveLocation;
+            // What a game's library entry sets up. The Xbox kind of profile is looked up in no registry and no Steam files.
+            form.ActiveGame.TargetProfileTypes = new[] { NonXboxProfile.ProfileType.Xbox };
+            form.ActiveGame.TargetProfiles = new[] { new NonXboxProfile(0, NonXboxProfile.ProfileType.Xbox) };
+            form.ActiveGame.BaseNonXboxSaveLocation = save.NonXboxProfilesFolder + "<user-id>\\";
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => ProfileList(profileTabs) != null && ProfileList(profileTabs).RowCount == 1 && xboxFiles.RowCount == 2, "the profile list");
+            CheckEqual("No non-Xbox profiles found", ((NonXboxProfile)ProfileList(profileTabs).Rows[0].DataBoundItem).UserName, "the profile list says that it found none");
+            Check(await IsRefusedForProfile(allFromXbox, status, responder), "a transfer is refused");
+
+            Say("== Two profiles get a folder: one is picked, and the files go into it");
+            save.AddNonXboxProfile("1111");
+            string secondProfile = save.AddNonXboxProfile("2222");
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => ProfileList(profileTabs).RowCount == 2 && xboxFiles.RowCount == 2, "both profiles in the list");
+            Check(ProfileList(profileTabs).Enabled, "the list can be clicked, although it was turned off while it had nothing to show");
+            Check(await IsRefusedForProfile(allFromXbox, status, responder), "a transfer is refused until one of them is picked");
+            ClickProfile(form, ProfileList(profileTabs), 1);
+            await WaitUntil(() => form.ActiveGame.TargetProfiles[0].UserID == "2222" && nonXboxFiles.RowCount == 0, "the second profile to be picked");
+            Check(!await IsRefusedForProfile(allFromXbox, status, responder), "with the profile picked, the transfer goes ahead");
+            CheckEqual("xbox slot 0, xbox slot 3", string.Join(", ", new[] { "saveFile0.sav", "saveFile3.sav" }.Select(f => File.Exists(secondProfile + f) ? File.ReadAllText(secondProfile + f) : null)), "the files are in the folder of the profile that was picked");
+            CheckEqual(0, Directory.GetFileSystemEntries(save.NonXboxProfilesFolder + "1111").Length, "the other profile's folder was left alone");
+
+            Say("== A folder picked by hand in place of the profile");
+            await form.useNonXboxSaveLocation(pickedByHand.TrimEnd('\\'));
+            CheckEqual(pickedByHand, form.ActiveGame.BaseNonXboxSaveLocation, "the folder is the save location");
+            CheckEqual(0, profileTabs.TabPages.Count, "the profile list is taken away, as the folder has no place for a profile");
+            CheckEqual("saveFile0.sav, saveFile3.sav, saveFile7.sav", string.Join(", ", nonXboxFiles.Rows.Cast<DataGridViewRow>().Select(r => ((NonXboxFileInfo)r.DataBoundItem).RelativePath)), "the non-Xbox list shows the files in it");
+
+            Say("== The tool closed and started again, with that folder remembered (issue #133)");
+            // Closing stores the library. The next start reads it back, and selecting the game applies its entry.
+            settings.UserGameLibrary = GameLibrary.GetLibraryJson();
+            await GameLibrary.Initialize();
+            GameInfo startedAgain = GameLibrary.getGameInfo(package);
+            startedAgain.Name = "Test Game";
+            Select(form, packages, startedAgain);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both file lists after the start");
+            CheckEqual(pickedByHand, form.ActiveGame.BaseNonXboxSaveLocation, "the folder picked by hand is still the save location");
+            Check(form.ActiveGame.TargetProfiles != null && form.ActiveGame.TargetProfiles.Length == 1 && form.ActiveGame.TargetProfiles[0].UserID == null, "the game's entry names a profile again, and none is picked");
+            CheckEqual(0, profileTabs.TabPages.Count, "there is no profile list to pick one from");
+            Check(!await IsRefusedForProfile(allFromXbox, status, responder), "the transfer goes ahead all the same: the folder has no place for a profile");
+            CheckEqual("xbox slot 0", save.ReadNonXboxFile("saveFile0.sav"), "the files are in the folder picked by hand");
+            form.ActiveGame.TargetProfileTypes = null;
             form.ActiveGame.TargetProfiles = null;
 
             Say("== A translation with a mistyped pattern, then a click in each file list");
@@ -757,15 +794,49 @@ namespace GPSaveConverter.UiSmoke
 
             Say("== An error that nothing in the application handles");
             GameInfo missing = GameLibrary.getGameInfo("Missing.Game_0000000000000");
-            packages.DataSource = new[] { missing };
-            packages.Rows[0].Selected = true;
             responder.ErrorWindowsExpected = 1;
-            form.GetType().GetMethod("packagesDataGridView_Click", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(form, new object[] { packages, EventArgs.Empty });
+            Select(form, packages, missing);
             await WaitUntil(() => responder.ErrorWindowsSeen == 2 && !Application.OpenForms.OfType<ErrorForm>().Any(), "the error window for the unhandled error");
             string lastWindow = responder.Transcript.Last();
             Check(lastWindow.Contains(ErrorReport.UnexpectedProblem), "the window says the tool did not expect the problem");
             Check(lastWindow.Contains("DirectoryNotFoundException") && lastWindow.Contains("Game: Missing.Game_0000000000000"), "its details name the error and the game");
             Check(form.Enabled && !form.IsDisposed, "the main window is still there and usable");
+        }
+
+        /// <summary>Selects a game the way a click on it in the package list does.</summary>
+        private static void Select(SaveFileConverterForm form, DataGridView packages, GameInfo game)
+        {
+            packages.DataSource = new[] { game };
+            packages.Rows[0].Selected = true;
+            form.GetType().GetMethod("packagesDataGridView_Click", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(form, new object[] { packages, EventArgs.Empty });
+        }
+
+        /// <summary>The first list of non-Xbox profiles, or null while there is none.</summary>
+        private static DataGridView ProfileList(TabControl profileTabs)
+        {
+            return profileTabs.TabPages.Count == 0 ? null : (DataGridView)profileTabs.TabPages[0].Controls[0];
+        }
+
+        /// <summary>Picks a profile the way a click on its row does.</summary>
+        private static void ClickProfile(SaveFileConverterForm form, DataGridView list, int row)
+        {
+            list.ClearSelection();
+            list.Rows[row].Selected = true;
+            form.GetType().GetMethod("nonXboxProfileTable_CellClicked", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(form, new object[] { list, null });
+        }
+
+        /// <summary>
+        /// Presses a transfer button and waits for the outcome.
+        /// </summary>
+        /// <returns>True if the transfer was refused for want of a non-Xbox profile, false if it ran.</returns>
+        private static async Task<bool> IsRefusedForProfile(Button transfer, ToolStripStatusLabel status, DialogResponder responder)
+        {
+            int boxesBefore = responder.Transcript.Count;
+            Func<bool> refused = () => responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Configure Profile]") && t.Contains("Select non-Xbox Profile(s)"));
+            status.Text = string.Empty;
+            transfer.PerformClick();
+            await WaitUntil(() => (refused() && !responder.AnyOpen()) || status.Text.StartsWith("Transfer complete"), "the transfer, or its refusal");
+            return refused();
         }
 
         /// <summary>

@@ -41,7 +41,10 @@ it out.
 - **File ▸ Backups**: both backups listed, each restored, both folders back byte for byte, the file
   lists refreshed.
 - Backups turned off in the preferences.
-- A profile that the save location has no place for: the transfer is refused.
+- A save location with a place for a non-Xbox profile: the transfer is refused until a profile is
+  picked, and then goes into that profile's folder.
+- A folder picked by hand, and the tool started again after it: the transfer goes ahead, with no
+  profile asked for.
 - A mistyped pattern in a translation: the status line says so and no window opens.
 - An Xbox save that cannot be read: the error window names the profile, and no profile stays open.
 - An error nothing handles: the error window comes up and the main window survives.

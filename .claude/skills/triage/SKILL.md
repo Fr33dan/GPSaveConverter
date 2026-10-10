@@ -113,6 +113,15 @@ Ask which version they use before anything else. Two causes were fixed in v.0.4.
 - The Xbox app can leave several folders for one profile under `wgs`, and only one holds the save. Older versions opened the first one, which showed no Xbox files or failed outright (#29, #113, #114). People used to work around it by deleting the folders that held only a `containers.index`. They no longer need to.
 - A page on pcgamingwiki.com that the tool could not read stopped the game from being selected (#77).
 
+### The non-Xbox profile list is empty, or a transfer asks for a profile
+
+"Select non-Xbox Profile(s) (or select save file location manually)" means the game's save location has a place for a profile and none is picked. Two things lead there:
+
+- **The list has nothing to pick.** For a Steam game the tool lists the folders under `<Steam folder>\userdata` that hold a save of this game. If the Steam version has never saved, there is none. Starting the Steam version and saving once is the answer, not picking another folder. For Forza Horizon 5 the folder is `<Steam folder>\userdata\<Steam ID>\1551360\remote\<Xbox ID as a number>\`.
+- **A folder was picked by hand, and the tool was started again.** Versions up to v.0.4.12 accepted the folder until the tool was closed, and refused every transfer from the next start on (#5, #133). On those versions, tell them to pick the folder again with **Select non-Xbox Location** and to transfer without closing the tool in between.
+
+A screenshot that shows DLLs or a `DLC` folder in the non-Xbox list is the game's install folder, not its save folder (#133).
+
 ### Pull requests from contributors
 
 - Continuous integration does not start by itself on a first-time contributor's pull request. The run waits with the conclusion `action_required`. Read the diff first. If it changes only data such as `GameLibrary.json`, approve the run with `gh api -X POST repos/Fr33dan/GPSaveConverter/actions/runs/<run id>/approve`. If it changes code or workflows, leave the approval to the maintainer.

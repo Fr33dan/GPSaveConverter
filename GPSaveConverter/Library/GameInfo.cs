@@ -145,6 +145,33 @@ namespace GPSaveConverter.Library
             return await this.TargetProfiles[index].getProfileOptions(baseLocation);
         }
 
+        /// <summary>
+        /// True while the save location has a place for a profile that has not been picked. Nothing
+        /// can be copied until then, because the save folder is not known.
+        /// </summary>
+        internal bool WaitingForProfile
+        {
+            get
+            {
+                // A profile the location has no place for is not waited for. A folder picked by hand
+                // has no such place, and the profiles of the game's library entry are back each time
+                // the stored library is read. Going by them alone refused every transfer from the
+                // next start on, with nothing shown to pick from (issues #5 and #133).
+                return this.TargetProfiles != null
+                    && this.TargetProfiles.Any(p => p.UserID == null && p.HasPlaceIn(this.BaseNonXboxSaveLocation));
+            }
+        }
+
+        /// <summary>
+        /// Makes a folder that was picked by hand the save location. It is used as it is, so no
+        /// profile belongs to it.
+        /// </summary>
+        internal void UsePickedSaveLocation(string folder)
+        {
+            this.BaseNonXboxSaveLocation = folder + "\\";
+            this.TargetProfiles = null;
+        }
+
         internal void ApplyDeserializedInfo(GameInfo deserializedInfo)
         {
             this.BaseNonXboxSaveLocation = deserializedInfo.BaseNonXboxSaveLocation;

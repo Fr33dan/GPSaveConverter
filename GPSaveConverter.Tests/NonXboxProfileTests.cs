@@ -56,5 +56,26 @@ namespace GPSaveConverter.Tests
             // Steam profiles should NOT replace the _XboxInt marker
             Assert.Equal("C:\\Saves\\<user-id_XboxInt>\\game.dat", result);
         }
+
+        [Theory]
+        [InlineData(0, "C:\\Saves\\<user-id>\\", true)]
+        [InlineData(0, "C:\\Saves\\<user-id_XboxInt>\\", true)]
+        [InlineData(0, "C:\\Saves\\<user-id_SteamID64>\\", true)]
+        [InlineData(0, "C:\\Saves\\<user-id>\\remote\\<user-id2_XboxInt>\\", true)]
+        [InlineData(0, "C:\\Saves\\", false)]
+        [InlineData(0, null, false)]
+        // The second profile's marker starts the way the first one's does.
+        [InlineData(0, "C:\\Saves\\<user-id2>\\", false)]
+        [InlineData(0, "C:\\Saves\\<user-id2_XboxInt>\\", false)]
+        [InlineData(1, "C:\\Saves\\<user-id2>\\", true)]
+        [InlineData(1, "C:\\Saves\\<user-id>\\remote\\<user-id2_XboxInt>\\", true)]
+        [InlineData(1, "C:\\Saves\\<user-id>\\", false)]
+        [InlineData(1, "C:\\Saves\\<user-id_XboxInt>\\", false)]
+        public void HasPlaceIn_GoesByTheProfilesOwnMarker(int index, string location, bool expected)
+        {
+            var profile = new NonXboxProfile(index, NonXboxProfile.ProfileType.Steam);
+
+            Assert.Equal(expected, profile.HasPlaceIn(location));
+        }
     }
 }
