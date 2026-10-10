@@ -61,7 +61,13 @@ namespace GPSaveConverter.Library
 
         [Browsable(false),JsonIgnore]
         public Xbox.XboxFileInfo XboxFileInfo { get; set; }
-        
+
+        /// <summary>
+        /// The Xbox profile that ${XboxProfileID} stands for, as its folder names it. Set whenever a
+        /// translation is picked for a file, so it does not depend on which Xbox file was looked at last.
+        /// </summary>
+        internal string XboxProfileID { get; set; }
+
         public FileTranslation() { }
 
 
@@ -153,31 +159,157 @@ namespace GPSaveConverter.Library
         /// <param name="complete">False if a ${Name} got no value from the path and was left in place.</param>
         internal string FillXboxFileID(Match nonXboxMatch, string xboxProfileID, bool asPattern, out bool complete)
         {
+            return Fill(XboxFileID,
+                        name => ProfileValue(name, xboxProfileID) ?? GroupValue(name, nonXboxMatch),
+                        text => TemplateText(text, asPattern),
+                        value => asPattern ? Regex.Escape(value) : value,
+                        out complete);
+        }
+
+        /// <summary>
+        /// Finds the blob a non-Xbox file maps to among the blobs of its container.
+        /// </summary>
+        /// <param name="newFileID">The ID to give the blob if it has to be created.</param>
+        /// <param name="newFileIDComplete">False if that ID still holds a ${Name} with no value, so it cannot be used.</param>
+        /// <returns>The matching blob, or null if the container has none.</returns>
+        internal T FindXboxFile<T>(IEnumerable<T> files, Func<T, string> fileID, string nonXboxRelativePath, string xboxProfileID, out string newFileID, out bool newFileIDComplete) where T : class
+        {
+            // First the reading every earlier version used: the blob ID taken exactly as it is written.
+            string asWritten = ExactRegex(replaceRegex(Regex.Escape(Regex.Replace(nonXboxRelativePath, NonXboxFilenameRegex, XboxFileID))));
+            T matchedFile = files.Where(f => Regex.Match(fileID(f), asWritten).Success).FirstOrDefault();
+
+            Match nonXboxMatch = Regex.Match(nonXboxRelativePath, NonXboxFilenameRegex);
+            newFileID = FillXboxFileID(nonXboxMatch, xboxProfileID, false, out newFileIDComplete);
+
+            if (matchedFile == null)
+            {
+                // Then as a pattern, where a backslash or dot in the real ID has a backslash in front of it.
+                string pattern = replaceRegex(FillXboxFileID(nonXboxMatch, xboxProfileID, true, out newFileIDComplete));
+                matchedFile = files.Where(f => Regex.Match(fileID(f), pattern).Success).FirstOrDefault();
+            }
+            return matchedFile;
+        }
+
+        /// <summary>
+        /// Picks out the Xbox containers a non-Xbox file could belong in.
+        /// </summary>
+        internal List<T> FindContainers<T>(IEnumerable<T> containers, Func<T, string> name1, Func<T, string> name2, string nonXboxRelativePath, string xboxProfileID)
+        {
+            Match nonXboxMatch = Regex.Match(nonXboxRelativePath, NonXboxFilenameRegex);
+            string pattern1 = FillContainerPattern(ContainerName1, nonXboxMatch, xboxProfileID);
+            string pattern2 = FillContainerPattern(ContainerName2, nonXboxMatch, xboxProfileID);
+
+            List<T> found = containers.Where(c => Regex.Match(name1(c), pattern1).Success && Regex.Match(name2(c), pattern2).Success).ToList();
+
+            // Earlier versions put the values from the file's path into the pattern unescaped. A saved
+            // translation may have come to depend on that, so it is still tried when nothing else matches.
+            if (found.Count == 0)
+            {
+                try
+                {
+                    string asWritten1 = replaceRegex(ExactRegex(Regex.Replace(nonXboxRelativePath, NonXboxFilenameRegex, ContainerName1)));
+                    string asWritten2 = replaceRegex(ExactRegex(Regex.Replace(nonXboxRelativePath, NonXboxFilenameRegex, ContainerName2)));
+
+                    found = containers.Where(c => Regex.Match(name1(c), asWritten1).Success && Regex.Match(name2(c), asWritten2).Success).ToList();
+                }
+                catch (ArgumentException)
+                {
+                    // The file's path does not make a valid pattern. A folder separator before some letters does that.
+                }
+            }
+            return found;
+        }
+
+        private string FillContainerPattern(string containerName, Match nonXboxMatch, string xboxProfileID)
+        {
+            // The container name in a translation is a pattern already. Only the values going into it are escaped.
+            bool complete;
+            return replaceRegex(Fill(containerName,
+                                     name => ProfileValue(name, xboxProfileID) ?? GroupValue(name, nonXboxMatch),
+                                     text => text,
+                                     Regex.Escape,
+                                     out complete));
+        }
+
+        /// <summary>
+        /// Works out where an Xbox file this translation matches goes in the non-Xbox save folder.
+        /// </summary>
+        /// <param name="complete">False if a ${Name} got no value from the Xbox names and was left in place.</param>
+        internal string FillNonXboxFilename(string containerName1, string containerName2, string fileID, string xboxProfileID, out bool complete)
+        {
+            // In the order earlier versions applied them: the blob ID first, then each container name.
+            Match[] xboxMatches = new Match[] { Regex.Match(fileID, XboxFileIDRegex), Regex.Match(containerName1, ContainerName1Regex), Regex.Match(containerName2, ContainerName2Regex) };
+
+            return Fill(NonXboxFilename,
+                        name => ProfileValue(name, xboxProfileID) ?? GroupValue(name, xboxMatches),
+                        text => TemplateText(text, false),
+                        value => value,
+                        out complete);
+        }
+
+        /// <summary>
+        /// The non-Xbox path as earlier versions built it, with the template text left exactly as written.
+        /// </summary>
+        internal string NonXboxFilenameAsWritten(string containerName1, string containerName2, string fileID)
+        {
+            string path = Regex.Replace(fileID, XboxFileIDRegex, NonXboxFilename);
+            path = Regex.Replace(containerName1, ContainerName1Regex, path);
+            return Regex.Replace(containerName2, ContainerName2Regex, path);
+        }
+
+        /// <summary>
+        /// Finds the existing non-Xbox file an Xbox file maps to.
+        /// </summary>
+        /// <param name="relativePaths">The files in the non-Xbox save folder, relative to it.</param>
+        /// <param name="path">The path from <see cref="FillNonXboxFilename"/>.</param>
+        /// <param name="pathAsWritten">The path from <see cref="NonXboxFilenameAsWritten"/>.</param>
+        /// <returns>The matching entry of <paramref name="relativePaths"/>, or null if there is none.</returns>
+        internal static string FindNonXboxFile(IEnumerable<string> relativePaths, string path, string pathAsWritten)
+        {
+            // An exact match first, so a file is never passed over for one whose name only contains it.
+            foreach (string wanted in new string[] { path, pathAsWritten })
+            {
+                string exactMatch = relativePaths.FirstOrDefault(p => string.Equals(SingleSeparators(p), SingleSeparators(wanted), StringComparison.OrdinalIgnoreCase));
+                if (exactMatch != null) return exactMatch;
+            }
+
+            // Then the way earlier versions looked: the path read as a pattern and matched anywhere in a name.
+            try
+            {
+                return relativePaths.FirstOrDefault(p => Regex.Match(p, pathAsWritten).Success);
+            }
+            catch (ArgumentException)
+            {
+                // The path does not make a valid pattern. A folder separator before some letters does that.
+                return null;
+            }
+        }
+
+        private static string SingleSeparators(string path)
+        {
+            return Regex.Replace(path, @"\\+", @"\");
+        }
+
+        /// <summary>
+        /// Puts values in place of the ${Name} parts of a template.
+        /// </summary>
+        /// <param name="valueOf">Gives the value for a name, or null if there is none.</param>
+        /// <param name="text">Applied to the template text between the ${Name} parts.</param>
+        /// <param name="value">Applied to each value before it goes in.</param>
+        /// <param name="complete">False if a ${Name} had no value and was left in place.</param>
+        private static string Fill(string template, Func<string, string> valueOf, Func<string, string> text, Func<string, string> value, out bool complete)
+        {
             complete = true;
             StringBuilder result = new StringBuilder();
             int position = 0;
-            foreach (Match substitution in Regex.Matches(XboxFileID, @"\$\{(\w+)\}"))
+            foreach (Match substitution in Regex.Matches(template, @"\$\{(\w+)\}"))
             {
-                result.Append(TemplateText(XboxFileID.Substring(position, substitution.Index - position), asPattern));
+                result.Append(text(template.Substring(position, substitution.Index - position)));
 
-                string name = substitution.Groups[1].Value;
-                string value = null;
-                if (name == "XboxProfileID")
+                string found = valueOf(substitution.Groups[1].Value);
+                if (found != null)
                 {
-                    value = xboxProfileID.TrimStart('0');
-                }
-                else if (name == "XboxProfileID_Int")
-                {
-                    value = Convert.ToInt64(xboxProfileID, 16).ToString();
-                }
-                else if (nonXboxMatch.Groups[name].Success)
-                {
-                    value = nonXboxMatch.Groups[name].Value;
-                }
-
-                if (value != null)
-                {
-                    result.Append(asPattern ? Regex.Escape(value) : value);
+                    result.Append(value(found));
                 }
                 else
                 {
@@ -186,9 +318,25 @@ namespace GPSaveConverter.Library
                 }
                 position = substitution.Index + substitution.Length;
             }
-            result.Append(TemplateText(XboxFileID.Substring(position), asPattern));
+            result.Append(text(template.Substring(position)));
 
             return result.ToString();
+        }
+
+        private static string ProfileValue(string name, string xboxProfileID)
+        {
+            if (name == "XboxProfileID") return xboxProfileID.TrimStart('0');
+            if (name == "XboxProfileID_Int") return Convert.ToInt64(xboxProfileID, 16).ToString();
+            return null;
+        }
+
+        private static string GroupValue(string name, params Match[] matches)
+        {
+            foreach (Match match in matches)
+            {
+                if (match.Groups[name].Success) return match.Groups[name].Value;
+            }
+            return null;
         }
 
         /// <summary>
@@ -221,12 +369,12 @@ namespace GPSaveConverter.Library
 
             if (returnVal.Contains("${XboxProfileID}"))
             {
-                returnVal = returnVal.Replace("${XboxProfileID}", XboxFileInfo.Parent.Parent.XboxProfileID.TrimStart('0'));
+                returnVal = returnVal.Replace("${XboxProfileID}", (XboxProfileID ?? XboxFileInfo.Parent.Parent.XboxProfileID).TrimStart('0'));
             }
 
             if (returnVal.Contains("${XboxProfileID_Int}"))
             {
-                long profileIDLong = Convert.ToInt64(XboxFileInfo.Parent.Parent.XboxProfileID, 16);
+                long profileIDLong = Convert.ToInt64(XboxProfileID ?? XboxFileInfo.Parent.Parent.XboxProfileID, 16);
                 returnVal = returnVal.Replace("${XboxProfileID_Int}", profileIDLong.ToString());
             }
 

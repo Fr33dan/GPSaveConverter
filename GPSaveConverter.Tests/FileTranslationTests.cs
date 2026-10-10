@@ -117,6 +117,39 @@ namespace GPSaveConverter.Tests
             Assert.False(a.Equals("not a FileTranslation"));
         }
 
+        [Fact]
+        public void FindNonXboxFile_PrefersTheExactNameOverOneThatContainsIt()
+        {
+            string found = FileTranslation.FindNonXboxFile(new[] { "autoprofile.sav", "profile.sav" }, "profile.sav", "profile.sav");
+
+            Assert.Equal("profile.sav", found);
+        }
+
+        [Fact]
+        public void FindNonXboxFile_IgnoresLetterCaseAndRepeatedSeparators()
+        {
+            string found = FileTranslation.FindNonXboxFile(new[] { "Saves\\Level.sav" }, "saves\\level.sav", "saves\\\\level.sav");
+
+            Assert.Equal("Saves\\Level.sav", found);
+        }
+
+        [Fact]
+        public void FindNonXboxFile_NoExactName_FallsBackToTheNameAnywhereInAPath()
+        {
+            // What earlier versions did for every lookup. Kept so saved translations that lean on it still work.
+            string found = FileTranslation.FindNonXboxFile(new[] { "9FD2\\Level01.sav" }, "Level01.sav", "Level01.sav");
+
+            Assert.Equal("9FD2\\Level01.sav", found);
+        }
+
+        [Fact]
+        public void FindNonXboxFile_PathThatIsNotAValidPattern_FindsNothingInsteadOfThrowing()
+        {
+            string found = FileTranslation.FindNonXboxFile(new[] { "other.sav" }, "Saves\\Level.sav", "Saves\\Level.sav");
+
+            Assert.Null(found);
+        }
+
         private const string XboxProfileID = "000900000000ABCD";
 
         private static string XboxFileIDFor(string xboxFileID, string nonXboxFilename, string path, bool asPattern, out bool complete)
