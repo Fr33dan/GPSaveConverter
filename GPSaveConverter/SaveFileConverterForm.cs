@@ -356,25 +356,15 @@ namespace GPSaveConverter
             DialogResult res = MessageBox.Show(this, "This could overwrite files in your Xbox save data which cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
             if (res == DialogResult.Yes)
             {
-                foreach (DataGridViewRow row in rows)
-                {
-                    NonXboxFileInfo file = row.DataBoundItem as NonXboxFileInfo; do
-                    {
-                        try
-                        {
-                            ActiveGame.getXboxFileVersion(this.currentContainer, file, true);
-                        }
-                        catch (Exception e)
-                        {
-                            res = MessageBox.Show(this, "An error occurred updating file " + file.RelativePath + Environment.NewLine + e.Message, "Error", MessageBoxButtons.AbortRetryIgnore);
+                IEnumerable<NonXboxFileInfo> files = rows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem as NonXboxFileInfo);
+                bool finished = TransferLoop.Run(files,
+                    file => ActiveGame.getXboxFileVersion(this.currentContainer, file, true),
+                    (file, e) => askAfterError(file.RelativePath, e));
 
-                            if (res == DialogResult.Abort)
-                            {
-                                logger.Info("Transfer aborted");
-                                return;
-                            }
-                        }
-                    } while (res == DialogResult.Retry);
+                if (!finished)
+                {
+                    logger.Info("Transfer aborted");
+                    return;
                 }
 
                 currentContainer.UpdateIndex();
@@ -395,34 +385,38 @@ namespace GPSaveConverter
             DialogResult res = MessageBox.Show(this, "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
             if (res == DialogResult.Yes)
             {
-                foreach (DataGridViewRow row in rows)
-                {
-                    Xbox.XboxFileInfo file = row.DataBoundItem as Xbox.XboxFileInfo;
-                    do
-                    {
-                        try
-                        {
-                            ActiveGame.getNonXboxFileVersion(file, true);
-                        }
-                        catch (Exception e)
-                        {
-                            res = MessageBox.Show(this, "An error occurred updating file " + file.FileID + Environment.NewLine + e.Message, "Error", MessageBoxButtons.AbortRetryIgnore);
+                IEnumerable<Xbox.XboxFileInfo> files = rows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem as Xbox.XboxFileInfo);
+                bool finished = TransferLoop.Run(files,
+                    file => ActiveGame.getNonXboxFileVersion(file, true),
+                    (file, e) => askAfterError(file.FileID, e));
 
-                            if (res == DialogResult.Abort)
-                            {
-                                logger.Info("Transfer aborted");
-                                return;
-                            }
-                        }
-                    } while (res == DialogResult.Retry);
+                if (!finished)
+                {
+                    logger.Info("Transfer aborted");
+                    return;
                 }
-                
+
                 logger.Info("Transfer complete");
 
                 // Reload to refresh UI.
                 await this.fetchNonXboxSaveFiles();
             }
             else { logger.Info("Transfer canceled"); }
+        }
+
+        private AfterError askAfterError(string fileName, Exception e)
+        {
+            DialogResult res = MessageBox.Show(this, "An error occurred updating file " + fileName + Environment.NewLine + e.Message, "Error", MessageBoxButtons.AbortRetryIgnore);
+
+            switch (res)
+            {
+                case DialogResult.Abort:
+                    return AfterError.Abort;
+                case DialogResult.Retry:
+                    return AfterError.Retry;
+                default:
+                    return AfterError.Skip;
+            }
         }
 
         private async void moveSelectionToXboxButton_Click(object sender, EventArgs e)
