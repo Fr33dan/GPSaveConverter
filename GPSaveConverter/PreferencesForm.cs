@@ -48,12 +48,16 @@ namespace GPSaveConverter
             this.logLevelComboBox.Items.AddRange(NLog.LogLevel.AllLevels.ToArray());
             this.logLevelComboBox.SelectedIndex = Settings.FileLogLevel.Ordinal;
             this.allowNetworkCheckbox.Checked = Settings.AllowWebDataFetch;
+            this.backupCheckbox.Checked = Settings.BackupBeforeTransfer;
+            this.backupsToKeepUpDown.Value = Math.Min(Math.Max(Settings.BackupsToKeep, this.backupsToKeepUpDown.Minimum), this.backupsToKeepUpDown.Maximum);
         }
 
         private void saveButton_Click(object sender, EventArgs e)
         {
             Settings.FileLogLevel = this.logLevelComboBox.SelectedItem as NLog.LogLevel;
             Settings.AllowWebDataFetch = this.allowNetworkCheckbox.Checked;
+            Settings.BackupBeforeTransfer = this.backupCheckbox.Checked;
+            Settings.BackupsToKeep = (int)this.backupsToKeepUpDown.Value;
             Settings.Save();
 
             NLog.LogManager.Configuration.Variables["fileLogLevel"] = Settings.FileLogLevel.ToString();

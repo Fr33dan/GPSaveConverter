@@ -13,6 +13,8 @@ namespace GPSaveConverter.Interfaces
         string DefaultGameLibrary { get; set; }
         string UserGameLibrary { get; set; }
         LogLevel FileLogLevel { get; set; }
+        bool BackupBeforeTransfer { get; set; }
+        int BackupsToKeep { get; set; }
 
         void Save();
         void Reset();

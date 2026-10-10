@@ -94,5 +94,29 @@ namespace GPSaveConverter.Properties {
                 this["DefaultGameLibrary"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool BackupBeforeTransfer {
+            get {
+                return ((bool)(this["BackupBeforeTransfer"]));
+            }
+            set {
+                this["BackupBeforeTransfer"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int BackupsToKeep {
+            get {
+                return ((int)(this["BackupsToKeep"]));
+            }
+            set {
+                this["BackupsToKeep"] = value;
+            }
+        }
     }
 }

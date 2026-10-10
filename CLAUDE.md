@@ -21,7 +21,10 @@ The release exe is `GPSaveConverter/bin/Release/net472/GPSaveConverter.exe`.
 | `GPSaveConverter/Library/GameInfo.cs` | Maps a file between an Xbox container and a PC folder |
 | `GPSaveConverter/Library/FileTranslation.cs` | One translation rule |
 | `GPSaveConverter/Xbox/` | Reads and writes the `wgs` container format (`containers.index`, `container.N`) |
+| `GPSaveConverter/SaveBackups/` | Backs up save files before a transfer and restores them |
+| `GPSaveConverter/TransferLoop.cs` | Copies a list of files, with abort, retry or skip after a failure |
 | `GPSaveConverter/SaveFileConverterForm.cs` | The one main window |
+| `GPSaveConverter/BackupsForm.cs` | The **File ▸ Backups** window |
 | `GPSaveConverter/Interfaces/` | Seams for file system, registry, HTTP, settings and PowerShell |
 | `GPSaveConverter/Resources/GameLibrary.json` | The game library |
 | `GPSaveConverter.Tests/` | xUnit and NSubstitute tests |
@@ -42,6 +45,13 @@ The release exe is `GPSaveConverter/bin/Release/net472/GPSaveConverter.exe`.
 **Nothing secret goes in the exe.** A resource or constant in a released binary is public. A Steam Web API key shipped that way once and had to be revoked.
 
 **Test classes share static seams.** Classes take their dependencies from static properties (`GameLibrary.Registry`, `NonXboxProfile.FileSystem`, and so on) and xUnit runs test classes in parallel. A new test class must not assign a static that another test class assigns.
+
+**A transfer has to stay undoable.** Before a transfer writes anything, `SaveBackups` keeps what is there, under `%LOCALAPPDATA%\GPSaveConverter\Backups\<package>\<time>\`. **File ▸ Backups** puts it back.
+
+- Copying to Xbox: the whole profile folder is copied before the first file is written. Restoring makes the folder identical to that copy, so it deletes whatever was added since. `SaveBackup.Verify` therefore refuses any folder that is not `...\Packages\<package>\SystemAppData\wgs\<profile>`. Do not loosen that check.
+- Copying from Xbox: `GameInfo.getNonXboxFileVersion` calls `SaveBackup.Preserve` just before it writes a file. Restoring puts those files back and removes the ones the transfer created. It touches no other file. New code that writes into the non-Xbox save folder must call `Preserve` first as well.
+- A restore backs up what it replaces, so it can be undone the same way.
+- The folder is called `SaveBackups` because `.gitignore` ignores any folder named `Backup*`.
 
 ## How a file translation works
 

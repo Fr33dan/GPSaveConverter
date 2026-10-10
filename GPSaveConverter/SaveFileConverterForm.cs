@@ -18,6 +18,7 @@ namespace GPSaveConverter
     {
         internal static ISettingsProvider Settings { get; set; } = new DefaultSettingsProvider();
         internal static IFileSystem FileSystem { get; set; } = new DefaultFileSystem();
+        internal static SaveBackups.SaveBackupStore Backups { get; set; } = new SaveBackups.SaveBackupStore(SaveBackups.SaveBackupStore.DefaultRoot);
         private static NLog.Logger logger = LogHelper.getClassLogger();
         Xbox.XboxContainerIndex currentContainer;
         internal Library.GameInfo ActiveGame { get; set; }
@@ -361,55 +362,171 @@ namespace GPSaveConverter
         {
             if (!CheckReadyToMove()) return;
 
-            DialogResult res = MessageBox.Show(this, "This could overwrite files in your Xbox save data which cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
-            if (res == DialogResult.Yes)
+            List<NonXboxFileInfo> files = rows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem as NonXboxFileInfo).ToList();
+            if (files.Count == 0)
             {
-                IEnumerable<NonXboxFileInfo> files = rows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem as NonXboxFileInfo);
-                bool finished = TransferLoop.Run(files,
-                    file => ActiveGame.getXboxFileVersion(this.currentContainer, file, true),
-                    (file, e) => askAfterError(file.RelativePath, e));
-
-                if (!finished)
-                {
-                    logger.Info("Transfer aborted");
-                    return;
-                }
-
-                currentContainer.UpdateIndex();
-
-                logger.Info("Transfer complete");
-
-                // Reload to refresh UI.
-                currentContainer = new Xbox.XboxContainerIndex(ActiveGame, (string)this.xboxProfileListBox.SelectedItem);
-                this.xboxFilesTable.DataSource = currentContainer.getFileList();
+                MessageBox.Show(this, "There are no files to copy", "No files");
+                return;
             }
-            else { logger.Info("Transfer canceled"); }
-            
+
+            bool backUp = Settings.BackupBeforeTransfer;
+            string question = backUp
+                ? "This will overwrite files in your Xbox save data." + Environment.NewLine + Environment.NewLine
+                    + "The Xbox save is backed up first. To undo the transfer, choose File > Backups." + Environment.NewLine + Environment.NewLine
+                    + "Continue?"
+                : "This could overwrite files in your Xbox save data which cannot be undone. Are you sure?";
+            DialogResult res = MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo);
+            if (res != DialogResult.Yes)
+            {
+                logger.Info("Transfer canceled");
+                return;
+            }
+
+            SaveBackups.SaveBackup backup = null;
+            if (backUp)
+            {
+                try
+                {
+                    logger.Info("Backing up the Xbox save...");
+                    string packageName = ActiveGame.PackageName;
+                    string gameName = ActiveGame.Name;
+                    string profileFolder = this.currentContainer.xboxProfileFolder;
+                    string madeBefore = "copying " + countFiles(files.Count) + " to Xbox";
+                    backup = await runLocked(() => Backups.BackUpXboxSave(packageName, gameName, profileFolder, madeBefore));
+                }
+                catch (Exception e)
+                {
+                    logger.Warn(e, "The Xbox save could not be backed up");
+                    res = MessageBox.Show(this, "The Xbox save could not be backed up:" + Environment.NewLine + e.Message + Environment.NewLine + Environment.NewLine
+                        + "Copy the files anyway, without a backup?", "Backup failed", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                    if (res != DialogResult.Yes)
+                    {
+                        logger.Info("Transfer canceled");
+                        return;
+                    }
+                }
+            }
+
+            bool finished = TransferLoop.Run(files,
+                file => ActiveGame.getXboxFileVersion(this.currentContainer, file, true),
+                (file, e) => askAfterError(file.RelativePath, e));
+
+            if (backup != null)
+            {
+                pruneBackups();
+            }
+
+            if (!finished)
+            {
+                logger.Info(backup != null ? "Transfer aborted. To undo the files already copied, choose File > Backups." : "Transfer aborted");
+                return;
+            }
+
+            currentContainer.UpdateIndex();
+
+            logger.Info(backup != null ? "Transfer complete. To undo it, choose File > Backups." : "Transfer complete");
+
+            // Reload to refresh UI.
+            currentContainer = new Xbox.XboxContainerIndex(ActiveGame, (string)this.xboxProfileListBox.SelectedItem);
+            this.xboxFilesTable.DataSource = currentContainer.getFileList();
         }
 
         private async Task moveFilesFromXbox(System.Collections.IEnumerable rows)
         {
             if (!CheckReadyToMove()) return;
-            DialogResult res = MessageBox.Show(this, "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?", "Are you sure?", MessageBoxButtons.YesNo);
-            if (res == DialogResult.Yes)
+
+            List<Xbox.XboxFileInfo> files = rows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem as Xbox.XboxFileInfo).ToList();
+            if (files.Count == 0)
             {
-                IEnumerable<Xbox.XboxFileInfo> files = rows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem as Xbox.XboxFileInfo);
-                bool finished = TransferLoop.Run(files,
-                    file => ActiveGame.getNonXboxFileVersion(file, true),
-                    (file, e) => askAfterError(file.FileID, e));
-
-                if (!finished)
-                {
-                    logger.Info("Transfer aborted");
-                    return;
-                }
-
-                logger.Info("Transfer complete");
-
-                // Reload to refresh UI.
-                await this.fetchNonXboxSaveFiles();
+                MessageBox.Show(this, "There are no files to copy", "No files");
+                return;
             }
-            else { logger.Info("Transfer canceled"); }
+
+            bool backUp = Settings.BackupBeforeTransfer;
+            string question = backUp
+                ? "This will overwrite save files in your non-Xbox save data." + Environment.NewLine + Environment.NewLine
+                    + "Each file is backed up before it is replaced. To undo the transfer, choose File > Backups." + Environment.NewLine + Environment.NewLine
+                    + "Continue?"
+                : "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?";
+            DialogResult res = MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo);
+            if (res != DialogResult.Yes)
+            {
+                logger.Info("Transfer canceled");
+                return;
+            }
+
+            // Filled as the transfer goes: each file is kept just before it is written.
+            SaveBackups.SaveBackup backup = backUp
+                ? Backups.StartNonXboxBackup(ActiveGame.PackageName, ActiveGame.Name, ActiveGame.NonXboxSaveLocation, "copying " + countFiles(files.Count) + " from Xbox")
+                : null;
+
+            bool finished = TransferLoop.Run(files,
+                file => ActiveGame.getNonXboxFileVersion(file, true, backup),
+                (file, e) => askAfterError(file.FileID, e));
+
+            bool backedUp = backup != null && backup.Files.Count > 0;
+            if (backedUp)
+            {
+                try
+                {
+                    backup.Complete();
+                }
+                catch (Exception e)
+                {
+                    // Nothing is lost. The journal the backup wrote as it went is read when it is loaded.
+                    logger.Debug(e, "The backup's journal could not be folded into it");
+                }
+                pruneBackups();
+            }
+
+            if (!finished)
+            {
+                logger.Info(backedUp ? "Transfer aborted. To undo the files already copied, choose File > Backups." : "Transfer aborted");
+                return;
+            }
+
+            logger.Info(backedUp ? "Transfer complete. To undo it, choose File > Backups." : "Transfer complete");
+
+            // Reload to refresh UI.
+            await this.fetchNonXboxSaveFiles();
+        }
+
+        private static string countFiles(int count)
+        {
+            return count == 1 ? "1 file" : count + " files";
+        }
+
+        /// <summary>
+        /// Runs slow work off the UI thread. The window is locked meanwhile, so that nothing else can be
+        /// started before the work is done.
+        /// </summary>
+        private async Task<T> runLocked<T>(Func<T> work)
+        {
+            this.Enabled = false;
+            try
+            {
+                return await Task.Run(work);
+            }
+            finally
+            {
+                this.Enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the oldest backups of the active game once there are more than the preferences allow.
+        /// </summary>
+        private void pruneBackups()
+        {
+            try
+            {
+                Backups.Prune(ActiveGame.PackageName, Settings.BackupsToKeep);
+            }
+            catch (Exception e)
+            {
+                // Never a reason to stop: the transfer the newest backup belongs to is going ahead or done.
+                logger.Debug(e, "Old backups could not be removed");
+            }
         }
 
         private AfterError askAfterError(string fileName, Exception e)
@@ -479,6 +596,7 @@ namespace GPSaveConverter
             this.loadGameProfileToolStripMenuItem.Enabled = true;
             this.editNonXboxLocationToolStripMenuItem1.Enabled = true;
             this.copySaveFileTablesToolStripMenuItem.Enabled = true;
+            this.backupsToolStripMenuItem.Enabled = true;
             this.editNonXboxLocationToolStripMenuItem2.Enabled = true;
             this.copyPackageIDToolStripMenuItem.Enabled = true;
 
@@ -712,6 +830,40 @@ namespace GPSaveConverter
         private void copyPackageIDToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(this.ActiveGame.PackageName);
+        }
+
+        private async void backupsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            bool restored;
+            using (BackupsForm backupsForm = new BackupsForm(Backups, ActiveGame.PackageName, ActiveGame.Name))
+            {
+                backupsForm.ShowDialog(this);
+                restored = backupsForm.Restored;
+            }
+
+            if (restored)
+            {
+                try
+                {
+                    // Reload to refresh UI.
+                    if (this.currentContainer != null && this.currentContainer.PackageName == ActiveGame.PackageName)
+                    {
+                        currentContainer = new Xbox.XboxContainerIndex(ActiveGame, this.currentContainer.XboxProfileID);
+                        this.xboxFilesTable.DataSource = currentContainer.getFileList();
+                    }
+
+                    // The button is on exactly when the non-Xbox list has been filled for this game.
+                    if (this.viewNonXboxFileButton.Enabled)
+                    {
+                        await this.fetchNonXboxSaveFiles();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Warn(ex, "The save files could not be listed again after the restore");
+                    MessageBox.Show(this, "The save files could not be listed again:" + Environment.NewLine + ex.Message + Environment.NewLine + Environment.NewLine + "Select the game again to refresh the lists.", "Error");
+                }
+            }
         }
         private void copySaveFileTablesToolStripMenuItem_Click(object sender, EventArgs e)
         {
