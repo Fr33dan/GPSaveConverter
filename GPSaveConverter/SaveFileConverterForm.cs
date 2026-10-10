@@ -116,9 +116,14 @@ namespace GPSaveConverter
 
             if (failed)
             {
-                this.xboxProfileListBox.Items.Add("No profiles found");
+                this.xboxProfileListBox.Items.Add(NoXboxProfiles);
             }
         }
+
+        /// <summary>
+        /// Shown in the Xbox profile list in place of a profile. Selecting it does nothing.
+        /// </summary>
+        private const string NoXboxProfiles = "No profiles found";
 
         private async Task fetchNonXboxProfiles(int index)
         {
@@ -656,11 +661,18 @@ namespace GPSaveConverter
             if (!suspendCrossMatch)
             {
                 List<Xbox.XboxFileInfo> matchedFiles = new List<Xbox.XboxFileInfo>();
-                foreach (DataGridViewRow r in this.nonXboxFilesTable.SelectedRows)
+                try
                 {
-                    NonXboxFileInfo i = (NonXboxFileInfo)r.DataBoundItem;
+                    foreach (DataGridViewRow r in this.nonXboxFilesTable.SelectedRows)
+                    {
+                        NonXboxFileInfo i = (NonXboxFileInfo)r.DataBoundItem;
 
-                    matchedFiles.Add(this.ActiveGame.getXboxFileVersion(this.currentContainer, i));
+                        matchedFiles.Add(this.ActiveGame.getXboxFileVersion(this.currentContainer, i));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    reportMatchFailure(ex);
                 }
 
                 suspendCrossMatch = true;
@@ -677,11 +689,18 @@ namespace GPSaveConverter
             if (!suspendCrossMatch)
             {
                 List<NonXboxFileInfo> matchedFiles = new List<NonXboxFileInfo>();
-                foreach (DataGridViewRow r in this.xboxFilesTable.SelectedRows)
+                try
                 {
-                    Xbox.XboxFileInfo i = (Xbox.XboxFileInfo)r.DataBoundItem;
+                    foreach (DataGridViewRow r in this.xboxFilesTable.SelectedRows)
+                    {
+                        Xbox.XboxFileInfo i = (Xbox.XboxFileInfo)r.DataBoundItem;
 
-                    matchedFiles.Add(this.ActiveGame.getNonXboxFileVersion(i));
+                        matchedFiles.Add(this.ActiveGame.getNonXboxFileVersion(i));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    reportMatchFailure(ex);
                 }
 
                 suspendCrossMatch = true;
@@ -693,12 +712,39 @@ namespace GPSaveConverter
             }
         }
 
+        /// <summary>
+        /// Says in the status line why the file on the other side could not be found. This runs on every
+        /// click in a file list, often on a translation that is still being typed, so it must not put
+        /// a window in the way.
+        /// </summary>
+        private static void reportMatchFailure(Exception e)
+        {
+            logger.Warn("The matching file could not be worked out: {0}", e.Message);
+        }
+
         private void xboxProfileListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentContainer = new Xbox.XboxContainerIndex(ActiveGame, (string)this.xboxProfileListBox.SelectedItem);
-            this.viewXboxFilesButton.Enabled = true;
-            //this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
-            this.xboxFilesTable.DataSource = currentContainer.getFileList();
+            string profile = this.xboxProfileListBox.SelectedItem as string;
+            if (profile == null || profile == NoXboxProfiles)
+            {
+                return;
+            }
+
+            try
+            {
+                currentContainer = new Xbox.XboxContainerIndex(ActiveGame, profile);
+                this.viewXboxFilesButton.Enabled = true;
+                //this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
+                this.xboxFilesTable.DataSource = currentContainer.getFileList();
+            }
+            catch (Exception ex)
+            {
+                // No profile is open now. Leaving the last one open would show another save's files as this one's.
+                currentContainer = null;
+                this.viewXboxFilesButton.Enabled = false;
+                this.xboxFilesTable.DataSource = GPSaveConverter.Library.GameLibrary.xboxFiles;
+                ErrorReport.Show(this, "The Xbox save of profile " + profile + " could not be read.", ex);
+            }
         }
 
         private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)

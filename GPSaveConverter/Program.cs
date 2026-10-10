@@ -16,6 +16,7 @@ namespace GPSaveConverter
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            ErrorReport.CatchUnhandledErrors();
             Application.Run(new SaveFileConverterForm());
         }
     }
