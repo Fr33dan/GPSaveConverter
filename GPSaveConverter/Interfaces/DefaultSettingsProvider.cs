@@ -43,6 +43,18 @@ namespace GPSaveConverter.Interfaces
             set => Properties.Settings.Default.FileLogLevel = value;
         }
 
+        public bool BackupBeforeTransfer
+        {
+            get => Properties.Settings.Default.BackupBeforeTransfer;
+            set => Properties.Settings.Default.BackupBeforeTransfer = value;
+        }
+
+        public int BackupsToKeep
+        {
+            get => Properties.Settings.Default.BackupsToKeep;
+            set => Properties.Settings.Default.BackupsToKeep = value;
+        }
+
         public void Save() => Properties.Settings.Default.Save();
 
         public void Reset() => Properties.Settings.Default.Reset();

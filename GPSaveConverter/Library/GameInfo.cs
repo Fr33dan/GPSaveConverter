@@ -232,7 +232,8 @@ namespace GPSaveConverter.Library
             }
         }
 
-        internal NonXboxFileInfo getNonXboxFileVersion(Xbox.XboxFileInfo file, bool createOrUpdate = false)
+        /// <param name="backup">If given, the non-Xbox file is kept in it as it is before it is written.</param>
+        internal NonXboxFileInfo getNonXboxFileVersion(Xbox.XboxFileInfo file, bool createOrUpdate = false, SaveBackups.SaveBackup backup = null)
         {
             FileTranslation t = findTranslation(file);
             NonXboxFileInfo returnVal = null;
@@ -271,6 +272,11 @@ namespace GPSaveConverter.Library
                 if (createOrUpdate)
                 {
                     logger.Info("Extracting Xbox save file: {0} -> {1}", file.FileID, returnVal.FilePath);
+                    if (backup != null)
+                    {
+                        // Before the folder is made, so the backup can tell that it was not there.
+                        backup.Preserve(returnVal.FilePath);
+                    }
                     FileSystem.CreateDirectory(Path.GetDirectoryName(returnVal.FilePath));
                     FileSystem.CopyFile(file.getFilePath(), returnVal.FilePath, true);
                     returnVal.Timestamp = FileSystem.GetFileLastWriteTime(returnVal.FilePath);

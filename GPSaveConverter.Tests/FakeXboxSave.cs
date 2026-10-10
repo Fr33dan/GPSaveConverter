@@ -47,7 +47,10 @@ namespace GPSaveConverter.Tests
         /// <summary>The non-Xbox save folder, with a trailing separator as the application stores it.</summary>
         internal string NonXboxFolder { get { return Path.Combine(root, "N") + "\\"; } }
 
-        private string ProfileFolder
+        /// <summary>A folder for backups, outside both save folders.</summary>
+        internal string BackupFolder { get { return Path.Combine(root, "B"); } }
+
+        internal string ProfileFolder
         {
             get { return Path.Combine(LocalAppData, "Packages", PackageName, "SystemAppData", "wgs", ProfileID + "_0001"); }
         }

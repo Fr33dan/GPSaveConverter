@@ -34,6 +34,10 @@
             this.allowNetworkCheckbox = new System.Windows.Forms.CheckBox();
             this.reloadLibraryButton = new System.Windows.Forms.Button();
             this.resetAllButton = new System.Windows.Forms.Button();
+            this.backupCheckbox = new System.Windows.Forms.CheckBox();
+            this.backupsToKeepLabel = new System.Windows.Forms.Label();
+            this.backupsToKeepUpDown = new System.Windows.Forms.NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.backupsToKeepUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // logLevelComboBox
@@ -42,7 +46,7 @@
             this.logLevelComboBox.FormattingEnabled = true;
             this.logLevelComboBox.Location = new System.Drawing.Point(139, 12);
             this.logLevelComboBox.Name = "logLevelComboBox";
-            this.logLevelComboBox.Size = new System.Drawing.Size(121, 21);
+            this.logLevelComboBox.Size = new System.Drawing.Size(141, 21);
             this.logLevelComboBox.TabIndex = 0;
             // 
             // logLevelLabel
@@ -58,7 +62,7 @@
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(185, 99);
+            this.saveButton.Location = new System.Drawing.Point(205, 155);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(75, 23);
             this.saveButton.TabIndex = 2;
@@ -82,7 +86,7 @@
             this.reloadLibraryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.reloadLibraryButton.Location = new System.Drawing.Point(76, 62);
             this.reloadLibraryButton.Name = "reloadLibraryButton";
-            this.reloadLibraryButton.Size = new System.Drawing.Size(184, 23);
+            this.reloadLibraryButton.Size = new System.Drawing.Size(204, 23);
             this.reloadLibraryButton.TabIndex = 4;
             this.reloadLibraryButton.Text = "Reload Default Game Library Data";
             this.reloadLibraryButton.UseVisualStyleBackColor = true;
@@ -91,7 +95,7 @@
             // resetAllButton
             // 
             this.resetAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.resetAllButton.Location = new System.Drawing.Point(12, 99);
+            this.resetAllButton.Location = new System.Drawing.Point(12, 155);
             this.resetAllButton.Name = "resetAllButton";
             this.resetAllButton.Size = new System.Drawing.Size(75, 23);
             this.resetAllButton.TabIndex = 5;
@@ -99,11 +103,55 @@
             this.resetAllButton.UseVisualStyleBackColor = true;
             this.resetAllButton.Click += new System.EventHandler(this.resetAllButton_Click);
             // 
+            // backupCheckbox
+            // 
+            this.backupCheckbox.AutoSize = true;
+            this.backupCheckbox.Location = new System.Drawing.Point(76, 96);
+            this.backupCheckbox.Name = "backupCheckbox";
+            this.backupCheckbox.Size = new System.Drawing.Size(177, 17);
+            this.backupCheckbox.TabIndex = 6;
+            this.backupCheckbox.Text = "Back up saves before a transfer";
+            this.backupCheckbox.UseVisualStyleBackColor = true;
+            // 
+            // backupsToKeepLabel
+            // 
+            this.backupsToKeepLabel.AutoSize = true;
+            this.backupsToKeepLabel.Location = new System.Drawing.Point(76, 122);
+            this.backupsToKeepLabel.Name = "backupsToKeepLabel";
+            this.backupsToKeepLabel.Size = new System.Drawing.Size(138, 13);
+            this.backupsToKeepLabel.TabIndex = 7;
+            this.backupsToKeepLabel.Text = "Backups to keep per game:";
+            // 
+            // backupsToKeepUpDown
+            // 
+            this.backupsToKeepUpDown.Location = new System.Drawing.Point(225, 120);
+            this.backupsToKeepUpDown.Maximum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            0});
+            this.backupsToKeepUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.backupsToKeepUpDown.Name = "backupsToKeepUpDown";
+            this.backupsToKeepUpDown.Size = new System.Drawing.Size(55, 20);
+            this.backupsToKeepUpDown.TabIndex = 8;
+            this.backupsToKeepUpDown.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
             // PreferencesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(272, 134);
+            this.ClientSize = new System.Drawing.Size(292, 190);
+            this.Controls.Add(this.backupsToKeepUpDown);
+            this.Controls.Add(this.backupsToKeepLabel);
+            this.Controls.Add(this.backupCheckbox);
             this.Controls.Add(this.resetAllButton);
             this.Controls.Add(this.reloadLibraryButton);
             this.Controls.Add(this.allowNetworkCheckbox);
@@ -115,6 +163,7 @@
             this.Text = "Preferences";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PreferencesForm_FormClosing);
             this.Load += new System.EventHandler(this.PreferencesForm_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.backupsToKeepUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -128,5 +177,8 @@
         private System.Windows.Forms.CheckBox allowNetworkCheckbox;
         private System.Windows.Forms.Button reloadLibraryButton;
         private System.Windows.Forms.Button resetAllButton;
+        private System.Windows.Forms.CheckBox backupCheckbox;
+        private System.Windows.Forms.Label backupsToKeepLabel;
+        private System.Windows.Forms.NumericUpDown backupsToKeepUpDown;
     }
 }

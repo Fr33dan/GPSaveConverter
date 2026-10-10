@@ -83,6 +83,7 @@
             this.exportGameLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copySaveFileTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.backupsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showFileTranslationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -574,6 +575,7 @@
             this.loadGameProfileToolStripMenuItem,
             this.editNonXboxLocationToolStripMenuItem1,
             this.copySaveFileTablesToolStripMenuItem,
+            this.backupsToolStripMenuItem,
             this.exportGameLibraryToolStripMenuItem,
             this.preferencesToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -629,7 +631,16 @@
             this.copySaveFileTablesToolStripMenuItem.Text = "Copy Save File Table(s)";
             this.copySaveFileTablesToolStripMenuItem.ToolTipText = "Copy save file tables for file translation request on GitHub.";
             this.copySaveFileTablesToolStripMenuItem.Click += new System.EventHandler(this.copySaveFileTablesToolStripMenuItem_Click);
-            // 
+            //
+            // backupsToolStripMenuItem
+            //
+            this.backupsToolStripMenuItem.Enabled = false;
+            this.backupsToolStripMenuItem.Name = "backupsToolStripMenuItem";
+            this.backupsToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.backupsToolStripMenuItem.Text = "Backups";
+            this.backupsToolStripMenuItem.ToolTipText = "Restore save files to how they were before a transfer.";
+            this.backupsToolStripMenuItem.Click += new System.EventHandler(this.backupsToolStripMenuItem_Click);
+            //
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -843,6 +854,7 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copySaveFileTablesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem backupsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editNonXboxLocationToolStripMenuItem;
         private System.Windows.Forms.Panel fileTranslationPanel;
         private System.Windows.Forms.PropertyGrid fileTranslationPropertyGrid;
