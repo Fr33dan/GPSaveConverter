@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using Xunit;
+using GPSaveConverter.SaveBackups;
 using GPSaveConverter.Interfaces;
 using GPSaveConverter.Library;
 using GPSaveConverter.Xbox;
@@ -440,5 +441,107 @@ namespace GPSaveConverter.Tests
 
             Assert.Equal(new KeyValuePair<string, string>("ProfileData", "steam profile"), Assert.Single(save.ReadContainer("User_9000000000001", "User_9000000000001")));
         }
+
+        #region Backups
+
+        [Fact]
+        public async Task CopyFromXbox_WithABackup_CanBeUndone()
+        {
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox slot 0")
+                .WithXboxFile("SaveGame", "", "SaveSlot3", "xbox slot 3")
+                .WithNonXboxFile("saveFile0.sav", "steam slot 0")
+                .WithNonXboxFile("settings.ini", "steam settings")
+                .Build();
+            GameInfo game = Game(Translation("SaveGame", "", "SaveSlot${FileSlot}", "saveFile${FileSlot}.sav", "(?<FileSlot>[0-9]+)"));
+            SortedDictionary<string, string> before = FolderContents.Read(save.NonXboxFolder);
+            SaveBackupStore store = new SaveBackupStore(save.BackupFolder);
+            SaveBackup backup = store.StartNonXboxBackup(game.PackageName, game.Name, game.NonXboxSaveLocation, "copying 2 files from Xbox");
+
+            await game.refreshNonXboxSaveFiles();
+            XboxContainerIndex index = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
+            foreach (XboxFileInfo file in index.getFileList())
+            {
+                game.getNonXboxFileVersion(file, true, backup);
+            }
+            backup.Complete();
+
+            Assert.Equal("xbox slot 0", save.ReadNonXboxFile("saveFile0.sav"));
+            Assert.Equal("xbox slot 3", save.ReadNonXboxFile("saveFile3.sav"));
+
+            store.Restore(Assert.Single(store.List(game.PackageName)));
+
+            Assert.Equal(before, FolderContents.Read(save.NonXboxFolder));
+        }
+
+        [Fact]
+        public async Task CopyFromXbox_IntoAFolderThatWasNotThere_UndoRemovesTheFolder()
+        {
+            save.WithXboxFile("Save0", "Save", "Profile", "xbox profile")
+                .WithNonXboxFile("settings.ini", "steam settings")
+                .Build();
+            GameInfo game = Game(Translation("Save${FileSlot}", "Save", "Profile", "Save${FileSlot}\\\\EscapeAcademyProfile.json", "(?<FileSlot>[0-9]+)"));
+            SortedDictionary<string, string> before = FolderContents.Read(save.NonXboxFolder);
+            SaveBackupStore store = new SaveBackupStore(save.BackupFolder);
+            SaveBackup backup = store.StartNonXboxBackup(game.PackageName, game.Name, game.NonXboxSaveLocation, "copying 1 file from Xbox");
+
+            await game.refreshNonXboxSaveFiles();
+            XboxContainerIndex index = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
+            game.getNonXboxFileVersion(index.getFileList().Single(), true, backup);
+            backup.Complete();
+
+            Assert.Equal("xbox profile", save.ReadNonXboxFile("Save0\\EscapeAcademyProfile.json"));
+
+            store.Restore(Assert.Single(store.List(game.PackageName)));
+
+            Assert.Equal(before, FolderContents.Read(save.NonXboxFolder));
+        }
+
+        [Fact]
+        public async Task CopyFromXbox_WithoutABackup_WorksAsBefore()
+        {
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress")
+                .WithNonXboxFile("saveFile0.sav", "old steam progress")
+                .Build();
+            GameInfo game = Game(Translation("SaveGame", "", "SaveSlot${FileSlot}", "saveFile${FileSlot}.sav", "(?<FileSlot>[0-9]+)"));
+
+            await game.refreshNonXboxSaveFiles();
+            XboxContainerIndex index = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
+            game.getNonXboxFileVersion(index.getFileList().Single(), true, null);
+
+            Assert.Equal("xbox progress", save.ReadNonXboxFile("saveFile0.sav"));
+            Assert.False(System.IO.Directory.Exists(save.BackupFolder));
+        }
+
+        [Fact]
+        public async Task CopyToXbox_AfterABackup_CanBeUndone()
+        {
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox slot 0")
+                .WithXboxFile("Profile", "Profile", "settings.dat", "xbox settings")
+                .WithNonXboxFile("saveFile0.sav", "steam slot 0")
+                .WithNonXboxFile("saveFile5.sav", "steam slot 5")
+                .Build();
+            GameInfo game = Game(Translation("SaveGame", "", "SaveSlot${FileSlot}", "saveFile${FileSlot}.sav", "(?<FileSlot>[0-9]+)"));
+            SortedDictionary<string, string> before = FolderContents.Read(save.ProfileFolder);
+            SaveBackupStore store = new SaveBackupStore(save.BackupFolder);
+            store.BackUpXboxSave(game.PackageName, game.Name, new XboxContainerIndex(game, FakeXboxSave.ProfileID).xboxProfileFolder, "copying 2 files to Xbox");
+
+            // The first replaces a blob. The second adds one, which also rewrites the container file.
+            await CopyToXbox(game, "saveFile0.sav");
+            await CopyToXbox(game, "saveFile5.sav");
+
+            Assert.Equal(new[] { "steam slot 0", "steam slot 5" }, save.ReadContainer("SaveGame", "").Select(blob => blob.Value));
+            Assert.NotEqual(before, FolderContents.Read(save.ProfileFolder));
+
+            store.Restore(Assert.Single(store.List(game.PackageName)));
+
+            Assert.Equal(before, FolderContents.Read(save.ProfileFolder));
+
+            // And the application reads the restored save like any other.
+            XboxContainerIndex restored = new XboxContainerIndex(game, FakeXboxSave.ProfileID);
+            Assert.Equal(new[] { "SaveSlot0", "settings.dat" }, restored.getFileList().Select(file => file.FileID));
+            Assert.Equal(new KeyValuePair<string, string>("SaveSlot0", "xbox slot 0"), Assert.Single(save.ReadContainer("SaveGame", "")));
+        }
+
+        #endregion
     }
 }
