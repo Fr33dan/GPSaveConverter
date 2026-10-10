@@ -68,7 +68,13 @@ A translation has four templates and a list of named regex groups:
 
 ## Releases
 
-Tags look like `v.0.4.10`. A release is the single exe attached to a GitHub Release. Bump `AssemblyFileVersion` in `GPSaveConverter/Properties/AssemblyInfo.cs`.
+Tags look like `v.0.4.10`. A release is the single exe attached to a GitHub Release.
+
+1. Bump `AssemblyFileVersion` in `GPSaveConverter/Properties/AssemblyInfo.cs` to the new version and merge that.
+2. Push the tag. `.github/workflows/release.yml` stops if the tag and `AssemblyFileVersion` disagree. Otherwise it builds, runs the tests, checks the exe is 32-bit with its dependencies embedded, and opens a draft release with the exe attached.
+3. The maintainer reads the generated notes and publishes the draft. Nothing is public before that.
+
+The same workflow can be run by hand from the Actions tab to check the build without making a release.
 
 ## GitHub issues and PRs
 

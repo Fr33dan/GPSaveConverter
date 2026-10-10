@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    # Tags look like v.0.4.10
+    tags: ['v.*']
+  # Run by hand to check the build without making a release.
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    env:
+      EXE: GPSaveConverter/bin/Release/net472/GPSaveConverter.exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.x'
+
+      # The tag is the version users see. Stop if the exe would report a different one.
+      - name: Check the tag matches AssemblyFileVersion
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          $version = $env:TAG -replace '^v\.', ''
+          $match = Select-String -Path GPSaveConverter/Properties/AssemblyInfo.cs -Pattern '^\[assembly: AssemblyFileVersion\("([0-9.]+)"\)\]'
+          if (-not $match) { Write-Error "AssemblyFileVersion not found in AssemblyInfo.cs"; exit 1 }
+          $fileVersion = $match.Matches[0].Groups[1].Value
+          if ($fileVersion -ne $version -and $fileVersion -ne "$version.0") {
+            Write-Error "Tag $env:TAG does not match AssemblyFileVersion $fileVersion. Bump the version in GPSaveConverter/Properties/AssemblyInfo.cs first."
+            exit 1
+          }
+          Write-Host "Tag $env:TAG matches AssemblyFileVersion $fileVersion"
+
+      - name: Build
+        run: dotnet build GPSaveConverter.sln --configuration Release --verbosity minimal
+
+      - name: Run tests
+        run: dotnet test GPSaveConverter.Tests/GPSaveConverter.Tests.csproj --configuration Release --no-build --verbosity minimal
+
+      # A release is one exe with its dependencies inside it, running as a 32-bit process.
+      - name: Check the exe
+        run: |
+          if (-not (Test-Path $env:EXE)) { Write-Error "$env:EXE was not built"; exit 1 }
+
+          $stream = [IO.File]::OpenRead((Resolve-Path $env:EXE))
+          $reader = [System.Reflection.PortableExecutable.PEReader]::new($stream)
+          $flags = $reader.PEHeaders.CorHeader.Flags
+          $metadata = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader($reader)
+          $embedded = @($metadata.ManifestResources | ForEach-Object { $metadata.GetString($metadata.GetManifestResource($_).Name) } | Where-Object { $_ -like 'costura.*.dll.compressed' })
+          $reader.Dispose(); $stream.Dispose()
+
+          if ($embedded.Count -lt 10) {
+            Write-Error "Only $($embedded.Count) dependencies are embedded in the exe. Costura.Fody should embed all of them."
+            exit 1
+          }
+          if (-not $flags.HasFlag([System.Reflection.PortableExecutable.CorFlags]::Prefers32Bit)) {
+            Write-Error "The exe is not 32-bit preferred (flags: $flags). See PlatformTarget and Prefer32Bit in the csproj."
+            exit 1
+          }
+          Write-Host "$env:EXE: $((Get-Item $env:EXE).Length) bytes, $($embedded.Count) embedded dependencies, flags: $flags"
+
+      - name: Upload the exe
+        uses: actions/upload-artifact@v7
+        with:
+          name: GPSaveConverter
+          path: ${{ env.EXE }}
+
+      # A draft: nothing is public until a maintainer reviews the notes and publishes it.
+      - name: Create draft release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create $env:TAG $env:EXE --draft --title $env:TAG --generate-notes
