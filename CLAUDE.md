@@ -13,6 +13,15 @@ dotnet test GPSaveConverter.Tests/GPSaveConverter.Tests.csproj -c Release
 
 The release exe is `GPSaveConverter/bin/Release/net472/GPSaveConverter.exe`.
 
+The window test runs the real windows against a made-up save and presses the real buttons. It is not in the solution, so it is built by its own path. CI runs it too.
+
+```
+dotnet build tools/UiSmoke/UiSmoke.csproj -c Release
+tools/UiSmoke/bin/Release/net472/GPSaveConverter.UiSmoke.exe
+```
+
+A real transfer cannot be tried by hand without a Game Pass save. After changing what a window does, run the window test, and add a step to its script for the new behaviour. `tools/UiSmoke/README.md` says how.
+
 ## Layout
 
 | Path | What it holds |
@@ -30,6 +39,7 @@ The release exe is `GPSaveConverter/bin/Release/net472/GPSaveConverter.exe`.
 | `GPSaveConverter/Interfaces/` | Seams for file system, registry, HTTP, settings and PowerShell |
 | `GPSaveConverter/Resources/GameLibrary.json` | The game library |
 | `GPSaveConverter.Tests/` | xUnit and NSubstitute tests |
+| `tools/UiSmoke/` | The window test |
 
 ## Rules that are easy to break
 

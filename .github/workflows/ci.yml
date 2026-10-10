@@ -31,6 +31,12 @@ jobs:
       - name: Run tests
         run: dotnet test GPSaveConverter.Tests/GPSaveConverter.Tests.csproj --configuration ${{ matrix.configuration }} --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
+      # Runs the real windows against a made-up save. See tools/UiSmoke/README.md.
+      - name: Window test
+        run: |
+          dotnet build tools/UiSmoke/UiSmoke.csproj --configuration ${{ matrix.configuration }} --verbosity minimal
+          tools/UiSmoke/bin/${{ matrix.configuration }}/net472/GPSaveConverter.UiSmoke.exe
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7
