@@ -68,6 +68,8 @@ The app produces all four. The reporter selects the game, then chooses **File â–
 
 A paste with the Xbox table filled in and "Non-Xbox save location:" empty means the tool has no folder for the game yet. The reporter has to click **Select non-Xbox Location**, pick the folder with the other version's saves, and paste again. Versions up to v.0.4.12 found no folder on pcgamingwiki.com for a game whose name the Xbox app writes differently from the wiki, such as `FINAL FANTASY VII REMAKE INTERGRADE` (#180), so this is common and not the reporter's mistake.
 
+Do not leave them to find that folder. Look the game up on pcgamingwiki.com, and put the folder from its "Save game data location" section in the same reply, with a link to the page as the source. Say why the tool showed none, if you know.
+
 With the data in hand:
 
 1. Write the translation. `CLAUDE.md` explains how the templates and groups work. Prefer one rule with a named group over one rule per file.
@@ -154,6 +156,7 @@ Age alone is not a reason to close anything. If an old issue has a concrete answ
 - Give steps as a short numbered list the reporter can follow exactly. Use the app's real menu names.
 - Before any instruction that copies files, tell them to use v.0.4.12 or later. From that version the tool backs up what a transfer changes, and **File â–¸ Backups** puts it back. Only someone who cannot update needs telling to back up both save folders by hand. The wiki's Backups page explains it for users.
 - One reply per issue per pass. Do not post again to an issue that is waiting on the reporter.
+- Find out why before you reply. When a paste is incomplete or the tool showed something odd, the cause is often the tool's, and the reporter should hear it, and the way around it, in the same reply. On #180 the first reply asked for the Steam files without saying where they are; the cause turned up afterwards and a second reply had to follow.
 - Do not state a fact about a particular game's save format unless the thread or the code shows it.
 
 ### Snippet: asking for the tables
