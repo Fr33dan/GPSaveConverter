@@ -29,6 +29,8 @@ namespace GPSaveConverter.UiSmoke
         public NLog.LogLevel FileLogLevel { get; set; } = NLog.LogLevel.Debug;
         public bool BackupBeforeTransfer { get; set; } = true;
         public int BackupsToKeep { get; set; } = 10;
+        public bool UsePreviewTranslations { get; set; }
+        public string PreviewGameLibrary { get; set; } = string.Empty;
         public void Save() { }
         public void Reset() { }
     }
@@ -47,6 +49,34 @@ namespace GPSaveConverter.UiSmoke
     internal class NoScripts : IScriptRunner
     {
         public string RunScript(string scriptText) { return string.Empty; }
+    }
+
+    /// <summary>
+    /// Stands in for the network. It serves the translations that are being tested, and any other
+    /// address is a mistake in the test: nothing here may reach the real network.
+    /// </summary>
+    internal class StagedTranslationsOnly : IHttpClient
+    {
+        public string Library = string.Empty;
+
+        public string DownloadString(string address)
+        {
+            if (address != GameLibrary.PreviewLibraryURL)
+            {
+                throw new InvalidOperationException("The window test asked the network for " + address);
+            }
+            return Library;
+        }
+
+        public Task<string> DownloadStringAsync(string address)
+        {
+            return Task.FromResult(DownloadString(address));
+        }
+
+        public Task<byte[]> DownloadDataAsync(string address)
+        {
+            throw new InvalidOperationException("The window test asked the network for " + address);
+        }
     }
 
     internal static class Native
@@ -548,6 +578,7 @@ namespace GPSaveConverter.UiSmoke
                 BackupsForm.Settings = settings;
                 GameLibrary.Settings = settings;
                 GameLibrary.ScriptRunner = new NoScripts();
+                GameLibrary.HttpClient = new StagedTranslationsOnly();
                 XboxPackageList.Environment = new FakeEnvironment(save.LocalAppData);
                 SaveBackupStore store = new SaveBackupStore(save.BackupFolder);
                 SaveFileConverterForm.Backups = store;
@@ -805,6 +836,33 @@ namespace GPSaveConverter.UiSmoke
             await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both lists after the undo");
             CheckSame(withoutTheContainer, FolderContents.Read(save.ProfileFolder), "restoring that backup takes the container out again");
 
+            Say("== A translation that is still being tested: a tick in Preferences brings it in, and unticking takes it out");
+            Label translationsLabel = Field<Label>(form, "fileTranslationsMarkerLabel");
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "quick.dat"), "steam quick save");
+            ((StagedTranslationsOnly)GameLibrary.HttpClient).Library = "{ \"Version\": \"2026-01-01\", \"GameInfo\": [ { \"PackageName\": \"" + package + "\", \"FileTranslations\": [ "
+                + "{ \"NamedRegexGroups\": [], \"ContainerName1\": \"SaveGame\", \"ContainerName2\": \"\", \"XboxFileID\": \"SaveSlot0\", \"NonXboxFilename\": \"quick\\\\.dat\" } ] } ] }";
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 4, "the lists with quick.dat in them");
+            CheckEqual(string.Empty, await MatchOnXbox(nonXboxFiles, xboxFiles, "quick.dat"), "before: nothing on the Xbox side matches quick.dat");
+
+            await SavePreferences(form, true);
+            await WaitUntil(() => form.ActiveGame.PreviewTranslations.Count == 1 && xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 4, "the translation being tested");
+            Check(status.Text.Contains("still being tested"), "ticked: the status line says a translation being tested is in use: \"" + status.Text + "\"");
+            CheckEqual("File Translations: (1 being tested is tried first)", translationsLabel.Text, "and so does the translations panel");
+            CheckEqual("SaveSlot0", await MatchOnXbox(nonXboxFiles, xboxFiles, "quick.dat"), "quick.dat is matched to SaveSlot0, with no restart");
+            CheckEqual(1, form.ActiveGame.FileTranslations.Count, "the game's own translations are as they were");
+            Check(!GameLibrary.GetLibraryJson().Contains("quick"), "nothing of it is in the library that gets stored");
+
+            await SavePreferences(form, false);
+            await WaitUntil(() => form.ActiveGame.PreviewTranslations.Count == 0 && xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 4, "the translation being tested to go");
+            CheckEqual(string.Empty, await MatchOnXbox(nonXboxFiles, xboxFiles, "quick.dat"), "unticked: quick.dat matches nothing again");
+            CheckEqual("File Translations:", translationsLabel.Text, "and the translations panel no longer mentions it");
+
+            File.Delete(Path.Combine(save.NonXboxFolder, "quick.dat"));
+            settings.AllowWebDataFetch = false;
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "the lists without quick.dat");
+
             Say("== A translation with a mistyped pattern, then a click in each file list");
             FileTranslation mistyped = new FileTranslation { ContainerName1 = "SaveGame", ContainerName2 = "", XboxFileID = "${Slot}", NonXboxFilename = "${Slot}", NamedRegexGroups = new[] { "(?<Slot>[0-9" } };
             form.ActiveGame.FileTranslations.Insert(0, mistyped);
@@ -872,6 +930,37 @@ namespace GPSaveConverter.UiSmoke
             list.ClearSelection();
             list.Rows[row].Selected = true;
             form.GetType().GetMethod("nonXboxProfileTable_CellClicked", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(form, new object[] { list, null });
+        }
+
+        /// <summary>
+        /// Selects one file in the non-Xbox list, as a click on it does, and reads which Xbox files
+        /// the application highlights for it.
+        /// </summary>
+        private static async Task<string> MatchOnXbox(DataGridView nonXboxFiles, DataGridView xboxFiles, string relativePath)
+        {
+            nonXboxFiles.ClearSelection();
+            foreach (DataGridViewRow row in nonXboxFiles.Rows)
+            {
+                row.Selected = ((NonXboxFileInfo)row.DataBoundItem).RelativePath == relativePath;
+            }
+            await Task.Delay(150);
+            return string.Join(", ", xboxFiles.SelectedRows.Cast<DataGridViewRow>().Select(r => ((XboxFileInfo)r.DataBoundItem).FileID));
+        }
+
+        /// <summary>
+        /// Opens Preferences from the menu, allows internet access, sets the option for translations
+        /// that are being tested, and presses Save.
+        /// </summary>
+        private static async Task SavePreferences(SaveFileConverterForm form, bool useTranslationsBeingTested)
+        {
+            Field<ToolStripMenuItem>(form, "preferencesToolStripMenuItem").PerformClick();
+            await WaitUntil(() => Application.OpenForms.OfType<PreferencesForm>().Any(f => f.Visible), "the Preferences window");
+
+            PreferencesForm preferences = Application.OpenForms.OfType<PreferencesForm>().Single();
+            Field<CheckBox>(preferences, "allowNetworkCheckbox").Checked = true;
+            Field<CheckBox>(preferences, "previewTranslationsCheckbox").Checked = useTranslationsBeingTested;
+            Field<Button>(preferences, "saveButton").PerformClick();
+            await WaitUntil(() => !preferences.Visible, "the Preferences window to close");
         }
 
         /// <summary>

@@ -1,0 +1,110 @@
+{
+  "Version": "2026-10-10",
+  "GameInfo": [
+    {
+      "Name": "Disgaea 4 Complete+",
+      "PackageName": "NISAmericaInc.Disgaea4Complete_f6hsb3tktby1t",
+      "Issues": [ 150 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "Save_${Slot}.sav",
+          "XboxFileID": "data",
+          "ContainerName1": "save.${Slot}",
+          "ContainerName2": "Disgaea 4 Complete\\+",
+          "NamedRegexGroups": [ "(?<Slot>[0-9]{3})" ]
+        },
+        {
+          "NonXboxFilename": "SystemSave.sav",
+          "XboxFileID": "data",
+          "ContainerName1": "SystemSave",
+          "ContainerName2": "SystemSave",
+          "NamedRegexGroups": []
+        }
+      ]
+    },
+    {
+      "Name": "FINAL FANTASY VII REMAKE INTERGRADE",
+      "PackageName": "39EA002F.EXED1_n746a19ndrrjg",
+      "Issues": [ 180 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "ff7remake${Slot}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "ff7remake${Slot}",
+          "ContainerName2": "ff7remake${Slot}",
+          "NamedRegexGroups": [ "(?<Slot>[a-z0-9]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Generation Zero",
+      "PackageName": "AvalancheStudios.GenerationZero_m0byj0nmrybdr",
+      "Issues": [ 144 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "savegame",
+          "XboxFileID": "savegame",
+          "ContainerName1": "GenerationZero",
+          "ContainerName2": "GenerationZero",
+          "NamedRegexGroups": []
+        }
+      ]
+    },
+    {
+      "Name": "Like a Dragon: Infinite Wealth",
+      "PackageName": "SEGAofAmericaInc.ProjectElvis_s751p9cej88mt",
+      "Issues": [ 145 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Slot}\\\\data.sav",
+          "XboxFileID": "data",
+          "ContainerName1": "save/${Slot}/data.sav",
+          "ContainerName2": ".*",
+          "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
+        },
+        {
+          "NonXboxFilename": "${Slot}\\\\${Slot}_icon0.dds",
+          "XboxFileID": "icon",
+          "ContainerName1": "save/${Slot}/data.sav",
+          "ContainerName2": ".*",
+          "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
+        },
+        {
+          "NonXboxFilename": "system\\\\data.sys",
+          "XboxFileID": "data",
+          "ContainerName1": "save/system/data.sys",
+          "ContainerName2": "displayName",
+          "NamedRegexGroups": []
+        }
+      ]
+    },
+    {
+      "Name": "Persona 3 Portable",
+      "PackageName": "SEGAofAmericaInc.M0cb6b3aet_s751p9cej88mt",
+      "Issues": [ 168, 48 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FileName}",
+          "XboxFileID": "progress",
+          "ContainerName1": "${FileName}",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileName>[\\w.]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "RoadCraft",
+      "PackageName": "FocusHomeInteractiveSA.Roadbuilder_4hny5m903y3g0",
+      "Issues": [ 164 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "SLOT_${SlotNumber}\\\\${FileName}",
+          "XboxFileID": "save\\\\SLOT_${SlotNumber}/${FileName}",
+          "ContainerName1": "MainSave",
+          "ContainerName2": "MainSave",
+          "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
+        }
+      ]
+    }
+  ]
+}

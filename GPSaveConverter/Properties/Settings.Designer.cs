@@ -118,5 +118,29 @@ namespace GPSaveConverter.Properties {
                 this["BackupsToKeep"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UsePreviewTranslations {
+            get {
+                return ((bool)(this["UsePreviewTranslations"]));
+            }
+            set {
+                this["UsePreviewTranslations"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PreviewGameLibrary {
+            get {
+                return ((string)(this["PreviewGameLibrary"]));
+            }
+            set {
+                this["PreviewGameLibrary"] = value;
+            }
+        }
     }
 }

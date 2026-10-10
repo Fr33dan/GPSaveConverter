@@ -38,6 +38,7 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 | `GPSaveConverter/Library/PCGameWiki.cs` | Looks up a game's save folder on pcgamingwiki.com when the library has none |
 | `GPSaveConverter/Interfaces/` | Seams for file system, registry, HTTP, settings and PowerShell |
 | `GPSaveConverter/Resources/GameLibrary.json` | The game library |
+| `GPSaveConverter/Resources/GameLibrary.Preview.json` | Translations that are still being tested |
 | `GPSaveConverter.Tests/` | xUnit and NSubstitute tests |
 | `tools/UiSmoke/` | The window test |
 
@@ -49,6 +50,13 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 - Keep the file's UTF-8 byte order mark. Check with `head -c 3 GPSaveConverter/Resources/GameLibrary.json | od -An -tx1` (expect `ef bb bf`).
 - `GameLibraryJsonTests` must pass. It runs `StoredGameLibrary.FindProblem` on the file.
 - Add a translation only after the person who asked for it confirms it works on their saves. Nobody maintaining this can test most games.
+
+**`GameLibrary.Preview.json` on `master` is live for testers.** It holds translations nobody has confirmed yet. A copy of the app with **Use translations being tested** ticked in Preferences downloads it at start-up and tries what is in it before any other translation. Nobody else's copy asks for it, and it is not in the exe.
+
+- The app takes the file whole each time, whatever its `Version`, and never merges it into the user's library. So an entry can be changed or taken out, and a tester has the new state at the next start. A translation in `GameLibrary.json` cannot be taken back like that: the app only ever adds to what a user has.
+- An entry here is the text of the game's file in `GPSaveConverter.Tests/Fixtures/RequestedTranslations`, which `RequestedTranslationTests` checks against the names the reporter posted. `GameLibraryJsonTests` fails if the two differ, or if an entry is in the game library already.
+- Leave `BaseNonXboxSaveLocation` out unless it has nothing of one person's in it: no Steam ID, no user name.
+- When the reporter says it works, one pull request moves the entry into `GameLibrary.json`, bumps `Version` there, and takes it out here.
 
 **User settings follow the strong name and `AssemblyVersion`.** Each user's settings, including the translations they wrote themselves, are stored under `%LOCALAPPDATA%\GPSaveConverter\GPSaveConverter.exe_StrongName_<hash>\0.4.0.0\user.config`. Removing signing, changing `GPSaveConverterUnprotected.snk`, or changing `AssemblyVersion` from `0.4.0.0` makes all of that vanish for existing users. For a release, change `AssemblyFileVersion` only.
 
@@ -119,6 +127,7 @@ The maintainer decides these. Ask first:
 - Closing an issue.
 - Merging a pull request from a contributor.
 - Merging any change to `GPSaveConverter/Resources/GameLibrary.json`. It is live the moment it merges.
+- Merging any change to `GPSaveConverter/Resources/GameLibrary.Preview.json`. It is live for testers the moment it merges.
 - Making a release. Each one needs its own yes before the tag is pushed, and publishing the draft is the maintainer's click.
 - Pushing straight to `master`.
 

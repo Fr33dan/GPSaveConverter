@@ -17,5 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\GPSaveConverter\Resources\GameLibrary.Preview.json" Link="GameLibrary.Preview.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

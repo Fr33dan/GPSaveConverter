@@ -55,6 +55,18 @@ namespace GPSaveConverter.Interfaces
             set => Properties.Settings.Default.BackupsToKeep = value;
         }
 
+        public bool UsePreviewTranslations
+        {
+            get => Properties.Settings.Default.UsePreviewTranslations;
+            set => Properties.Settings.Default.UsePreviewTranslations = value;
+        }
+
+        public string PreviewGameLibrary
+        {
+            get => Properties.Settings.Default.PreviewGameLibrary;
+            set => Properties.Settings.Default.PreviewGameLibrary = value;
+        }
+
         public void Save() => Properties.Settings.Default.Save();
 
         public void Reset() => Properties.Settings.Default.Reset();
