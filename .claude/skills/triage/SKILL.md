@@ -83,7 +83,7 @@ Traps the harness has caught. Each has a test in `RequestedTranslationTests.cs`:
 
 - **The fields are patterns.** A `+`, `(`, `[` or similar in a real name has to be written with a backslash in front. A container named `Disgaea 4 Complete+` only matches `Disgaea 4 Complete\+`.
 - **Subfolders on the non-Xbox side.** The non-Xbox name must cover the whole relative path, with each backslash doubled: `SLOT_0\\CompleteSave`. In a profile file that is four backslashes, because JSON doubles them again. A name without its folder matches starting from the Xbox side only.
-- **A backslash in an Xbox blob ID.** Copying to Xbox misses the existing blob and would add a wrongly named one. Until that defect is fixed, say the translation is for Xbox to PC only.
+- **A backslash in an Xbox blob ID.** Before v.0.4.11, copying to Xbox missed the existing blob and added a wrongly named one. Tell anyone on an older version to update before copying in that direction.
 - **Loading a profile replaces the save location.** Include `BaseNonXboxSaveLocation` when the reporter posted theirs. Otherwise tell them to click **Select non-Xbox Location** again after loading.
 - **Slots that exist on one side only.** A file with no Xbox container cannot be copied to Xbox. Say so when the posted tables show one.
 
@@ -113,6 +113,10 @@ Check these before anything else:
 ### Bug reports
 
 Find the code from the stack trace. Reproduce the failure in a test, fix it on a branch, open a pull request, and link it in the issue. Label `bug`. If a later release already fixed it, say which version and ask the reporter to retry.
+
+In the pull request write `Refs #N`. `Fixes #N` and `Closes #N` close the issue the moment the pull request merges, and closing is the maintainer's decision. Tell the reporter once the fix is in a release, not when it merges: until then there is nothing for them to download.
+
+Two reports with different errors can have one cause. Several Forza Horizon threads (#29, #113, #114) turned out to be the tool opening an empty leftover folder in `wgs` in place of the one that holds the save. Read the attached exception text, not only the title.
 
 ### Questions and feature requests
 
