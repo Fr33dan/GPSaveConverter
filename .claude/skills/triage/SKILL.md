@@ -96,7 +96,7 @@ Traps the harness has caught. Each has a test in `RequestedTranslationTests.cs`:
 There are two different causes. Do not assume which.
 
 - **The mapping is wrong.** A file landed under the wrong name or in the wrong container. Ask for the tables and the translation used, and check them against each other.
-- **The save format differs between stores.** Some games encrypt saves or tie them to the account. If the mapping is right and the game still refuses the file, no translation can fix it. Say that plainly and label `incompatible-save`.
+- **The save format differs between stores.** Some games encrypt saves or tie them to the account. Others keep several files on one store as a single one on the other, as Tunic does (#6). If the mapping is right and the game still refuses the file, no translation can fix it. Say that plainly and label `incompatible-save`. Converting the contents of a save is not planned: the maintainer decided on 2026-10-10 that the tool stays with moving and renaming files. Do not offer to look into a game's format.
 
 Either way, the save they had before can be put back with **File ▸ Backups**, if the transfer was made with v.0.4.12 or later. Say so: it is usually what they want first.
 
