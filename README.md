@@ -5,7 +5,7 @@ Finds games by listing any Microsoft Store package with a wgs folder (believed t
 
 There is an extremely small (as of now, at least) game library that contains the locations of non-Xbox save files. Some other game storefronts/save systems support multiple profiles; if this is the case with your game profiles will be shown by the file name identifying them. If your game is not found in this library, you will be prompted to select the location manually when a package is selected.
 
-It is strongly recommended you back up both save file folders before using this application. 
+From v.0.4.12 the application backs up what a transfer is about to change, and **File > Backups** puts it back. With an older version, it is strongly recommended you back up both save file folders before using it.
 
 ![Save File Converter v0 4 3 Screenshot](https://user-images.githubusercontent.com/4670572/159533555-dbc49599-7620-4774-bd78-501e997ac22c.png)
 
