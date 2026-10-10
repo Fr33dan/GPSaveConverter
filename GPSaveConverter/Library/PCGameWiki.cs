@@ -33,23 +33,14 @@ namespace GPSaveConverter.Library
             logger.Info("Fetching save data from pcgamingwiki.com");
             try
             {
-                string url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=query&prop=revisions&titles={0}&formatversion=2&format=json", Uri.EscapeDataString(i.Name));
-                string queryJson = await httpClient.DownloadStringAsync(url);
-
-                JsonNode queryRoot = JsonValue.Parse(queryJson);
-
-                if (queryRoot == null)
+                int? foundPage = await findPage(i.Name);
+                if (foundPage == null)
                 {
                     return;
                 }
-                if (queryRoot["query"]["pages"][0]["missing"] != null && queryRoot["query"]["pages"][0]["missing"].AsValue().GetValue<bool>())
-                {
-                    return;
-                }
-                int pageID = queryRoot["query"]["pages"][0]["pageid"].AsValue().GetValue<int>();
+                int pageID = foundPage.Value;
 
-
-                url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=parse&pageid={0}&formatversion=2&format=json&prop=sections", pageID);
+                string url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=parse&pageid={0}&formatversion=2&format=json&prop=sections", pageID);
                 string sectionsJson = await httpClient.DownloadStringAsync(url);
                 JsonNode sectionsRoot = JsonValue.Parse(sectionsJson);
 
@@ -94,6 +85,68 @@ namespace GPSaveConverter.Library
             {
                 logger.Info(e, "Unable to fetch save data location");
             }
+        }
+
+        /// <summary>
+        /// Finds the wiki's page for a game from the name the Xbox app gives the game.
+        /// </summary>
+        /// <returns>The page's ID, or null if the wiki has no page that is plainly this game's.</returns>
+        private async Task<int?> findPage(string gameName)
+        {
+            string url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=query&prop=revisions&titles={0}&formatversion=2&format=json", Uri.EscapeDataString(gameName));
+            JsonNode queryRoot = JsonValue.Parse(await httpClient.DownloadStringAsync(url));
+            if (queryRoot == null)
+            {
+                return null;
+            }
+
+            JsonNode page = queryRoot["query"]["pages"][0];
+            if (page["missing"] == null || !page["missing"].GetValue<bool>())
+            {
+                return page["pageid"].GetValue<int>();
+            }
+
+            // A title is matched letter for letter, and the Xbox app often writes a name another way
+            // than the wiki does: "FINAL FANTASY IX" for "Final Fantasy IX", "The Angler™" for
+            // "The Angler", "All-Star" for "All Star". So search for the name, and take a page only if
+            // its title is the same name once case, symbols and punctuation are left out. A page that
+            // is merely similar could be another game, and its save folder would be the wrong one.
+            string wanted = lettersAndDigits(gameName);
+            if (wanted == String.Empty)
+            {
+                return null;
+            }
+
+            url = String.Format(@"https://www.pcgamingwiki.com/w/api.php?action=query&list=search&srsearch={0}&srnamespace=0&srlimit=5&formatversion=2&format=json", Uri.EscapeDataString(wordsOf(gameName)));
+            JsonNode searchRoot = JsonValue.Parse(await httpClient.DownloadStringAsync(url));
+            JsonArray hits = searchRoot?["query"]?["search"] as JsonArray;
+            if (hits == null)
+            {
+                return null;
+            }
+
+            foreach (JsonNode hit in hits)
+            {
+                if (lettersAndDigits(hit["title"].GetValue<string>()) == wanted)
+                {
+                    return hit["pageid"].GetValue<int>();
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// A name as words with one space between them. The wiki's search finds nothing for a word
+        /// with a "™" stuck to it, and reads ":" and "-" as instructions.
+        /// </summary>
+        private static string wordsOf(string name)
+        {
+            return Regex.Replace(name, @"[^\p{L}\p{N}]+", " ").Trim();
+        }
+
+        private static string lettersAndDigits(string name)
+        {
+            return Regex.Replace(name, @"[^\p{L}\p{N}]+", String.Empty).ToLowerInvariant();
         }
 
         /// <summary>
