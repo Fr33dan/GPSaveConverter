@@ -529,6 +529,13 @@ namespace GPSaveConverter
             question.AppendLine();
             question.AppendLine("The Xbox app uploads a new container the next time the game runs. This tool cannot remove it from the cloud afterwards, so create one only if the game is meant to have it.");
             question.AppendLine();
+            if (missing.Count > 1)
+            {
+                // Some games keep each file in a container of its own, and not every game accepts one
+                // it did not make. One container shows which kind this is. Many cannot be taken back.
+                question.AppendLine("If this has not been tried with this game before, answer No. Then copy just one of the files that were left out, and see whether the game accepts it.");
+                question.AppendLine();
+            }
             question.AppendLine("Yes: create " + (missing.Count == 1 ? "it" : "them") + " and copy every file.");
             question.AppendLine("No: copy only the files that have a container.");
             question.Append("Cancel: copy nothing.");

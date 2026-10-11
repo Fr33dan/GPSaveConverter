@@ -47,7 +47,8 @@ it out.
   profile asked for.
 - A file the Xbox save has no container for: the question that names the container, answered No
   (nothing is written) and then Yes (the container is made the way the game makes one), and the
-  backup that takes it out again.
+  backup that takes it out again. With two containers to make, the question also says to try one
+  file first; answered Cancel, nothing is written.
 - **Use translations being tested** in Preferences: ticked, a translation the stand-in network
   serves is in use at once and the status line says so; unticked, it is gone; nothing of it is in
   the library that gets stored.

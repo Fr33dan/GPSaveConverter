@@ -810,6 +810,7 @@ namespace GPSaveConverter.UiSmoke
             await WaitUntil(() => status.Text.Contains("left out") && !responder.AnyOpen(), "the file to be left out");
             string question = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Create Xbox containers?]")) ?? string.Empty;
             Check(question.Contains("    Profile") && question.Contains("no container for 1 file"), "the question names the container and says how many files need it");
+            Check(!question.Contains("just one of the files"), "with one container to make, it does not say to try one first");
             CheckSame(withoutTheContainer, FolderContents.Read(save.ProfileFolder), "answered No: the Xbox save is untouched");
             CheckEqual(backupsBefore, store.List(package).Count, "and no backup was made, as nothing was going to be copied");
 
@@ -835,6 +836,35 @@ namespace GPSaveConverter.UiSmoke
             Select(form, packages, form.ActiveGame);
             await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both lists after the undo");
             CheckSame(withoutTheContainer, FolderContents.Read(save.ProfileFolder), "restoring that backup takes the container out again");
+
+            Say("== Several containers to make at once: the question says to try one first");
+            FileTranslation extraTranslation = new FileTranslation { ContainerName1 = "Extra${Slot}", ContainerName2 = "Extra${Slot}", XboxFileID = "data", NonXboxFilename = "extra${Slot}\\.dat", NamedRegexGroups = new string[] { "(?<Slot>[0-9]+)" } };
+            form.ActiveGame.FileTranslations.Add(extraTranslation);
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "extra1.dat"), "steam extra 1");
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "extra2.dat"), "steam extra 2");
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 5, "the lists with the two new files in them");
+            foreach (DataGridViewRow row in nonXboxFiles.Rows)
+            {
+                row.Selected = ((NonXboxFileInfo)row.DataBoundItem).RelativePath.StartsWith("extra");
+            }
+
+            responder.AnswerByTitle["Create Xbox containers?"] = Answer.Cancel;
+            boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            selectionToXbox.PerformClick();
+            await WaitUntil(() => status.Text == "Transfer canceled" && !responder.AnyOpen(), "the transfer to be called off");
+            responder.AnswerByTitle.Remove("Create Xbox containers?");
+            question = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Create Xbox containers?]")) ?? string.Empty;
+            Check(question.Contains("    Extra1") && question.Contains("    Extra2") && question.Contains("these 2 containers have"), "the question names both containers");
+            Check(question.Contains("answer No. Then copy just one of the files"), "and says to try one file first");
+            CheckSame(withoutTheContainer, FolderContents.Read(save.ProfileFolder), "answered Cancel: the Xbox save is untouched");
+
+            form.ActiveGame.FileTranslations.Remove(extraTranslation);
+            File.Delete(Path.Combine(save.NonXboxFolder, "extra1.dat"));
+            File.Delete(Path.Combine(save.NonXboxFolder, "extra2.dat"));
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both lists without the two files");
 
             Say("== A translation that is still being tested: a tick in Preferences brings it in, and unticking takes it out");
             Label translationsLabel = Field<Label>(form, "fileTranslationsMarkerLabel");
