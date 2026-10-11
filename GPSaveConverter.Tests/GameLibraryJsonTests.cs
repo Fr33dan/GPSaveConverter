@@ -34,6 +34,81 @@ namespace GPSaveConverter.Tests
             Assert.True(problem == null, problem);
         }
 
+        #region The translations that are being tested
+
+        // GameLibrary.Preview.json sits beside the game library and is downloaded by every copy of
+        // the app that has the option for it turned on. These are the gate for that file.
+
+        private static StoredGameLibrary PreviewLibrary()
+        {
+            string file = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "GameLibrary.Preview.json");
+            return JsonSerializer.Deserialize<StoredGameLibrary>(System.IO.File.ReadAllText(file));
+        }
+
+        [Fact]
+        public void PreviewLibrary_HasNoProblems()
+        {
+            string problem = PreviewLibrary().FindProblem(true);
+            Assert.True(problem == null, problem);
+        }
+
+        [Fact]
+        public void PreviewLibrary_IsWhereTheAppLooksForIt()
+        {
+            // The file is copied into the tests from this path in the repository.
+            Assert.EndsWith("/GPSaveConverter/master/GPSaveConverter/Resources/GameLibrary.Preview.json", GameLibrary.PreviewLibraryURL);
+        }
+
+        [Fact]
+        public void PreviewLibrary_EveryTranslationIsOneThatWasChecked()
+        {
+            // What a tester is given has to be what RequestedTranslationTests checked against the
+            // file names posted in the issue. Those tests read the files in this folder.
+            string fixtures = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "RequestedTranslations");
+            System.Collections.Generic.List<GameInfo> checkedGames = new System.Collections.Generic.List<GameInfo>();
+            foreach (string file in System.IO.Directory.GetFiles(fixtures, "*.json"))
+            {
+                checkedGames.Add(JsonSerializer.Deserialize<GameInfo>(System.IO.File.ReadAllText(file)));
+            }
+
+            foreach (GameInfo game in PreviewLibrary().GameInfo)
+            {
+                GameInfo wasChecked = checkedGames.Find(g => g.PackageName == game.PackageName);
+                Assert.True(wasChecked != null, game.PackageName + " has no file in Fixtures\\RequestedTranslations.");
+                Assert.True(System.Linq.Enumerable.SequenceEqual(wasChecked.FileTranslations, game.FileTranslations), game.PackageName + ": the translations differ from the ones that were checked.");
+            }
+        }
+
+        [Fact]
+        public void PreviewLibrary_HoldsNothingTheGameLibraryAlreadyHas()
+        {
+            // A translation that is confirmed moves to the game library. Left here as well, it would
+            // go on being tried first for everyone with the option on.
+            StoredGameLibrary shipped = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Resources.GameLibrary);
+
+            foreach (GameInfo game in PreviewLibrary().GameInfo)
+            {
+                foreach (GameInfo shippedGame in shipped.GameInfo)
+                {
+                    if (shippedGame.PackageName != game.PackageName) continue;
+
+                    foreach (FileTranslation translation in game.FileTranslations)
+                    {
+                        Assert.False(shippedGame.FileTranslations.Contains(translation), game.PackageName + ": \"" + translation.NonXboxFilename + "\" is in the game library already.");
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void FindProblem_NoGames_IsAllowedForThePreviewLibrary()
+        {
+            // It lists none when every translation in it has been confirmed or dropped.
+            Assert.Null(Library("2026-01-31").FindProblem(true));
+        }
+
+        #endregion
+
         [Fact]
         public void FindProblem_ValidLibrary_ReturnsNull()
         {

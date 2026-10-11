@@ -81,6 +81,7 @@ namespace GPSaveConverter.Library
             }
             await Task.Run(LoadSavedLibrary);
             await Task.Run(GetInstalledApps);
+            await Task.Run(RefreshPreviewTranslations);
         }
 
         private static void FirstTimeInitializeGameLibrary()
@@ -135,6 +136,120 @@ namespace GPSaveConverter.Library
             }
 
             return returnVal;
+        }
+
+        /// <summary>
+        /// Where the translations that are still being tested are published. It is a second file
+        /// beside the game library, in the same form. Only a copy of the app with the option for
+        /// it turned on ever asks for it.
+        /// </summary>
+        internal const string PreviewLibraryURL = @"https://raw.githubusercontent.com/Fr33dan/GPSaveConverter/master/GPSaveConverter/Resources/GameLibrary.Preview.json";
+
+        private static Dictionary<string, GameInfo> previewLibrary = new Dictionary<string, GameInfo>();
+
+        /// <summary>
+        /// Downloads the translations that are being tested and keeps them in the settings.
+        /// </summary>
+        /// <returns>True if a usable copy was downloaded.</returns>
+        internal static bool UpdatePreviewLibrary()
+        {
+            try
+            {
+                string json = HttpClient.DownloadString(PreviewLibraryURL);
+
+                StoredGameLibrary downloaded = JsonSerializer.Deserialize<StoredGameLibrary>(json);
+
+                string problem = downloaded == null ? "The library is empty." : downloaded.FindProblem(true);
+                if (problem != null)
+                {
+                    logger.Warn("Downloaded preview translations ignored. {0}", problem);
+                    return false;
+                }
+
+                // Taken whatever its date. A translation being tested can change twice in a day, and
+                // the copy kept here is replaced whole, never merged, so the newest is the one in use.
+                if (json != Settings.PreviewGameLibrary)
+                {
+                    Settings.PreviewGameLibrary = json;
+                    Settings.Save();
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                // Offline or a bad download. The copy already stored still works.
+                logger.Warn(e, "Unable to download the translations that are being tested");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Brings the translations that are being tested up to date with the settings: downloads and
+        /// reads them if the option is on, drops them if it is off. Every game that has been looked
+        /// at gets them, or loses them, at once.
+        /// </summary>
+        internal static void RefreshPreviewTranslations()
+        {
+            DownloadPreviewTranslations();
+            LoadPreviewTranslations();
+        }
+
+        /// <summary>
+        /// The slow half of <see cref="RefreshPreviewTranslations"/>: the download, if the option is
+        /// on and internet access is allowed. It touches only the settings, so it can run off the
+        /// window's thread.
+        /// </summary>
+        internal static void DownloadPreviewTranslations()
+        {
+            if (Settings.UsePreviewTranslations && Settings.AllowWebDataFetch)
+            {
+                UpdatePreviewLibrary();
+            }
+        }
+
+        /// <summary>
+        /// The quick half of <see cref="RefreshPreviewTranslations"/>: reads the copy kept in the
+        /// settings, or drops it if the option is off, and gives every game its share.
+        /// </summary>
+        internal static void LoadPreviewTranslations()
+        {
+            Dictionary<string, GameInfo> preview = new Dictionary<string, GameInfo>();
+
+            if (Settings.UsePreviewTranslations)
+            {
+                try
+                {
+                    StoredGameLibrary stored = string.IsNullOrEmpty(Settings.PreviewGameLibrary) ? null : JsonSerializer.Deserialize<StoredGameLibrary>(Settings.PreviewGameLibrary);
+                    if (stored != null && stored.FindProblem(true) == null)
+                    {
+                        foreach (GameInfo game in stored.GameInfo)
+                        {
+                            preview[game.PackageName] = game;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.Warn(e, "The stored preview translations could not be read");
+                }
+            }
+
+            previewLibrary = preview;
+
+            if (uwpLibrary != null)
+            {
+                foreach (GameInfo game in uwpLibrary.Values.Where(g => g.NonUWPDataPopulated).ToList())
+                {
+                    ApplyPreviewTranslations(game);
+                }
+            }
+        }
+
+        private static void ApplyPreviewTranslations(GameInfo game)
+        {
+            GameInfo preview;
+            previewLibrary.TryGetValue(game.PackageName, out preview);
+            game.ApplyPreview(preview);
         }
 
         internal static void LoadDefaultLibrary()
@@ -291,6 +406,10 @@ namespace GPSaveConverter.Library
             {
                 RegisterSerializedInfo(saveLibraryInfo);
             }
+
+            // After the user's own library, so that a save location of theirs is kept. Before the
+            // wiki, so that a location given with a translation being tested is used ahead of a guess.
+            ApplyPreviewTranslations(i);
 
             if (i.BaseNonXboxSaveLocation == null && Settings.AllowWebDataFetch)
             {

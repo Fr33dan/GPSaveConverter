@@ -37,6 +37,7 @@
             this.backupCheckbox = new System.Windows.Forms.CheckBox();
             this.backupsToKeepLabel = new System.Windows.Forms.Label();
             this.backupsToKeepUpDown = new System.Windows.Forms.NumericUpDown();
+            this.previewTranslationsCheckbox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.backupsToKeepUpDown)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,7 +63,7 @@
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(205, 155);
+            this.saveButton.Location = new System.Drawing.Point(205, 178);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(75, 23);
             this.saveButton.TabIndex = 2;
@@ -80,11 +81,23 @@
             this.allowNetworkCheckbox.TabIndex = 3;
             this.allowNetworkCheckbox.Text = "Allow Internet Game Info Sources";
             this.allowNetworkCheckbox.UseVisualStyleBackColor = true;
+            this.allowNetworkCheckbox.CheckedChanged += new System.EventHandler(this.allowNetworkCheckbox_CheckedChanged);
+            //
+            // previewTranslationsCheckbox
+            //
+            this.previewTranslationsCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.previewTranslationsCheckbox.AutoSize = true;
+            this.previewTranslationsCheckbox.Location = new System.Drawing.Point(76, 62);
+            this.previewTranslationsCheckbox.Name = "previewTranslationsCheckbox";
+            this.previewTranslationsCheckbox.Size = new System.Drawing.Size(168, 17);
+            this.previewTranslationsCheckbox.TabIndex = 9;
+            this.previewTranslationsCheckbox.Text = "Use translations being tested";
+            this.previewTranslationsCheckbox.UseVisualStyleBackColor = true;
             // 
             // reloadLibraryButton
             // 
             this.reloadLibraryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.reloadLibraryButton.Location = new System.Drawing.Point(76, 62);
+            this.reloadLibraryButton.Location = new System.Drawing.Point(76, 85);
             this.reloadLibraryButton.Name = "reloadLibraryButton";
             this.reloadLibraryButton.Size = new System.Drawing.Size(204, 23);
             this.reloadLibraryButton.TabIndex = 4;
@@ -95,7 +108,7 @@
             // resetAllButton
             // 
             this.resetAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.resetAllButton.Location = new System.Drawing.Point(12, 155);
+            this.resetAllButton.Location = new System.Drawing.Point(12, 178);
             this.resetAllButton.Name = "resetAllButton";
             this.resetAllButton.Size = new System.Drawing.Size(75, 23);
             this.resetAllButton.TabIndex = 5;
@@ -106,7 +119,7 @@
             // backupCheckbox
             // 
             this.backupCheckbox.AutoSize = true;
-            this.backupCheckbox.Location = new System.Drawing.Point(76, 96);
+            this.backupCheckbox.Location = new System.Drawing.Point(76, 119);
             this.backupCheckbox.Name = "backupCheckbox";
             this.backupCheckbox.Size = new System.Drawing.Size(177, 17);
             this.backupCheckbox.TabIndex = 6;
@@ -116,7 +129,7 @@
             // backupsToKeepLabel
             // 
             this.backupsToKeepLabel.AutoSize = true;
-            this.backupsToKeepLabel.Location = new System.Drawing.Point(76, 122);
+            this.backupsToKeepLabel.Location = new System.Drawing.Point(76, 145);
             this.backupsToKeepLabel.Name = "backupsToKeepLabel";
             this.backupsToKeepLabel.Size = new System.Drawing.Size(138, 13);
             this.backupsToKeepLabel.TabIndex = 7;
@@ -124,7 +137,7 @@
             // 
             // backupsToKeepUpDown
             // 
-            this.backupsToKeepUpDown.Location = new System.Drawing.Point(225, 120);
+            this.backupsToKeepUpDown.Location = new System.Drawing.Point(225, 143);
             this.backupsToKeepUpDown.Maximum = new decimal(new int[] {
             999,
             0,
@@ -148,7 +161,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 190);
+            this.ClientSize = new System.Drawing.Size(292, 213);
+            this.Controls.Add(this.previewTranslationsCheckbox);
             this.Controls.Add(this.backupsToKeepUpDown);
             this.Controls.Add(this.backupsToKeepLabel);
             this.Controls.Add(this.backupCheckbox);
@@ -180,5 +194,6 @@
         private System.Windows.Forms.CheckBox backupCheckbox;
         private System.Windows.Forms.Label backupsToKeepLabel;
         private System.Windows.Forms.NumericUpDown backupsToKeepUpDown;
+        private System.Windows.Forms.CheckBox previewTranslationsCheckbox;
     }
 }

@@ -113,6 +113,54 @@ namespace GPSaveConverter.Library
             set { fileTranslations = value; }
         }
 
+        /// <summary>
+        /// Translations that are still being tested, from the preview library. They are tried before
+        /// <see cref="FileTranslations"/>, and are never stored with the user's library: they are
+        /// in force only while the option for them is on.
+        /// </summary>
+        [Browsable(false), JsonIgnore]
+        internal List<FileTranslation> PreviewTranslations { get; private set; } = new List<FileTranslation>();
+
+        /// <summary>
+        /// Every translation of the game in the order they are tried. The first that matches is used.
+        /// </summary>
+        private IEnumerable<FileTranslation> TranslationsInOrder
+        {
+            get { return this.PreviewTranslations.Concat(this.FileTranslations); }
+        }
+
+        /// <summary>
+        /// Puts the preview library's entry for the game in force, or takes one out again.
+        /// </summary>
+        /// <param name="preview">The entry, or null if the preview library has none for the game.</param>
+        internal void ApplyPreview(GameInfo preview)
+        {
+            this.PreviewTranslations = preview == null ? new List<FileTranslation>() : preview.FileTranslations.ToList();
+
+            // A save location is taken from the entry only when the game has none. One the user
+            // chose, or the library gave, stays.
+            if (preview != null && string.IsNullOrEmpty(this.BaseNonXboxSaveLocation) && !string.IsNullOrEmpty(preview.BaseNonXboxSaveLocation))
+            {
+                this.BaseNonXboxSaveLocation = preview.BaseNonXboxSaveLocation;
+                if (preview.TargetProfileTypes != null)
+                {
+                    setProfileTypes(preview.TargetProfileTypes);
+                }
+            }
+        }
+
+        private void setProfileTypes(NonXboxProfile.ProfileType[] types)
+        {
+            this.TargetProfileTypes = types;
+
+            this.TargetProfiles = new NonXboxProfile[types.Length];
+
+            for (int j = 0; j < types.Length; j++)
+            {
+                TargetProfiles[j] = new NonXboxProfile(j, types[j]);
+            }
+        }
+
         private string expandSaveFileLocation()
         {
             string returnVal = GameLibrary.ExpandSaveFileLocation(BaseNonXboxSaveLocation);
@@ -187,14 +235,7 @@ namespace GPSaveConverter.Library
 
             if (deserializedInfo.TargetProfileTypes != null)
             {
-                this.TargetProfileTypes = deserializedInfo.TargetProfileTypes;
-
-                this.TargetProfiles = new NonXboxProfile[TargetProfileTypes.Length];
-
-                for (int j = 0; j < TargetProfileTypes.Length; j++)
-                {
-                    TargetProfiles[j] = new NonXboxProfile(j, deserializedInfo.TargetProfileTypes[j]);
-                }
+                setProfileTypes(deserializedInfo.TargetProfileTypes);
             }
         }
 
@@ -204,7 +245,7 @@ namespace GPSaveConverter.Library
             {
                 return null;
             }
-            foreach (FileTranslation t in this.FileTranslations)
+            foreach (FileTranslation t in this.TranslationsInOrder)
             {
                 t.NonXboxFileInfo = file;
                 t.XboxProfileID = xboxProfileID;
@@ -218,7 +259,7 @@ namespace GPSaveConverter.Library
         }
         private FileTranslation findTranslation(Xbox.XboxFileInfo file)
         {
-            foreach (FileTranslation t in this.FileTranslations)
+            foreach (FileTranslation t in this.TranslationsInOrder)
             {
                 t.XboxFileInfo = file;
                 t.XboxProfileID = file.Parent.Parent.XboxProfileID;

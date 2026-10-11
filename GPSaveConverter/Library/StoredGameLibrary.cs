@@ -15,8 +15,11 @@ namespace GPSaveConverter.Library
         /// <summary>
         /// Checks the library for mistakes that would stop the application loading or using it.
         /// </summary>
+        /// <param name="mayBeEmpty">
+        /// True for the preview library, which lists no games when no translation is being tested.
+        /// </param>
         /// <returns>A description of the first problem found, or null if there is none.</returns>
-        internal string FindProblem()
+        internal string FindProblem(bool mayBeEmpty = false)
         {
             DateTime versionDate;
             if (Version == null || !DateTime.TryParseExact(Version, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out versionDate))
@@ -24,7 +27,7 @@ namespace GPSaveConverter.Library
                 return "Version must be a date in the form yyyy-MM-dd.";
             }
 
-            if (GameInfo == null || GameInfo.Count == 0) return "The library contains no games.";
+            if (GameInfo == null || (GameInfo.Count == 0 && !mayBeEmpty)) return "The library contains no games.";
 
             HashSet<string> packageNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (GameInfo game in GameInfo)

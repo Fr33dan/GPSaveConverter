@@ -16,6 +16,18 @@ namespace GPSaveConverter.Interfaces
         bool BackupBeforeTransfer { get; set; }
         int BackupsToKeep { get; set; }
 
+        /// <summary>
+        /// Whether translations that are still being tested are used as well. They are tried
+        /// before any other.
+        /// </summary>
+        bool UsePreviewTranslations { get; set; }
+
+        /// <summary>
+        /// The translations being tested, as they were last downloaded. Kept so that they are there
+        /// when the tool starts with no connection.
+        /// </summary>
+        string PreviewGameLibrary { get; set; }
+
         void Save();
         void Reset();
     }

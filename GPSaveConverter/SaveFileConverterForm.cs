@@ -739,6 +739,9 @@ namespace GPSaveConverter
                     }
                 }
             }
+
+            // Last, so that it is what the status line is left showing.
+            showPreviewTranslationsNote();
         }
 
         private async void promptNonXboxLocationButton_Click(object sender, EventArgs e)
@@ -850,9 +853,38 @@ namespace GPSaveConverter
             if(prefsForm == null)
             {
                 prefsForm = new PreferencesForm();
+                prefsForm.PreviewTranslationsChanged += previewTranslationsChanged;
             }
 
             prefsForm.Show(this);
+        }
+
+        private void previewTranslationsChanged(object sender, EventArgs e)
+        {
+            // The game on screen may have gained or lost translations. Selecting it again shows its
+            // files matched by the ones now in force.
+            if (ActiveGame != null && this.packagesDataGridView.SelectedRows.Count > 0)
+            {
+                packagesDataGridView_Click(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Says, when the selected game has translations that are still being tested, that they are
+        /// the ones in use. Whoever turned the option on for one game may have forgotten it is on.
+        /// </summary>
+        private void showPreviewTranslationsNote()
+        {
+            int count = ActiveGame.PreviewTranslations.Count;
+            this.fileTranslationsMarkerLabel.Text = count == 0
+                ? "File Translations:"
+                : "File Translations: (" + count + " being tested " + (count == 1 ? "is" : "are") + " tried first)";
+
+            if (count > 0)
+            {
+                logger.Info("This game has {0} that {1} still being tested. {2} tried first. Turn this off in File > Preferences.",
+                    count == 1 ? "a file translation" : count + " file translations", count == 1 ? "is" : "are", count == 1 ? "It is" : "They are");
+            }
         }
 
         private void fileTranslationListBox_SelectedIndexChanged(object sender, EventArgs e)
