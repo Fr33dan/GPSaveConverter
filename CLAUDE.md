@@ -81,6 +81,8 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 
 - A new container is written as the game writes one: `container.1`, sync state 5 (created), no mark from the cloud, each blob with no cloud copy, entered at its place in the order of names, and the save as a whole marked 2 (modified). `XboxSyncState` has the values. The tests in the "Creating a container" region of `TransferIntegrationTests` hold the ones recorded from a real game; do not change one without a new recording.
 - A container the tool did not touch is written back exactly as it was read, mark, time and size included.
+- A blob replaced in a container that exists is overwritten in place, and the container stays marked as synced. That is on purpose: a save nobody has loaded yet should not be sent to the cloud. Once the game loads it and saves, the Xbox services mark the container and upload it themselves. Do not "fix" this by marking it as modified.
+- A new container gets the time of the transfer, which a game may show as the slot's "last played" time. That is also left as it is.
 - The wiki page "Xbox Save Format" has every field and how the values were found. Read it before changing anything in `GPSaveConverter/Xbox/`.
 
 ## How a file translation works
