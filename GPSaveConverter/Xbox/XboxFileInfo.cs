@@ -78,6 +78,14 @@ namespace GPSaveConverter.Xbox
         /// <summary>
         /// Replace this Xbox file with the specified file.
         /// </summary>
+        /// <remarks>
+        /// The file is overwritten where it is, and the container goes on saying it is synced. The
+        /// game does it another way: it writes a new file and marks the container as modified, and
+        /// the Xbox app then uploads it. Not doing that is on purpose. A save that was only just
+        /// copied in has not been loaded by the game yet, and one that turns out not to work should
+        /// not have gone to the cloud. Once the game loads it and saves, the Xbox services mark the
+        /// container themselves and upload it.
+        /// </remarks>
         /// <param name="replacement"></param>
         internal void Replace(NonXboxFileInfo replacement)
         {
