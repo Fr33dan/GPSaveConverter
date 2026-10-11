@@ -35,6 +35,14 @@ gh pr list --state open --json number,title,author,isDraft,mergeable
 
 For `needs-info` and `translation-provided`, look at who commented last. If the reporter answered, the issue is waiting on us.
 
+An answer can also come on an issue under any other label, so start every pass with the issues that changed lately and whose last comment is not ours:
+
+```
+gh issue list --state open --search "sort:updated-desc" --limit 30 --json number,title,updatedAt,comments --jq '.[] | select(.comments[-1].author.login != "Fr33dan") | "\(.number)\t\(.updatedAt)\t\(.comments[-1].author.login // "-")\t\(.title)"'
+```
+
+On #183 the reporter answered our question on an issue labelled `incompatible-save`. A check of the two waiting labels did not show it, and it sat until the next day.
+
 ## Labels
 
 | Label | Use it when |
@@ -110,6 +118,9 @@ Check these before anything else:
 
 - Versions up to v.0.4.12 cannot create an Xbox container. There the container the file belongs in must already exist, which usually means starting the Xbox version and saving once in the slot to be replaced. Later versions ask, name the containers, and create them on a yes. That was tried on one game, DOOM Eternal, on 2026-10-10: the game loaded the new slot and the Xbox app uploaded it. For any other game it is untried, so ask the reporter to say how it went, and add the result to the Game Compatibility table.
 - A container the tool created cannot be taken out of the cloud by the tool. Deleting that save in the game does it.
+- When more than one container would be created, the question tells the user to answer No and to try one file first. For a game nobody has tried, that is the advice to repeat. Two kinds of game need a word more:
+  - Forza Horizon 4 and 5. The built-in translation gives every livery and tune a container of its own, and the compatibility table says they do not carry over. Say to answer No.
+  - A game whose save is more than one file, such as Persona 3 Portable with its `.BIN` and `.BINslot`. There one save is two containers, so the first try is one pair, answered with Yes.
 - A game only appears in the list when its package folder holds local save data: `%LOCALAPPDATA%\Packages\<package>\SystemAppData\wgs` with a profile folder in it. The game does not have to be installed. Versions up to v.0.4.12 also wanted a second folder beside the profile folder, so a game that had been uninstalled could be missing from the list (#79).
 - If the user wrote several translations for the game, the first one that matches is used. Old attempts sitting earlier in the list hide newer ones.
 
@@ -159,6 +170,7 @@ Age alone is not a reason to close anything. If an old issue has a concrete answ
 - Give steps as a short numbered list the reporter can follow exactly. Use the app's real menu names.
 - Before any instruction that copies files, tell them to use v.0.4.12 or later. From that version the tool backs up what a transfer changes, and **File ▸ Backups** puts it back. Only someone who cannot update needs telling to back up both save folders by hand. The wiki's Backups page explains it for users.
 - One reply per issue per pass. Do not post again to an issue that is waiting on the reporter.
+- The exception is a release that changes what one of our replies told someone to do. Correct it on that issue once the release is out. #169 had steps for an error box that v.0.4.13 replaced with a question.
 - Find out why before you reply. When a paste is incomplete or the tool showed something odd, the cause is often the tool's, and the reporter should hear it, and the way around it, in the same reply. On #180 the first reply asked for the Steam files without saying where they are; the cause turned up afterwards and a second reply had to follow.
 - Do not state a fact about a particular game's save format unless the thread or the code shows it.
 
