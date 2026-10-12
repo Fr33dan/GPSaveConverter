@@ -32,6 +32,8 @@ namespace GPSaveConverter.Tests
         [InlineData("LikeADragonInfiniteWealth")]
         [InlineData("GenerationZero")]
         [InlineData("FinalFantasyVIIRemakeIntergrade")]
+        [InlineData("HogwartsLegacy")]
+        [InlineData("HellbladeSenuasSacrifice")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -512,6 +514,134 @@ namespace GPSaveConverter.Tests
             string problem;
             string[] names = Profile("FinalFantasyVIIRemakeIntergrade").Single().NewContainerNames(file, TranslationSimulator.XboxProfileID, out problem);
             Assert.Equal(new[] { container, container }, names);
+        }
+
+        #endregion
+
+        #region Hogwarts Legacy (#147, #152)
+
+        private static readonly string[] HogwartsSaves = { "HL-00-00", "HL-00-10", "HL-00-11", "HL-00-12", "HL-00-13", "HL-00-14" };
+
+        private static TranslationSimulator HogwartsLegacy()
+        {
+            // The Xbox table in the screenshots of #152. Every container holds one blob, "Data".
+            var xboxFiles = new[] { "DisclaimerState" }.Concat(HogwartsSaves).Concat(new[] { "ModOperations", "SaveGameList", "UnplayedCharacters", "WelcomeState" })
+                                                         .Select(container => new XboxFile(container, container, "Data")).ToArray();
+
+            // The save files in the folder the reporter had copied to.
+            var nonXboxFiles = HogwartsSaves.Select(save => save + ".sav").Concat(new[] { "SaveGameList.sav" }).ToArray();
+
+            return new TranslationSimulator(Profile("HogwartsLegacy"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("HL-00-00")]
+        [InlineData("HL-00-10")]
+        [InlineData("HL-00-14")]
+        [InlineData("SaveGameList")]
+        public void HogwartsLegacy_FileOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = HogwartsLegacy();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(name, name, "Data"));
+            var toXbox = game.ToXbox(name + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(name + " | " + name + " | Data", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("DisclaimerState")]
+        [InlineData("ModOperations")]
+        [InlineData("UnplayedCharacters")]
+        [InlineData("WelcomeState")]
+        public void HogwartsLegacy_ContainersNobodyReportedNeeding_AreLeftAlone(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, HogwartsLegacy().ToNonXbox(new XboxFile(container, container, "Data")).Outcome);
+        }
+
+        [Theory]
+        [InlineData("HogwartsLegacy.exe")]
+        [InlineData("Engine\\Binaries\\ThirdParty\\DbgHelp\\dbghelp.dll")]
+        public void HogwartsLegacy_FilesOfTheGameItself_AreNotSentToXbox(string file)
+        {
+            // In one screenshot of #152 the folder picked was the one the game is installed in.
+            Assert.Equal(Outcome.NoTranslation, HogwartsLegacy().ToXbox(file).Outcome);
+        }
+
+        [Fact]
+        public void HogwartsLegacy_WithTheSaveRuleAlone_TheSaveListHasNoTranslation()
+        {
+            // What the reporter of #152 had set up, and why copying "SaveGameList" stopped with
+            // "Relative file path translation to Xbox file ID not found".
+            var saveRuleAlone = new[] { Translation("HL-00-${slot}", "HL-00-${slot}", "Data", "HL-00-${slot}.sav", "(?<slot>[0-9]{2})") };
+            var game = new TranslationSimulator(saveRuleAlone, new[] { new XboxFile("SaveGameList", "SaveGameList", "Data") }, new string[0]);
+
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("SaveGameList", "SaveGameList", "Data")).Outcome);
+        }
+
+        [Fact]
+        public void HogwartsLegacy_XboxSaveNotOnTheOtherSide_IsCreatedUnderTheSameName()
+        {
+            // Not in either thread: going by the names, a second character's saves would be "HL-01-...".
+            var game = new TranslationSimulator(Profile("HogwartsLegacy"), new[] { new XboxFile("HL-01-00", "HL-01-00", "Data") }, new string[0]);
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("HL-01-00", "HL-01-00", "Data"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("HL-01-00.sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void HogwartsLegacy_SaveWithNoXboxContainer_NeedsOneOfItsOwnName()
+        {
+            Assert.Equal(Outcome.NoContainer, HogwartsLegacy().ToXbox("HL-00-01.sav").Outcome);
+
+            string problem;
+            string[] names = Profile("HogwartsLegacy").First().NewContainerNames("HL-00-01.sav", TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { "HL-00-01", "HL-00-01" }, names);
+        }
+
+        #endregion
+
+        #region Hellblade: Senua's Sacrifice (#148)
+
+        private const string HellbladeContainer = "UE4DefaultSaveGameContainer";
+
+        private static TranslationSimulator Hellblade()
+        {
+            // No file table was posted. These are the names the profile in the issue spells out:
+            // one container, with a blob for each of the two save files.
+            var xboxFiles = new[] { "HellbladeExtSaveData", "HellbladeSave_0" }.Select(blob => new XboxFile(HellbladeContainer, HellbladeContainer, blob)).ToArray();
+            var nonXboxFiles = new[] { "HellbladeExtSaveData.sav", "HellbladeSave_0.sav" };
+
+            return new TranslationSimulator(Profile("HellbladeSenuasSacrifice"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("HellbladeExtSaveData")]
+        [InlineData("HellbladeSave_0")]
+        public void Hellblade_SaveFile_MapsBothWays(string name)
+        {
+            TranslationSimulator game = Hellblade();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(HellbladeContainer, HellbladeContainer, name));
+            var toXbox = game.ToXbox(name + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(HellbladeContainer + " | " + HellbladeContainer + " | " + name, toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void Hellblade_AnyOtherName_IsLeftAlone()
+        {
+            // The profile names its two files outright, so nothing else moves in either direction.
+            Assert.Equal(Outcome.NoTranslation, Hellblade().ToXbox("HellbladeSave_1.sav").Outcome);
+            Assert.Equal(Outcome.NoTranslation, Hellblade().ToNonXbox(new XboxFile(HellbladeContainer, HellbladeContainer, "HellbladeSave_1")).Outcome);
         }
 
         #endregion

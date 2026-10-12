@@ -1,5 +1,5 @@
 {
-  "Version": "2026-10-10",
+  "Version": "2026-10-12",
   "GameInfo": [
     {
       "Name": "Disgaea 4 Complete+",
@@ -46,6 +46,42 @@
           "XboxFileID": "savegame",
           "ContainerName1": "GenerationZero",
           "ContainerName2": "GenerationZero",
+          "NamedRegexGroups": []
+        }
+      ]
+    },
+    {
+      "Name": "Hellblade: Senua's Sacrifice",
+      "PackageName": "NinjaTheoryLtd.HellbladeSenuasSacrifice_nkbnxvch6z38g",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\HellbladeGame\\Saved\\SaveGames\\",
+      "Issues": [ 148 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${BaseName}.sav",
+          "XboxFileID": "${BaseName}",
+          "ContainerName1": "UE4DefaultSaveGameContainer",
+          "ContainerName2": "UE4DefaultSaveGameContainer",
+          "NamedRegexGroups": [ "(?<BaseName>HellbladeExtSaveData|HellbladeSave_0)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Hogwarts Legacy",
+      "PackageName": "WarnerBros.Interactive.PHX_ktmk1xygcecda",
+      "Issues": [ 147, 152 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "HL-${Save}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "HL-${Save}",
+          "ContainerName2": "HL-${Save}",
+          "NamedRegexGroups": [ "(?<Save>[0-9]+-[0-9]+)" ]
+        },
+        {
+          "NonXboxFilename": "SaveGameList.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "SaveGameList",
+          "ContainerName2": "SaveGameList",
           "NamedRegexGroups": []
         }
       ]
