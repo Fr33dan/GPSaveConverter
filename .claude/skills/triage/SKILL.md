@@ -108,6 +108,12 @@ There are two different causes. Do not assume which.
 - **The mapping is wrong.** A file landed under the wrong name or in the wrong container. Ask for the tables and the translation used, and check them against each other.
 - **The save format differs between stores.** Some games encrypt saves or tie them to the account. Others keep several files on one store as a single one on the other, as Tunic does (#6). If the mapping is right and the game still refuses the file, no translation can fix it. Say that plainly and label `incompatible-save`. Converting the contents of a save is not planned: the maintainer decided on 2026-10-10 that the tool stays with moving and renaming files. Do not offer to look into a game's format.
 
+Three checks tell the two apart without the game:
+
+- **Run the reporter's own translation through the harness.** A test file you do not commit, with their profile and their file names in a `TranslationSimulator`, takes a minute and prints where each file goes. It has gone both ways. On #156 the mapping was right. On #154 the save data never reached the blob the game reads, so the result that was reported did not show what it seemed to.
+- **If save files from both sides are attached, compare how they begin.** Unpack an attachment in a new empty folder outside the repo, and never run anything in it. A different start to the same save (#154), or one file on one side for a folder of files on the other (#143), settles it as a difference in the save's contents. Say what you saw and how far you looked.
+- **Look at the shape of the Xbox table.** A container named after a file, holding a `data` blob and a `timestamp` blob, looks like the Xbox app's copy of ordinary files (#140, Dishonored). Check the Microsoft Store row on the game's PCGamingWiki page. If it names an ordinary folder, a plain file copy may be all that is needed, and a translation that changes `data` alone starts at the wrong end. This one is unconfirmed until someone reports back on #140.
+
 Either way, the save they had before can be put back with **File ▸ Backups**, if the transfer was made with v.0.4.12 or later. Say so: it is usually what they want first.
 
 When a result is settled either way, add the game to the Game Compatibility table in the wiki, with a link to the issue it comes from. The wiki is its own repository, `Fr33dan/GPSaveConverter.wiki`. Keep the table alphabetical and keep the file's CRLF line endings.
