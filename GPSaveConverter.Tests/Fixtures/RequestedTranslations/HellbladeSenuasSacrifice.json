@@ -1,0 +1,14 @@
+{
+  "Name": "Hellblade: Senua's Sacrifice",
+  "PackageName": "NinjaTheoryLtd.HellbladeSenuasSacrifice_nkbnxvch6z38g",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\HellbladeGame\\Saved\\SaveGames\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${BaseName}.sav",
+      "XboxFileID": "${BaseName}",
+      "ContainerName1": "UE4DefaultSaveGameContainer",
+      "ContainerName2": "UE4DefaultSaveGameContainer",
+      "NamedRegexGroups": [ "(?<BaseName>HellbladeExtSaveData|HellbladeSave_0)" ]
+    }
+  ]
+}
