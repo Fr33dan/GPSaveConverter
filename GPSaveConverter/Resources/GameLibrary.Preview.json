@@ -23,6 +23,20 @@
       ]
     },
     {
+      "Name": "DIRT 5",
+      "PackageName": "CodemastersSoftwareCompan.DiRT5_4cfye3zbe1gaw",
+      "Issues": [ 108 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${File}.prf",
+          "XboxFileID": "profile/${File}.prf",
+          "ContainerName1": "Dirt5",
+          "ContainerName2": "SaveData",
+          "NamedRegexGroups": [ "(?<File>items|private|public)" ]
+        }
+      ]
+    },
+    {
       "Name": "Disgaea 4 Complete+",
       "PackageName": "NISAmericaInc.Disgaea4Complete_f6hsb3tktby1t",
       "Issues": [ 150 ],
@@ -146,6 +160,34 @@
           "ContainerName1": "save/system/data.sys",
           "ContainerName2": "displayName",
           "NamedRegexGroups": []
+        }
+      ]
+    },
+    {
+      "Name": "Lords of the Fallen",
+      "PackageName": "CIGamesS.A.LordsoftheFallen-PC_9609msxhzdsvj",
+      "Issues": [ 98 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Save}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${Save}",
+          "ContainerName2": "${Save}",
+          "NamedRegexGroups": [ "(?<Save>GeneralSave|Save[0-9]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Manor Lords",
+      "PackageName": "HoodedHorse.ManorLords_znaey1dw2bdpr",
+      "Issues": [ 87 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Name}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${Name}",
+          "ContainerName2": "${Name}",
+          "NamedRegexGroups": [ "(?<Name>[A-Za-z0-9_]+)" ]
         }
       ]
     },

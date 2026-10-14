@@ -37,6 +37,9 @@ namespace GPSaveConverter.Tests
         [InlineData("Gears5")]
         [InlineData("CallOfTheWildTheAngler")]
         [InlineData("TheAlters")]
+        [InlineData("Dirt5")]
+        [InlineData("LordsOfTheFallen")]
+        [InlineData("ManorLords")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -803,6 +806,150 @@ namespace GPSaveConverter.Tests
             // write it differently.
             Assert.Equal(Outcome.NoTranslation, TheAlters().ToXbox("PlayerProfile.sav").Outcome);
             Assert.Equal(Outcome.NoTranslation, TheAlters().ToNonXbox(new XboxFile("PlayerProfile", "PlayerProfile", "Data")).Outcome);
+        }
+
+        #endregion
+
+        #region DIRT 5 (#108)
+
+        private static TranslationSimulator Dirt5()
+        {
+            // The Xbox table in the screenshot of #108: one container holding every file under its path.
+            // Two names are cut off in the screenshot; the first ghost is spelled out in the error box.
+            var xboxFiles = new[] { "ghosts/6_17663734281804447716.spooky", "ghosts/6_3812766141409", "profile/items.prf", "profile/private.prf",
+                                    "profile/public.prf", "profile/settings.json", "recipies/10340993300678" }
+                .Select(blob => new XboxFile("Dirt5", "SaveData", blob)).ToArray();
+            var nonXboxFiles = new[] { "items.prf", "private.prf", "public.prf" };
+
+            return new TranslationSimulator(Profile("Dirt5"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("items")]
+        [InlineData("private")]
+        [InlineData("public")]
+        public void Dirt5_ProfileFile_MapsBothWays(string name)
+        {
+            // The three files the reporter matched by hand, after which the progress carried over.
+            TranslationSimulator game = Dirt5();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("Dirt5", "SaveData", "profile/" + name + ".prf"));
+            var toXbox = game.ToXbox(name + ".prf");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".prf", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("Dirt5 | SaveData | profile/" + name + ".prf", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("ghosts/6_17663734281804447716.spooky")]
+        [InlineData("profile/settings.json")]
+        [InlineData("recipies/10340993300678")]
+        public void Dirt5_OtherXboxFiles_AreLeftAlone(string blob)
+        {
+            Assert.Equal(Outcome.NoTranslation, Dirt5().ToNonXbox(new XboxFile("Dirt5", "SaveData", blob)).Outcome);
+        }
+
+        #endregion
+
+        #region Lords of the Fallen (#98)
+
+        private static TranslationSimulator LordsOfTheFallen()
+        {
+            // The tables posted in the issue. On Xbox each save has two backups of its own, _b1 and _b2.
+            var xboxFiles = new[] { "GeneralSave", "GeneralSave_b1", "GeneralSave_b2", "Save00", "Save00_b1", "Save00_b2" }
+                .Select(container => new XboxFile(container, container, "Data")).ToArray();
+            var nonXboxFiles = new[] { "GeneralSave.sav", "GeneralSaveBackup.sav", "Save00.sav", "Save02.sav", "SaveBackup.sav" };
+
+            return new TranslationSimulator(Profile("LordsOfTheFallen"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("GeneralSave")]
+        [InlineData("Save00")]
+        public void LordsOfTheFallen_Save_MapsBothWays(string name)
+        {
+            TranslationSimulator game = LordsOfTheFallen();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(name, name, "Data"));
+            var toXbox = game.ToXbox(name + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(name + " | " + name + " | Data", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("GeneralSave_b1")]
+        [InlineData("Save00_b2")]
+        public void LordsOfTheFallen_XboxBackups_AreLeftAlone(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, LordsOfTheFallen().ToNonXbox(new XboxFile(container, container, "Data")).Outcome);
+        }
+
+        [Theory]
+        [InlineData("GeneralSaveBackup.sav")]
+        [InlineData("SaveBackup.sav")]
+        public void LordsOfTheFallen_SteamBackups_AreLeftAlone(string file)
+        {
+            Assert.Equal(Outcome.NoTranslation, LordsOfTheFallen().ToXbox(file).Outcome);
+        }
+
+        [Fact]
+        public void LordsOfTheFallen_SteamOnlySave_NeedsAContainerOfItsOwnName()
+        {
+            Assert.Equal(Outcome.NoContainer, LordsOfTheFallen().ToXbox("Save02.sav").Outcome);
+
+            string problem;
+            string[] names = Profile("LordsOfTheFallen").Single().NewContainerNames("Save02.sav", TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { "Save02", "Save02" }, names);
+        }
+
+        #endregion
+
+        #region Manor Lords (#87)
+
+        private static readonly string[] ManorLordsSaves = { "autosave", "autosave_descr", "rtsSettings", "saveGame_1", "saveGame_1_descr" };
+
+        private static TranslationSimulator ManorLords()
+        {
+            // The tables posted in the issue. The Steam side also has a picture and a coat of arms for
+            // each save, which the Xbox side has nothing for.
+            var xboxFiles = ManorLordsSaves.Select(container => new XboxFile(container, container, "Data")).ToArray();
+            var nonXboxFiles = new[] { "autosave.png", "autosave.sav", "autosave_coat_0.png", "autosave_descr.sav", "rtsSettings.sav",
+                                       "saveGame_1.png", "saveGame_1.sav", "saveGame_1_coat_0.png", "saveGame_1_descr.sav", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("ManorLords"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("autosave")]
+        [InlineData("autosave_descr")]
+        [InlineData("rtsSettings")]
+        [InlineData("saveGame_1")]
+        [InlineData("saveGame_1_descr")]
+        public void ManorLords_Save_MapsBothWays(string name)
+        {
+            TranslationSimulator game = ManorLords();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(name, name, "Data"));
+            var toXbox = game.ToXbox(name + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(name + " | " + name + " | Data", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("autosave.png")]
+        [InlineData("saveGame_1_coat_0.png")]
+        [InlineData("steam_autocloud.vdf")]
+        public void ManorLords_SteamOnlyFiles_AreNotSentToXbox(string file)
+        {
+            Assert.Equal(Outcome.NoTranslation, ManorLords().ToXbox(file).Outcome);
         }
 
         #endregion
