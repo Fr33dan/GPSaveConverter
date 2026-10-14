@@ -47,6 +47,26 @@ namespace GPSaveConverter.Tests
         }
 
         [Fact]
+        public async Task GetProfileOptions_SteamID64Marker_ListsTheFolderAndExpandsIntoIt()
+        {
+            // As in the game library's entry for Life is Strange: True Colors, where the folder is named
+            // with the account's SteamID64. The marker was never replaced, so no profile was ever listed.
+            var profile = new NonXboxProfile(0, NonXboxProfile.ProfileType.Steam);
+            const string location = "C:\\Saves\\Steam\\<user-id_SteamID64>\\";
+
+            _fileSystem.DirectoryExists("C:\\Saves\\Steam\\").Returns(true);
+            _fileSystem.GetDirectories("C:\\Saves\\Steam\\").Returns(new[] { "C:\\Saves\\Steam\\76561198083722517" });
+            // Only the real folder exists, not a path that still has the marker in it.
+            _fileSystem.DirectoryExists("C:\\Saves\\Steam\\76561198083722517\\").Returns(true);
+
+            NonXboxProfile[] result = await profile.getProfileOptions(location);
+
+            Assert.Single(result);
+            Assert.Equal("76561198083722517", result[0].UserID);
+            Assert.Equal("C:\\Saves\\Steam\\76561198083722517\\", result[0].ExpandSaveLocation(location));
+        }
+
+        [Fact]
         public async Task GetProfileOptions_XboxProfile_ConvertsIntToHex()
         {
             var profile = new NonXboxProfile(0, NonXboxProfile.ProfileType.Xbox);
