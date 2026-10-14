@@ -121,6 +121,12 @@ Either way, the save they had before can be put back with **File ▸ Backups**, 
 
 When a result is settled either way, add the game to the Game Compatibility table in the wiki, with a link to the issue it comes from. The wiki is its own repository, `Fr33dan/GPSaveConverter.wiki`. Keep the table alphabetical and keep the file's CRLF line endings.
 
+The table has three statuses, explained in a legend above it. The maintainer added the middle one on 2026-10-14:
+
+- 🟩 **Compatible:** the tool moves the save and the game loads it.
+- 🟨 **With extra steps:** someone reported the game accepting the save only after a step this tool does not do, such as converting the file (Final Fantasy XVI, #134) or patching it by hand (Wo Long, #45). It needs a report that it worked. Our own reading of how two files differ is not enough: The Outer Worlds stays red. A way round that does not use this tool at all, such as Avowed's through Battle.net (#119), stays red too, with the way described in the note.
+- 🟥 **Not Compatible:** the files land in the right place, the game rejects them, and nobody has found a way round.
+
 ### Copying to Xbox does nothing or fails
 
 Check these before anything else:
