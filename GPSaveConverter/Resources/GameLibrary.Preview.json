@@ -72,20 +72,6 @@
       ]
     },
     {
-      "Name": "Gears 5",
-      "PackageName": "Microsoft.HalifaxBaseGame_8wekyb3d8bbwe",
-      "Issues": [ 124 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "${FileName}",
-          "XboxFileID": "${FileName}",
-          "ContainerName1": "UE4DefaultSaveGameContainer",
-          "ContainerName2": "Gears5",
-          "NamedRegexGroups": [ "(?<FileName>\\w+)" ]
-        }
-      ]
-    },
-    {
       "Name": "Generation Zero",
       "PackageName": "AvalancheStudios.GenerationZero_m0byj0nmrybdr",
       "Issues": [ 144 ],
@@ -111,27 +97,6 @@
           "ContainerName1": "UE4DefaultSaveGameContainer",
           "ContainerName2": "UE4DefaultSaveGameContainer",
           "NamedRegexGroups": [ "(?<BaseName>HellbladeExtSaveData|HellbladeSave_0)" ]
-        }
-      ]
-    },
-    {
-      "Name": "Hogwarts Legacy",
-      "PackageName": "WarnerBros.Interactive.PHX_ktmk1xygcecda",
-      "Issues": [ 147, 152 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "HL-${Save}.sav",
-          "XboxFileID": "Data",
-          "ContainerName1": "HL-${Save}",
-          "ContainerName2": "HL-${Save}",
-          "NamedRegexGroups": [ "(?<Save>[0-9]+-[0-9]+)" ]
-        },
-        {
-          "NonXboxFilename": "SaveGameList.sav",
-          "XboxFileID": "Data",
-          "ContainerName1": "SaveGameList",
-          "ContainerName2": "SaveGameList",
-          "NamedRegexGroups": []
         }
       ]
     },
@@ -216,34 +181,6 @@
           "ContainerName1": "MainSave",
           "ContainerName2": "MainSave",
           "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
-        }
-      ]
-    },
-    {
-      "Name": "The Alters",
-      "PackageName": "4063811bitstudios.TheAlters_gwy9gn5q9j1y6",
-      "Issues": [ 135, 136 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "${FileName}.sav",
-          "XboxFileID": "Data",
-          "ContainerName1": "${FileName}",
-          "ContainerName2": "${FileName}",
-          "NamedRegexGroups": [ "(?<FileName>playthrough_[A-Z0-9]+)" ]
-        },
-        {
-          "NonXboxFilename": "${FileName}.sav",
-          "XboxFileID": "Data",
-          "ContainerName1": "${FileName}",
-          "ContainerName2": "${FileName}",
-          "NamedRegexGroups": [ "(?<FileName>[A-Z0-9]+-ACT[0-9]-day-[0-9]+-v-[0-9])" ]
-        },
-        {
-          "NonXboxFilename": "${FileName}.sav",
-          "XboxFileID": "Data",
-          "ContainerName1": "${FileName}",
-          "ContainerName2": "${FileName}",
-          "NamedRegexGroups": [ "(?<FileName>[A-Z0-9]+-Journey[0-9]-day-[0-9]+-v-[0-9])" ]
         }
       ]
     }
