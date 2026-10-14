@@ -39,6 +39,27 @@
       ]
     },
     {
+      "Name": "DEATH STRANDING",
+      "PackageName": "505GAMESS.P.A.DeathStranding_tefn33qh9azfc",
+      "Issues": [ 61 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Slot}\\\\checkpoint.dat",
+          "XboxFileID": "checkpoint.dat",
+          "ContainerName1": "${Slot}",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<Slot>(?:auto|manual|quick)save[0-9]+)" ]
+        },
+        {
+          "NonXboxFilename": "profile\\\\${File}",
+          "XboxFileID": "${File}",
+          "ContainerName1": "profile",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<File>[\\w.]+)" ]
+        }
+      ]
+    },
+    {
       "Name": "DIRT 5",
       "PackageName": "CodemastersSoftwareCompan.DiRT5_4cfye3zbe1gaw",
       "Issues": [ 108 ],
@@ -187,6 +208,20 @@
       ]
     },
     {
+      "Name": "Mount & Blade II: Bannerlord",
+      "PackageName": "TaleWorldsEntertainment.MountBladeIIBannerlord_mk53pm3ay0384",
+      "Issues": [ 44 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Name}.sav",
+          "XboxFileID": "${Name}.sav.00",
+          "ContainerName1": "GameSaves",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<Name>[^\\\\]+)" ]
+        }
+      ]
+    },
+    {
       "Name": "Persona 3 Portable",
       "PackageName": "SEGAofAmericaInc.M0cb6b3aet_s751p9cej88mt",
       "Issues": [ 168, 48 ],
@@ -197,6 +232,20 @@
           "ContainerName1": "${FileName}",
           "ContainerName2": "",
           "NamedRegexGroups": [ "(?<FileName>[\\w.]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Return to Monkey Island",
+      "PackageName": "DevolverDigital.ReturntoMonkeyIslandXBSeriesXS_6kzv4j18v0c96",
+      "Issues": [ 49 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${File}",
+          "XboxFileID": "${File}",
+          "ContainerName1": "UserProfile",
+          "ContainerName2": "UserProfile",
+          "NamedRegexGroups": [ "(?<File>Prefs\\.json|save\\.bin|Savegame[0-9]+\\.(?:png|save))" ]
         }
       ]
     },

@@ -1,0 +1,13 @@
+{
+  "Name": "Return to Monkey Island",
+  "PackageName": "DevolverDigital.ReturntoMonkeyIslandXBSeriesXS_6kzv4j18v0c96",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "UserProfile",
+      "ContainerName2": "UserProfile",
+      "NamedRegexGroups": [ "(?<File>Prefs\\.json|save\\.bin|Savegame[0-9]+\\.(?:png|save))" ]
+    }
+  ]
+}
