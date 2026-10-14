@@ -1,6 +1,27 @@
 {
-  "Version": "2026-10-12",
+  "Version": "2026-10-14",
   "GameInfo": [
+    {
+      "Name": "Call of the Wild: The Angler",
+      "PackageName": "AvalancheStudios.Tortoise_m0byj0nmrybdr",
+      "Issues": [ 92 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "slots\\\\${Slot}\\\\${File}",
+          "XboxFileID": "${File}",
+          "ContainerName1": "CotWTheAngler/slots/${Slot}",
+          "ContainerName2": "metadata",
+          "NamedRegexGroups": [ "(?<Slot>[0-9]+)", "(?<File>[a-z_]+)" ]
+        },
+        {
+          "NonXboxFilename": "${File}",
+          "XboxFileID": "${File}",
+          "ContainerName1": "CotWTheAngler",
+          "ContainerName2": "player_save_data",
+          "NamedRegexGroups": [ "(?<File>[a-z_]+)" ]
+        }
+      ]
+    },
     {
       "Name": "Disgaea 4 Complete+",
       "PackageName": "NISAmericaInc.Disgaea4Complete_f6hsb3tktby1t",
@@ -33,6 +54,20 @@
           "ContainerName1": "ff7remake${Slot}",
           "ContainerName2": "ff7remake${Slot}",
           "NamedRegexGroups": [ "(?<Slot>[a-z0-9]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Gears 5",
+      "PackageName": "Microsoft.HalifaxBaseGame_8wekyb3d8bbwe",
+      "Issues": [ 124 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FileName}",
+          "XboxFileID": "${FileName}",
+          "ContainerName1": "UE4DefaultSaveGameContainer",
+          "ContainerName2": "Gears5",
+          "NamedRegexGroups": [ "(?<FileName>\\w+)" ]
         }
       ]
     },
@@ -139,6 +174,34 @@
           "ContainerName1": "MainSave",
           "ContainerName2": "MainSave",
           "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
+        }
+      ]
+    },
+    {
+      "Name": "The Alters",
+      "PackageName": "4063811bitstudios.TheAlters_gwy9gn5q9j1y6",
+      "Issues": [ 135, 136 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FileName}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${FileName}",
+          "ContainerName2": "${FileName}",
+          "NamedRegexGroups": [ "(?<FileName>playthrough_[A-Z0-9]+)" ]
+        },
+        {
+          "NonXboxFilename": "${FileName}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${FileName}",
+          "ContainerName2": "${FileName}",
+          "NamedRegexGroups": [ "(?<FileName>[A-Z0-9]+-ACT[0-9]-day-[0-9]+-v-[0-9])" ]
+        },
+        {
+          "NonXboxFilename": "${FileName}.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${FileName}",
+          "ContainerName2": "${FileName}",
+          "NamedRegexGroups": [ "(?<FileName>[A-Z0-9]+-Journey[0-9]-day-[0-9]+-v-[0-9])" ]
         }
       ]
     }

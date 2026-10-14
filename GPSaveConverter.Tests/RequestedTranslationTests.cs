@@ -34,6 +34,9 @@ namespace GPSaveConverter.Tests
         [InlineData("FinalFantasyVIIRemakeIntergrade")]
         [InlineData("HogwartsLegacy")]
         [InlineData("HellbladeSenuasSacrifice")]
+        [InlineData("Gears5")]
+        [InlineData("CallOfTheWildTheAngler")]
+        [InlineData("TheAlters")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -642,6 +645,164 @@ namespace GPSaveConverter.Tests
             // The profile names its two files outright, so nothing else moves in either direction.
             Assert.Equal(Outcome.NoTranslation, Hellblade().ToXbox("HellbladeSave_1.sav").Outcome);
             Assert.Equal(Outcome.NoTranslation, Hellblade().ToNonXbox(new XboxFile(HellbladeContainer, HellbladeContainer, "HellbladeSave_1")).Outcome);
+        }
+
+        #endregion
+
+        #region Gears 5 (#124)
+
+        private const string GearsContainer = "UE4DefaultSaveGameContainer";
+
+        private static TranslationSimulator Gears5()
+        {
+            // Both tables come from the saves attached to the issue. Every Xbox file is a blob in one container.
+            var xboxFiles = new[] { "CampaignProfile", "CampaignToC", "GearGameSaveGame", "GearSaveSlot_0", "GearSaveSlot_5" }
+                .Select(blob => new XboxFile(GearsContainer, "Gears5", blob)).ToArray();
+            var nonXboxFiles = new[] { "CampaignToC", "GearGameSaveGame", "GearSaveSlot_0", "GearSaveSlot_5" };
+
+            return new TranslationSimulator(Profile("Gears5"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("CampaignToC")]
+        [InlineData("GearGameSaveGame")]
+        [InlineData("GearSaveSlot_0")]
+        [InlineData("GearSaveSlot_5")]
+        public void Gears5_FileOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = Gears5();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(GearsContainer, "Gears5", name));
+            var toXbox = game.ToXbox(name);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(GearsContainer + " | Gears5 | " + name, toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void Gears5_XboxOnlyFile_IsCreatedUnderTheSameName()
+        {
+            var toNonXbox = Gears5().ToNonXbox(new XboxFile(GearsContainer, "Gears5", "CampaignProfile"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("CampaignProfile", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void Gears5_SteamCloudFile_IsNotSentToXbox()
+        {
+            // The rule posted in the thread took any name, dots included. Steam can leave this file in the folder.
+            Assert.Equal(Outcome.NoTranslation, Gears5().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region Call of the Wild: The Angler (#92)
+
+        private static readonly string[] AnglerRootFiles = { "online_cache", "player_save_data", "player_settings" };
+        private static readonly string[] AnglerSlotFiles = { "metadata", "online_cache", "player_save_data", "player_settings" };
+
+        private static TranslationSimulator TheAngler()
+        {
+            // The tables posted in the issue. Each of five slots is a container of its own, and the files
+            // outside the slots are in one more.
+            var xboxFiles = AnglerRootFiles.Select(blob => new XboxFile("CotWTheAngler", "player_save_data", blob))
+                .Concat(Enumerable.Range(0, 5).SelectMany(slot => AnglerSlotFiles.Select(blob => new XboxFile("CotWTheAngler/slots/" + slot, "metadata", blob))))
+                .ToArray();
+            var nonXboxFiles = AnglerRootFiles
+                .Concat(Enumerable.Range(0, 5).SelectMany(slot => AnglerSlotFiles.Select(file => "slots\\" + slot + "\\" + file)))
+                .ToArray();
+
+            return new TranslationSimulator(Profile("CallOfTheWildTheAngler"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("0", "metadata")]
+        [InlineData("0", "player_save_data")]
+        [InlineData("2", "online_cache")]
+        [InlineData("4", "player_settings")]
+        public void TheAngler_SlotFile_MapsBothWays(string slot, string file)
+        {
+            TranslationSimulator game = TheAngler();
+            string container = "CotWTheAngler/slots/" + slot;
+            string path = "slots\\" + slot + "\\" + file;
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container, "metadata", file));
+            var toXbox = game.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " | metadata | " + file, toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("online_cache")]
+        [InlineData("player_save_data")]
+        [InlineData("player_settings")]
+        public void TheAngler_FileOutsideTheSlots_MapsBothWays(string file)
+        {
+            TranslationSimulator game = TheAngler();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("CotWTheAngler", "player_save_data", file));
+            var toXbox = game.ToXbox(file);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(file, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("CotWTheAngler | player_save_data | " + file, toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void TheAngler_SlotWithNoXboxContainer_NeedsOneOfItsOwnName()
+        {
+            Assert.Equal(Outcome.NoContainer, TheAngler().ToXbox("slots\\5\\metadata").Outcome);
+
+            string problem;
+            string[] names = Profile("CallOfTheWildTheAngler").First().NewContainerNames("slots\\5\\metadata", TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { "CotWTheAngler/slots/5", "metadata" }, names);
+        }
+
+        #endregion
+
+        #region The Alters (#135, #136)
+
+        // No file table was posted. These names are made up to fit the patterns of the translation in
+        // the thread, which two people there used.
+        private static readonly string[] AltersSaves = { "playthrough_8F3A2C", "8F3A2C-ACT1-day-3-v-1", "8F3A2C-Journey2-day-14-v-0" };
+
+        private static TranslationSimulator TheAlters()
+        {
+            var names = AltersSaves.Concat(new[] { "PlayerProfile" }).ToArray();
+            return new TranslationSimulator(Profile("TheAlters"), names.Select(name => new XboxFile(name, name, "Data")).ToArray(), names.Select(name => name + ".sav").ToArray());
+        }
+
+        [Theory]
+        [InlineData("playthrough_8F3A2C")]
+        [InlineData("8F3A2C-ACT1-day-3-v-1")]
+        [InlineData("8F3A2C-Journey2-day-14-v-0")]
+        public void TheAlters_Save_MapsBothWays(string name)
+        {
+            TranslationSimulator game = TheAlters();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(name, name, "Data"));
+            var toXbox = game.ToXbox(name + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(name + " | " + name + " | Data", toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void TheAlters_PlayerProfile_IsLeftAlone()
+        {
+            // Copying it made the game crash for one of the people in #135, who found the two versions
+            // write it differently.
+            Assert.Equal(Outcome.NoTranslation, TheAlters().ToXbox("PlayerProfile.sav").Outcome);
+            Assert.Equal(Outcome.NoTranslation, TheAlters().ToNonXbox(new XboxFile("PlayerProfile", "PlayerProfile", "Data")).Outcome);
         }
 
         #endregion
