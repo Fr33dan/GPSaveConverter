@@ -21,10 +21,14 @@ namespace GPSaveConverter.Library
         /// <returns>A description of the first problem found, or null if there is none.</returns>
         internal string FindProblem(bool mayBeEmpty = false)
         {
+            // The date of the change. Another change on the same day adds a capital letter, as in
+            // 2023-01-28A. Versions are compared as text, and that keeps both kinds in order.
             DateTime versionDate;
-            if (Version == null || !DateTime.TryParseExact(Version, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out versionDate))
+            if (Version == null
+                || !System.Text.RegularExpressions.Regex.IsMatch(Version, @"^[0-9]{4}-[0-9]{2}-[0-9]{2}[A-Z]?\z")
+                || !DateTime.TryParseExact(Version.Substring(0, 10), "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out versionDate))
             {
-                return "Version must be a date in the form yyyy-MM-dd.";
+                return "Version must be a date in the form yyyy-MM-dd, with a capital letter after it for another change on the same day.";
             }
 
             if (GameInfo == null || (GameInfo.Count == 0 && !mayBeEmpty)) return "The library contains no games.";

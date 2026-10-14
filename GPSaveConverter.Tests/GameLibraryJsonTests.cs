@@ -118,10 +118,24 @@ namespace GPSaveConverter.Tests
         }
 
         [Theory]
+        [InlineData("2023-01-28A")]
+        [InlineData("2023-01-28C")]
+        public void FindProblem_DateWithALetterForAnotherChangeThatDay_ReturnsNull(string version)
+        {
+            // How the library was numbered when it changed three times on 2023-01-28.
+            StoredGameLibrary library = Library(version, Game("Publisher.Game_abc", ValidTranslation));
+
+            Assert.Null(library.FindProblem());
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData("31-01-2026")]
         [InlineData("2026-1-31")]
         [InlineData("latest")]
+        [InlineData("2026-01-31a")]
+        [InlineData("2026-01-31AB")]
+        [InlineData("2026-02-30A")]
         public void FindProblem_VersionNotADate_IsReported(string version)
         {
             StoredGameLibrary library = Library(version, Game("Publisher.Game_abc", ValidTranslation));
