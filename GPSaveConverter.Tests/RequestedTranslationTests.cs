@@ -45,6 +45,7 @@ namespace GPSaveConverter.Tests
         [InlineData("MountAndBladeIIBannerlord")]
         [InlineData("ReturnToMonkeyIsland")]
         [InlineData("DeathStranding")]
+        [InlineData("Persona4Golden")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1325,6 +1326,59 @@ namespace GPSaveConverter.Tests
         public void DeathStranding_XboxTransferFile_IsLeftAlone()
         {
             Assert.Equal(Outcome.NoTranslation, DeathStranding().ToNonXbox(new XboxFile("transfer", "", "transfer.dat")).Outcome);
+        }
+
+        #endregion
+
+        #region Persona 4 Golden (#37)
+
+        private static TranslationSimulator Persona4Golden()
+        {
+            // The tables posted in the issue. Each file is a container of its own name, holding one blob, "progress".
+            var xboxFiles = new[] { "P4G.ini", "data0001.bin", "data0001.binslot", "system.bin", "system.binslot" }
+                .Select(container => new XboxFile(container, "", "progress")).ToArray();
+            var nonXboxFiles = new[] { "data0001.bin", "data0001.binslot", "data0002.bin", "data0002.binslot", "system.bin", "system.binslot" };
+
+            return new TranslationSimulator(Profile("Persona4Golden"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("data0001.bin")]
+        [InlineData("data0001.binslot")]
+        public void Persona4Golden_SaveOnBothSides_MapsBothWays(string name)
+        {
+            // The two translations a user in the thread reported working.
+            TranslationSimulator game = Persona4Golden();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(name, "", "progress"));
+            var toXbox = game.ToXbox(name);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(name + " |  | progress", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("data0002.bin")]
+        [InlineData("data0002.binslot")]
+        public void Persona4Golden_SteamOnlySave_NeedsAContainerOfItsOwnName(string name)
+        {
+            Assert.Equal(Outcome.NoContainer, Persona4Golden().ToXbox(name).Outcome);
+
+            string problem;
+            FileTranslation translation = Profile("Persona4Golden").First(t => System.Text.RegularExpressions.Regex.IsMatch(name, t.NonXboxFilenameRegex));
+            Assert.Equal(new[] { name, "" }, translation.NewContainerNames(name, TranslationSimulator.XboxProfileID, out problem));
+        }
+
+        [Theory]
+        [InlineData("P4G.ini")]
+        [InlineData("system.bin")]
+        [InlineData("system.binslot")]
+        public void Persona4Golden_FilesTheTranslationsLeaveOut_AreLeftAlone(string container)
+        {
+            // Not part of what was reported working, so not copied.
+            Assert.Equal(Outcome.NoTranslation, Persona4Golden().ToNonXbox(new XboxFile(container, "", "progress")).Outcome);
         }
 
         #endregion
