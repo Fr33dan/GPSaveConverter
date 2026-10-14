@@ -40,6 +40,8 @@ namespace GPSaveConverter.Tests
         [InlineData("Dirt5")]
         [InlineData("LordsOfTheFallen")]
         [InlineData("ManorLords")]
+        [InlineData("EiyudenChronicleRising")]
+        [InlineData("Control")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -950,6 +952,140 @@ namespace GPSaveConverter.Tests
         public void ManorLords_SteamOnlyFiles_AreNotSentToXbox(string file)
         {
             Assert.Equal(Outcome.NoTranslation, ManorLords().ToXbox(file).Outcome);
+        }
+
+        #endregion
+
+        #region Eiyuden Chronicle: Rising (#17)
+
+        private const string EiyudenContainer = "EiyudenSaveContainer";
+
+        private static TranslationSimulator EiyudenChronicleRising()
+        {
+            // The tables in the screenshot posted in the issue. Every Xbox file is a blob in one container.
+            var xboxFiles = new[] { "EcrSaveEc", "EcrSaveGame0", "EcrSaveGame1", "EcrSaveGame2", "EcrSaveInfo0", "EcrSaveInfo1", "EcrSaveInfo2", "EcrSaveSys" }
+                .Select(blob => new XboxFile(EiyudenContainer, EiyudenContainer, blob)).ToArray();
+            var nonXboxFiles = new[] { "EcrSaveGame0.sav", "EcrSaveInfo0.sav", "EcrSaveSys.sav", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("EiyudenChronicleRising"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("EcrSaveGame0")]
+        [InlineData("EcrSaveInfo0")]
+        [InlineData("EcrSaveSys")]
+        public void EiyudenChronicleRising_FileOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = EiyudenChronicleRising();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(EiyudenContainer, EiyudenContainer, name));
+            var toXbox = game.ToXbox(name + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(EiyudenContainer + " | " + EiyudenContainer + " | " + name, toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("EcrSaveEc")]
+        [InlineData("EcrSaveGame2")]
+        [InlineData("EcrSaveInfo2")]
+        public void EiyudenChronicleRising_XboxOnlyFile_IsCreatedUnderItsName(string name)
+        {
+            var toNonXbox = EiyudenChronicleRising().ToNonXbox(new XboxFile(EiyudenContainer, EiyudenContainer, name));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void EiyudenChronicleRising_SteamCloudFile_IsNotSentToXbox()
+        {
+            Assert.Equal(Outcome.NoTranslation, EiyudenChronicleRising().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region Control (#82)
+
+        private static TranslationSimulator Control()
+        {
+            // The tables in the screenshot posted in the issue in January 2026. The Steam list runs on
+            // below the window; these are the rows it shows. The Steam version keeps each blob as a
+            // file named after its container and itself. The Epic version keeps it as a .chunk file in
+            // a folder named after the container, which is what the translations earlier in the thread are for.
+            var xboxFiles = new[]
+            {
+                new XboxFile("achievements", "", "data"),
+                new XboxFile("preferences", "", "data"),
+                new XboxFile("savegame-slot-00", "", "global"),
+                new XboxFile("savegame-slot-00", "", "hub"),
+                new XboxFile("savegame-slot-00", "", "meta"),
+                new XboxFile("savegame-slot-00", "", "persistent")
+            };
+            var nonXboxFiles = new[] { "preferences_data", "savegame-slot-00_containment", "savegame-slot-00_expedition", "savegame-slot-00_global",
+                                       "savegame-slot-00_hub", "savegame-slot-00_maintenance", "savegame-slot-00_meta", "savegame-slot-00_persistent",
+                                       "savegame-slot-00_research", "savegame-slot-01_global", "savegame-slot-01_hub" };
+
+            return new TranslationSimulator(Profile("Control"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("preferences", "data")]
+        [InlineData("savegame-slot-00", "global")]
+        [InlineData("savegame-slot-00", "hub")]
+        [InlineData("savegame-slot-00", "meta")]
+        [InlineData("savegame-slot-00", "persistent")]
+        public void Control_FileOnBothSides_MapsBothWays(string container, string blob)
+        {
+            TranslationSimulator game = Control();
+            string file = container + "_" + blob;
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container, "", blob));
+            var toXbox = game.ToXbox(file);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(file, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " |  | " + blob, toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("containment")]
+        [InlineData("expedition")]
+        [InlineData("maintenance")]
+        [InlineData("research")]
+        public void Control_SteamOnlyPartOfASlot_IsAddedToTheSlotsContainer(string blob)
+        {
+            var toXbox = Control().ToXbox("savegame-slot-00_" + blob);
+
+            Assert.Equal(Outcome.NewFile, toXbox.Outcome);
+            Assert.Equal("savegame-slot-00", toXbox.XboxFile.ContainerName1);
+            Assert.Equal(blob, toXbox.NewFileID);
+        }
+
+        [Fact]
+        public void Control_SteamOnlySlot_NeedsAContainerOfItsOwnName()
+        {
+            Assert.Equal(Outcome.NoContainer, Control().ToXbox("savegame-slot-01_global").Outcome);
+
+            string problem;
+            string[] names = Profile("Control").Single().NewContainerNames("savegame-slot-01_global", TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { "savegame-slot-01", "" }, names);
+        }
+
+        [Fact]
+        public void Control_XboxAchievements_AreLeftAlone()
+        {
+            // The Steam folder has no such file. Steam keeps the achievements itself.
+            Assert.Equal(Outcome.NoTranslation, Control().ToNonXbox(new XboxFile("achievements", "", "data")).Outcome);
+        }
+
+        [Fact]
+        public void Control_EpicLayout_IsNotMatched()
+        {
+            Assert.Equal(Outcome.NoTranslation, Control().ToXbox("savegame-slot-00\\global.chunk").Outcome);
         }
 
         #endregion
