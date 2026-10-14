@@ -57,6 +57,7 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 - An entry here is the text of the game's file in `GPSaveConverter.Tests/Fixtures/RequestedTranslations`, which `RequestedTranslationTests` checks against the names the reporter posted. `GameLibraryJsonTests` fails if the two differ, or if an entry is in the game library already.
 - Leave `BaseNonXboxSaveLocation` out unless it has nothing of one person's in it: no Steam ID, no user name.
 - When the reporter says it works, one pull request moves the entry into `GameLibrary.json`, bumps `Version` there, and takes it out here.
+- Every game in this file also has a row in the wiki's Game Compatibility table, 🟦 **Being tested** unless its outcome is known some other way. Change the two together; the triage playbook says how.
 
 **User settings follow the strong name and `AssemblyVersion`.** Each user's settings, including the translations they wrote themselves, are stored under `%LOCALAPPDATA%\GPSaveConverter\GPSaveConverter.exe_StrongName_<hash>\0.4.0.0\user.config`. Removing signing, changing `GPSaveConverterUnprotected.snk`, or changing `AssemblyVersion` from `0.4.0.0` makes all of that vanish for existing users. For a release, change `AssemblyFileVersion` only.
 

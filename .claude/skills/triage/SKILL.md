@@ -90,9 +90,10 @@ With the data in hand:
    - Run `dotnet test GPSaveConverter.Tests/GPSaveConverter.Tests.csproj -c Release --filter RequestedTranslationTests`.
    - Add the same translations as an entry in `GPSaveConverter/Resources/GameLibrary.Preview.json`, with the issue number in `Issues`. Leave the save location out unless it has nothing of one person's in it. A translation tied to one person's files, such as one with their world ID in it, does not go there.
    - Open a pull request with the file, the tests and the entry. Once it is merged, the translation is there for anyone with **Use translations being tested** ticked.
+   - Give the game a row in the wiki's Game Compatibility table: 🟦 **Being tested** with the issue linked, or a mention in the note if the game already has a row. See the statuses further down.
 3. Reply and label `translation-provided`. Use the first snippet below. For someone on a version before v.0.4.13, or who does not allow the tool internet access, use the second one and give them the translation as a Game Profile: paste the fixture file's exact contents, do not retype it.
 4. If the reporter says it does not work, change the entry and tell them to start the tool again. They get the new translation in place of the old one, with nothing to remove.
-5. When the reporter confirms it works, open a pull request that moves the entry into `GPSaveConverter/Resources/GameLibrary.json`, bumps `Version` there to today's date, takes it out of the preview file, and says `Closes #N`. Ask the maintainer to merge it.
+5. When the reporter confirms it works, open a pull request that moves the entry into `GPSaveConverter/Resources/GameLibrary.json`, bumps `Version` there to today's date, takes it out of the preview file, and says `Closes #N`. Ask the maintainer to merge it. Once it is merged, turn the game's row 🟩 and drop "being tested" from its note. If the game turns out to reject the save instead, take the entry out of the preview file and turn the row 🟥, or 🟨 if someone found a way round.
 
 If the thread already holds a translation someone says works, treat it as step 2 onward: check it, then ask its author or the reporter to confirm before it goes in the library.
 
@@ -121,11 +122,12 @@ Either way, the save they had before can be put back with **File ▸ Backups**, 
 
 When a result is settled either way, add the game to the Game Compatibility table in the wiki, with a link to the issue it comes from. The wiki is its own repository, `Fr33dan/GPSaveConverter.wiki`. Keep the table alphabetical and keep the file's CRLF line endings.
 
-The table has three statuses, explained in a legend above it. The maintainer added the middle one on 2026-10-14:
+The table has four statuses, explained in a legend above it. The maintainer added 🟨 and 🟦 on 2026-10-14. The colour is always the save's outcome as far as anyone knows it:
 
 - 🟩 **Compatible:** the tool moves the save and the game loads it.
 - 🟨 **With extra steps:** someone reported the game accepting the save only after a step this tool does not do, such as converting the file (Final Fantasy XVI, #134) or patching it by hand (Wo Long, #45). It needs a report that it worked. Our own reading of how two files differ is not enough: The Outer Worlds stays red. A way round that does not use this tool at all, such as Avowed's through Battle.net (#119), stays red too, with the way described in the note.
 - 🟥 **Not Compatible:** the files land in the right place, the game rejects them, and nobody has found a way round.
+- 🟦 **Being tested:** the game has a translation in `GameLibrary.Preview.json`, and nobody has reported yet whether the game accepts the save. Every staged translation has a row, so the table and the preview file have to change together. A game whose outcome is known some other way keeps that colour, and its note says a translation is being tested. Examples: DIRT 5, where a user moved the files by hand, and Hogwarts Legacy and The Alters, which were reported working in their threads.
 
 ### Copying to Xbox does nothing or fails
 
