@@ -47,7 +47,7 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 **`GameLibrary.json` on `master` is live.** Every copy of the app with web fetch turned on downloads it from `master` at startup (`GameLibrary.UpdateDefaultLibrary`). Merging a change ships it to all users with no release.
 
 - Bump `Version` to the merge date (`yyyy-MM-dd`) in the same change. The app only takes a library whose `Version` is later than the one it has, so a change without a bump never reaches anyone.
-- For the same reason, a second library change on a day that already had one needs a later date than the first. With the same date it never reaches anyone who took the first.
+- Another change on a day that already had one adds a capital letter to the date: `2026-10-14A`, then `B`. Versions are compared as text, so that sorts after the plain date, as it did for `2023-01-28A` to `C`. v.0.4.11 to v.0.4.14 refuse a version with a letter and get the change only with the next plain date. If people on those versions must have it at once, use the next day's date instead.
 - Keep the file's UTF-8 byte order mark. Check with `head -c 3 GPSaveConverter/Resources/GameLibrary.json | od -An -tx1` (expect `ef bb bf`).
 - `GameLibraryJsonTests` must pass. It runs `StoredGameLibrary.FindProblem` on the file.
 - Add a translation only after the person who asked for it confirms it works on their saves. Nobody maintaining this can test most games.

@@ -41,9 +41,38 @@ namespace GPSaveConverter.Tests
             _settings.Received(1).Save();
         }
 
+        [Fact]
+        public void UpdateDefaultLibrary_AnotherChangeTheSameDay_IsStored()
+        {
+            // A capital letter after the date numbers another change on the same day. Versions are
+            // compared as text, so it comes after the plain date.
+            _httpClient.DownloadString(Arg.Any<string>()).Returns(Library("2026-01-31A", "Publisher.Game_abc", "Publisher.Other_abc"));
+
+            bool updated = GameLibrary.UpdateDefaultLibrary();
+
+            Assert.True(updated);
+            Assert.Equal("2026-01-31A", GameLibrary.Default.Version);
+        }
+
+        [Theory]
+        [InlineData("2026-01-31B", "2026-01-31C")]
+        [InlineData("2026-01-31C", "2026-02-01")]
+        public void UpdateDefaultLibrary_LaterVersionAfterOneWithALetter_IsStored(string stored, string downloaded)
+        {
+            _settings.DefaultGameLibrary = Library(stored, "Publisher.Game_abc");
+            GameLibrary.Settings = _settings;
+            _httpClient.DownloadString(Arg.Any<string>()).Returns(Library(downloaded, "Publisher.Game_abc"));
+
+            bool updated = GameLibrary.UpdateDefaultLibrary();
+
+            Assert.True(updated);
+            Assert.Equal(downloaded, GameLibrary.Default.Version);
+        }
+
         [Theory]
         [InlineData("2026-01-31")]
         [InlineData("2025-12-01")]
+        [InlineData("2026-01-30Z")]
         public void UpdateDefaultLibrary_SameOrOlderLibrary_IsNotStored(string version)
         {
             _httpClient.DownloadString(Arg.Any<string>()).Returns(Library(version, "Publisher.Other_abc"));
