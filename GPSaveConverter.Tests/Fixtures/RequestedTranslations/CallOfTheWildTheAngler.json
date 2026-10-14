@@ -1,0 +1,20 @@
+{
+  "Name": "Call of the Wild: The Angler",
+  "PackageName": "AvalancheStudios.Tortoise_m0byj0nmrybdr",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "slots\\\\${Slot}\\\\${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "CotWTheAngler/slots/${Slot}",
+      "ContainerName2": "metadata",
+      "NamedRegexGroups": [ "(?<Slot>[0-9]+)", "(?<File>[a-z_]+)" ]
+    },
+    {
+      "NonXboxFilename": "${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "CotWTheAngler",
+      "ContainerName2": "player_save_data",
+      "NamedRegexGroups": [ "(?<File>[a-z_]+)" ]
+    }
+  ]
+}

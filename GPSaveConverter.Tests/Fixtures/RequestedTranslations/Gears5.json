@@ -1,0 +1,13 @@
+{
+  "Name": "Gears 5",
+  "PackageName": "Microsoft.HalifaxBaseGame_8wekyb3d8bbwe",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${FileName}",
+      "XboxFileID": "${FileName}",
+      "ContainerName1": "UE4DefaultSaveGameContainer",
+      "ContainerName2": "Gears5",
+      "NamedRegexGroups": [ "(?<FileName>\\w+)" ]
+    }
+  ]
+}

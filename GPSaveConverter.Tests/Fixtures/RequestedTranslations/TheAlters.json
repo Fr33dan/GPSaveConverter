@@ -1,0 +1,27 @@
+{
+  "Name": "The Alters",
+  "PackageName": "4063811bitstudios.TheAlters_gwy9gn5q9j1y6",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${FileName}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${FileName}",
+      "ContainerName2": "${FileName}",
+      "NamedRegexGroups": [ "(?<FileName>playthrough_[A-Z0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "${FileName}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${FileName}",
+      "ContainerName2": "${FileName}",
+      "NamedRegexGroups": [ "(?<FileName>[A-Z0-9]+-ACT[0-9]-day-[0-9]+-v-[0-9])" ]
+    },
+    {
+      "NonXboxFilename": "${FileName}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${FileName}",
+      "ContainerName2": "${FileName}",
+      "NamedRegexGroups": [ "(?<FileName>[A-Z0-9]+-Journey[0-9]-day-[0-9]+-v-[0-9])" ]
+    }
+  ]
+}
