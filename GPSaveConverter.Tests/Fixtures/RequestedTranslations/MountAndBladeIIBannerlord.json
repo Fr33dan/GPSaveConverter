@@ -1,0 +1,13 @@
+{
+  "Name": "Mount & Blade II: Bannerlord",
+  "PackageName": "TaleWorldsEntertainment.MountBladeIIBannerlord_mk53pm3ay0384",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Name}.sav",
+      "XboxFileID": "${Name}.sav.00",
+      "ContainerName1": "GameSaves",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<Name>[^\\\\]+)" ]
+    }
+  ]
+}

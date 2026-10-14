@@ -42,6 +42,9 @@ namespace GPSaveConverter.Tests
         [InlineData("ManorLords")]
         [InlineData("EiyudenChronicleRising")]
         [InlineData("Control")]
+        [InlineData("MountAndBladeIIBannerlord")]
+        [InlineData("ReturnToMonkeyIsland")]
+        [InlineData("DeathStranding")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1128,6 +1131,200 @@ namespace GPSaveConverter.Tests
             Assert.Equal(container + " | " + container + " | " + blob, toXbox.XboxFile.ToString());
             Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
             Assert.Equal(path, toNonXbox.RelativePath);
+        }
+
+        #endregion
+
+        #region Mount & Blade II: Bannerlord (#44)
+
+        private static TranslationSimulator Bannerlord()
+        {
+            // The tables posted in the issue, with some of the save names. Each Xbox save is a blob whose
+            // name ends in .00, in one container. The other two containers hold settings.
+            var xboxFiles = new[] { new XboxFile("Cache", "", "stats.json.00"), new XboxFile("Configs", "", "BannerlordConfig.txt.00"), new XboxFile("Configs", "", "BannerlordGameKeys.xml.00") }
+                .Concat(new[] { "Cisd", "Why 2 s", "save001", "saveauto1", "saveauto2", "saveauto3" }.Select(name => new XboxFile("GameSaves", "", name + ".sav.00")))
+                .ToArray();
+            var nonXboxFiles = new[] { "save001.sav", "saveauto1.sav", "saveauto2.sav", "saveauto3.sav", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("MountAndBladeIIBannerlord"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("save001")]
+        [InlineData("saveauto1")]
+        [InlineData("saveauto3")]
+        public void Bannerlord_SaveOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = Bannerlord();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("GameSaves", "", name + ".sav.00"));
+            var toXbox = game.ToXbox(name + ".sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("GameSaves |  | " + name + ".sav.00", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("Cisd")]
+        [InlineData("Why 2 s")]
+        public void Bannerlord_XboxOnlySave_IsCreatedWithoutThePartNumber(string name)
+        {
+            var toNonXbox = Bannerlord().ToNonXbox(new XboxFile("GameSaves", "", name + ".sav.00"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void Bannerlord_SteamOnlySave_IsAddedAsItsFirstPart()
+        {
+            // A name made up for the test. The Steam saves in the table all have an Xbox copy.
+            var toXbox = Bannerlord().ToXbox("save002.sav");
+
+            Assert.Equal(Outcome.NewFile, toXbox.Outcome);
+            Assert.Equal("GameSaves", toXbox.XboxFile.ContainerName1);
+            Assert.Equal("save002.sav.00", toXbox.NewFileID);
+        }
+
+        [Theory]
+        [InlineData("Cache", "stats.json.00")]
+        [InlineData("Configs", "BannerlordConfig.txt.00")]
+        [InlineData("GameSaves", "save001.sav.01")]
+        public void Bannerlord_SettingsAndFurtherParts_AreLeftAlone(string container, string blob)
+        {
+            // No second part of a save is in the table. If a save has one, it must not become a file of its own.
+            Assert.Equal(Outcome.NoTranslation, Bannerlord().ToNonXbox(new XboxFile(container, "", blob)).Outcome);
+        }
+
+        [Fact]
+        public void Bannerlord_SteamCloudFile_IsNotSentToXbox()
+        {
+            Assert.Equal(Outcome.NoTranslation, Bannerlord().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region Return to Monkey Island (#49)
+
+        private static readonly string[] MonkeyIslandXboxFiles = { "Prefs.json", "Savegame1.png", "Savegame1.save", "save.bin" };
+
+        private static TranslationSimulator ReturnToMonkeyIsland()
+        {
+            // The tables in the screenshot posted in the issue. The Steam list runs on below the window.
+            var xboxFiles = MonkeyIslandXboxFiles.Select(blob => new XboxFile("UserProfile", "UserProfile", blob)).ToArray();
+            var nonXboxFiles = new[] { "Hintlog.txt", "Log.txt", "Playlog.txt", "Prefs.json", "save.bin", "Savegame1.png", "Savegame1.save",
+                                       "Savegame2.png", "Savegame2.save", "Savegame3.png", "Savegame3.save" };
+
+            return new TranslationSimulator(Profile("ReturnToMonkeyIsland"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("Prefs.json")]
+        [InlineData("Savegame1.png")]
+        [InlineData("Savegame1.save")]
+        [InlineData("save.bin")]
+        public void ReturnToMonkeyIsland_FileOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = ReturnToMonkeyIsland();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("UserProfile", "UserProfile", name));
+            var toXbox = game.ToXbox(name);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("UserProfile | UserProfile | " + name, toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("Savegame2.save")]
+        [InlineData("Savegame3.png")]
+        public void ReturnToMonkeyIsland_SteamOnlySave_IsAddedToTheContainer(string name)
+        {
+            var toXbox = ReturnToMonkeyIsland().ToXbox(name);
+
+            Assert.Equal(Outcome.NewFile, toXbox.Outcome);
+            Assert.Equal("UserProfile", toXbox.XboxFile.ContainerName1);
+            Assert.Equal(name, toXbox.NewFileID);
+        }
+
+        [Theory]
+        [InlineData("Hintlog.txt")]
+        [InlineData("Log.txt")]
+        [InlineData("Playlog.txt")]
+        public void ReturnToMonkeyIsland_Logs_AreNotSentToXbox(string name)
+        {
+            // The translation in the screenshot took any name, and would have put these in the Xbox save.
+            Assert.Equal(Outcome.NoTranslation, ReturnToMonkeyIsland().ToXbox(name).Outcome);
+        }
+
+        #endregion
+
+        #region Death Stranding (#61)
+
+        private static TranslationSimulator DeathStranding()
+        {
+            // The tables posted in the issue. The Xbox save has 23 slots of each kind, but no quicksave15.
+            // The paths on the other side are relative to the folder named with a long ID.
+            var slots = new[] { "autosave", "manualsave", "quicksave" }
+                .SelectMany(kind => Enumerable.Range(0, 23).Select(number => kind + number))
+                .Where(slot => slot != "quicksave15");
+            var xboxFiles = slots.Select(slot => new XboxFile(slot, "", "checkpoint.dat"))
+                .Concat(new[] { "bindings.cfg", "game_settings.cfg", "profile.dat" }.Select(file => new XboxFile("profile", "", file)))
+                .Concat(new[] { new XboxFile("transfer", "", "transfer.dat") })
+                .ToArray();
+            var nonXboxFiles = new[] { "manualsave0\\checkpoint.dat", "profile\\bindings.cfg", "profile\\game_settings.cfg", "profile\\profile.dat", "quicksave0\\checkpoint.dat" };
+
+            return new TranslationSimulator(Profile("DeathStranding"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("manualsave0", "checkpoint.dat")]
+        [InlineData("quicksave0", "checkpoint.dat")]
+        [InlineData("profile", "bindings.cfg")]
+        [InlineData("profile", "game_settings.cfg")]
+        [InlineData("profile", "profile.dat")]
+        public void DeathStranding_FileOnBothSides_MapsBothWays(string container, string blob)
+        {
+            TranslationSimulator game = DeathStranding();
+            string path = container + "\\" + blob;
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container, "", blob));
+            var toXbox = game.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " |  | " + blob, toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("autosave3")]
+        [InlineData("manualsave22")]
+        public void DeathStranding_XboxOnlySlot_IsCreatedInAFolderOfItsName(string slot)
+        {
+            var toNonXbox = DeathStranding().ToNonXbox(new XboxFile(slot, "", "checkpoint.dat"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(slot + "\\checkpoint.dat", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void DeathStranding_SlotWithNoXboxContainer_NeedsOneOfItsOwnName()
+        {
+            Assert.Equal(Outcome.NoContainer, DeathStranding().ToXbox("quicksave15\\checkpoint.dat").Outcome);
+
+            string problem;
+            string[] names = Profile("DeathStranding").First().NewContainerNames("quicksave15\\checkpoint.dat", TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { "quicksave15", "" }, names);
+        }
+
+        [Fact]
+        public void DeathStranding_XboxTransferFile_IsLeftAlone()
+        {
+            Assert.Equal(Outcome.NoTranslation, DeathStranding().ToNonXbox(new XboxFile("transfer", "", "transfer.dat")).Outcome);
         }
 
         #endregion
