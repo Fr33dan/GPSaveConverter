@@ -1089,5 +1089,47 @@ namespace GPSaveConverter.Tests
         }
 
         #endregion
+
+        #region LEGO Star Wars: The Skywalker Saga (#52)
+
+        private static TranslationSimulator SkywalkerSaga()
+        {
+            // This game is in the game library already. The issue is about the Steam version, which
+            // writes its files' names in capitals where the Xbox save has small letters.
+            StoredGameLibrary library = JsonSerializer.Deserialize<StoredGameLibrary>(GPSaveConverter.Properties.Resources.GameLibrary);
+            IList<FileTranslation> translations = library.GameInfo.Single(g => g.PackageName == "WarnerBros.Interactive.LEGOStarWarsTheSkywalkerSag_ktmk1xygcecda").FileTranslations;
+
+            // The tables in the screenshot posted in the issue. The Steam list stops before any slot
+            // folder, so the slot file further down is written the same way as the ones shown.
+            var xboxFiles = new[] { "achievements", "cutsceneprogress.blob", "dlcdata.blob", "profiledata.containerinfo", "settingsglobalprofile", "settingsplayer0profile" }
+                .Select(blob => new XboxFile("profiledata", "profiledata", blob))
+                .Concat(new[] { "achievementsystem.blob", "collectables.blob" }.Select(blob => new XboxFile("slot4", "slot4", blob)))
+                .ToArray();
+            var nonXboxFiles = new[] { "steam_autocloud.vdf", "PROFILEDATA\\ACHIEVEMENTS", "PROFILEDATA\\CUTSCENEPROGRESS.BLOB", "PROFILEDATA\\DLCDATA.BLOB",
+                                       "PROFILEDATA\\PROFILEDATA.CONTAINERINFO", "PROFILEDATA\\SETTINGSGLOBALPROFILE", "PROFILEDATA\\SETTINGSPLAYER0PROFILE", "SLOT4\\COLLECTABLES.BLOB" };
+
+            return new TranslationSimulator(translations, xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("profiledata", "achievements")]
+        [InlineData("profiledata", "cutsceneprogress.blob")]
+        [InlineData("profiledata", "profiledata.containerinfo")]
+        [InlineData("slot4", "collectables.blob")]
+        public void SkywalkerSaga_SteamNameInCapitals_MapsBothWays(string container, string blob)
+        {
+            TranslationSimulator game = SkywalkerSaga();
+            string path = container.ToUpperInvariant() + "\\" + blob.ToUpperInvariant();
+
+            var toXbox = game.ToXbox(path);
+            var toNonXbox = game.ToNonXbox(new XboxFile(container, container, blob));
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " | " + container + " | " + blob, toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+        }
+
+        #endregion
     }
 }

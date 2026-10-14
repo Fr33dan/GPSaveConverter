@@ -292,5 +292,62 @@ namespace GPSaveConverter.Tests
             Assert.Null(names);
             Assert.Contains("${Slot}_${Region}", problem);
         }
+
+        // Windows takes a file's name the same in any capitals. The names in an Xbox save are matched as
+        // they are written, so a file whose name is in other capitals than its container used to find none.
+
+        [Fact]
+        public void FindContainers_NameInOtherCapitals_FindsTheContainer()
+        {
+            string[][] containers = { new[] { "profiledata", "profiledata" }, new[] { "slot4", "slot4" } };
+
+            var found = ContainerNamed("${Slot}", "${Slot}").FindContainers(containers, c => c[0], c => c[1], "PROFILEDATA\\ACHIEVEMENTS", XboxProfileID);
+
+            Assert.Equal(new[] { "profiledata", "profiledata" }, Assert.Single(found));
+        }
+
+        [Fact]
+        public void FindContainers_NameInTheSameCapitals_IsTakenOverOneInOtherCapitals()
+        {
+            string[][] containers = { new[] { "Save", "Save" }, new[] { "SAVE", "SAVE" } };
+
+            var found = ContainerNamed("${Slot}", "${Slot}").FindContainers(containers, c => c[0], c => c[1], "SAVE\\data", XboxProfileID);
+
+            Assert.Equal(new[] { "SAVE", "SAVE" }, Assert.Single(found));
+        }
+
+        [Fact]
+        public void FindXboxFile_NameInOtherCapitals_FindsTheBlob()
+        {
+            string newFileID;
+            bool complete;
+
+            string found = ContainerNamed("${Slot}", "${Slot}").FindXboxFile(new[] { "achievements", "cutsceneprogress.blob" }, f => f, "PROFILEDATA\\CUTSCENEPROGRESS.BLOB", XboxProfileID, out newFileID, out complete);
+
+            Assert.Equal("cutsceneprogress.blob", found);
+        }
+
+        [Fact]
+        public void FindXboxFile_NameInTheSameCapitals_IsTakenOverOneInOtherCapitals()
+        {
+            string newFileID;
+            bool complete;
+
+            string found = ContainerNamed("${Slot}", "${Slot}").FindXboxFile(new[] { "DATA", "data" }, f => f, "save\\data", XboxProfileID, out newFileID, out complete);
+
+            Assert.Equal("data", found);
+        }
+
+        [Fact]
+        public void FindXboxFile_OtherCapitalsDoNotMakeAPartOfANameMatch()
+        {
+            string newFileID;
+            bool complete;
+
+            string found = ContainerNamed("${Slot}", "${Slot}").FindXboxFile(new[] { "achievementsystem.blob" }, f => f, "SLOT4\\ACHIEVEMENTS", XboxProfileID, out newFileID, out complete);
+
+            Assert.Null(found);
+            Assert.Equal("ACHIEVEMENTS", newFileID);
+        }
     }
 }

@@ -186,6 +186,13 @@ namespace GPSaveConverter.Library
                 // Then as a pattern, where a backslash or dot in the real ID has a backslash in front of it.
                 string pattern = replaceRegex(FillXboxFileID(nonXboxMatch, xboxProfileID, true, out newFileIDComplete));
                 matchedFile = files.Where(f => Regex.Match(fileID(f), pattern).Success).FirstOrDefault();
+
+                // Last, in any capitals, the way Windows reads a file's name. Some games write their names
+                // in capitals on one store and in small letters on the other (#52).
+                if (matchedFile == null)
+                {
+                    matchedFile = files.Where(f => Regex.Match(fileID(f), pattern, RegexOptions.IgnoreCase).Success).FirstOrDefault();
+                }
             }
             return matchedFile;
         }
@@ -216,6 +223,14 @@ namespace GPSaveConverter.Library
                 {
                     // The file's path does not make a valid pattern. A folder separator before some letters does that.
                 }
+            }
+
+            // Last, in any capitals, the way Windows reads a file's name. LEGO Star Wars: The Skywalker
+            // Saga names a folder PROFILEDATA on Steam and its container profiledata on Xbox (#52).
+            // Without this, copying to Xbox offered to make a second container under the Steam name.
+            if (found.Count == 0)
+            {
+                found = containers.Where(c => Regex.Match(name1(c), pattern1, RegexOptions.IgnoreCase).Success && Regex.Match(name2(c), pattern2, RegexOptions.IgnoreCase).Success).ToList();
             }
             return found;
         }
