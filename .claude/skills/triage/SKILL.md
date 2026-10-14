@@ -62,7 +62,7 @@ On #183 the reporter answered our question on an issue labelled `incompatible-sa
 
 ## What to do with each kind of issue
 
-Read the whole thread, including every screenshot, before classifying.
+Read the whole thread, including every screenshot, before classifying. Do not cut the output of `gh issue view` short to save space. A pasted file table can push the later comments past the cut. On #40 that hid an unanswered question from 2023, and the issue was nearly closed with it unanswered. Before proposing a close, check that the last comment you read is the thread's last.
 
 ### Someone needs a translation
 
