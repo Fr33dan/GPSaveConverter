@@ -79,6 +79,8 @@ A paste with the Xbox table filled in and "Non-Xbox save location:" empty means 
 
 Do not leave them to find that folder. Look the game up on pcgamingwiki.com, and put the folder from its "Save game data location" section in the same reply, with a link to the page as the source. Say why the tool showed none, if you know.
 
+A non-Xbox list in which every path starts with `\`, as in `\saveslot0\flags.sav`, means the stored save folder has no separator at its end. Versions before v.0.4.12 stored folders found on pcgamingwiki.com that way, and the tool keeps a game's folder across updates. No translation matches such a path. v.0.4.14 adds the separator itself. With an older version, picking the folder again with **Select non-Xbox Location** puts it right (#130, #108).
+
 With the data in hand:
 
 1. Write the translation. `CLAUDE.md` explains how the templates and groups work. Prefer one rule with a named group over one rule per file.
