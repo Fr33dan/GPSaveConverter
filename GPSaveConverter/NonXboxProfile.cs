@@ -100,6 +100,13 @@ namespace GPSaveConverter
         {
             string returnVal = baseLocation.Replace(ProfileMarkerPrefix() + ">", profileID);
 
+            if (this.profileType == ProfileType.Steam)
+            {
+                // The folder is named with the account's SteamID64, so the ID goes in as it is. The form
+                // of the marker only tells the profile lookup which kind of ID the folder name is.
+                returnVal = returnVal.Replace(ProfileMarkerPrefix() + "_SteamID64>", profileID);
+            }
+
             if (this.profileType == ProfileType.Xbox)
             {
                 if (returnVal.Contains(ProfileMarkerPrefix() + "_XboxInt>"))
