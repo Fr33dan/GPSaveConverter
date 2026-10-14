@@ -171,6 +171,14 @@ namespace GPSaveConverter.Library
                 returnVal = p.ExpandSaveLocation(returnVal);
             }
 
+            // Files are listed relative to this folder, so it has to end with a separator, or every
+            // path starts with one and no translation matches it (#130). Versions before v.0.4.12 kept
+            // folders found on pcgamingwiki.com without it, and the stored library carries a game's
+            // folder from one version to the next.
+            if (!String.IsNullOrEmpty(returnVal) && !returnVal.EndsWith("\\"))
+            {
+                returnVal += "\\";
+            }
             return returnVal;
         }
 

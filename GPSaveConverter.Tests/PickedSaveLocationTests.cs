@@ -64,6 +64,33 @@ namespace GPSaveConverter.Tests
         }
 
         [Fact]
+        public async Task StoredFolderWithoutSeparator_FilesAreListedWithoutOneInFront()
+        {
+            // Versions before v.0.4.12 stored folders found on pcgamingwiki.com without the separator
+            // at the end, and the stored library still holds them. On #130 that listed every file as
+            // "\saveslot0\flags.sav", which no translation matches.
+            string folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "gpsc-separator-" + System.Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(System.IO.Path.Combine(folder, "saveslot0"));
+            System.IO.File.WriteAllText(System.IO.Path.Combine(folder, "saveslot0", "flags.sav"), "save");
+            try
+            {
+                Start("{ \"Version\": \"2026-01-01\", \"GameInfo\": [ { \"PackageName\": \"" + Package + "\", \"BaseNonXboxSaveLocation\": \""
+                    + folder.Replace("\\", "\\\\") + "\" } ] }");
+                GameInfo game = await Select();
+                Assert.Equal(folder, game.BaseNonXboxSaveLocation);
+
+                await game.refreshNonXboxSaveFiles();
+
+                Assert.Equal(folder + "\\", game.NonXboxSaveLocation);
+                Assert.Equal(new[] { "saveslot0\\flags.sav" }, System.Linq.Enumerable.Select(GameLibrary.nonXboxFiles, f => f.RelativePath));
+            }
+            finally
+            {
+                System.IO.Directory.Delete(folder, true);
+            }
+        }
+
+        [Fact]
         public async Task LibraryLocation_AfterTheToolIsStartedAgain_WaitsForItsProfilesAsBefore()
         {
             Start(Library);
