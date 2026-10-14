@@ -1,0 +1,13 @@
+{
+  "Name": "DIRT 5",
+  "PackageName": "CodemastersSoftwareCompan.DiRT5_4cfye3zbe1gaw",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${File}.prf",
+      "XboxFileID": "profile/${File}.prf",
+      "ContainerName1": "Dirt5",
+      "ContainerName2": "SaveData",
+      "NamedRegexGroups": [ "(?<File>items|private|public)" ]
+    }
+  ]
+}

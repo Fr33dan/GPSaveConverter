@@ -1,0 +1,13 @@
+{
+  "Name": "Lords of the Fallen",
+  "PackageName": "CIGamesS.A.LordsoftheFallen-PC_9609msxhzdsvj",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Save}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${Save}",
+      "ContainerName2": "${Save}",
+      "NamedRegexGroups": [ "(?<Save>GeneralSave|Save[0-9]+)" ]
+    }
+  ]
+}

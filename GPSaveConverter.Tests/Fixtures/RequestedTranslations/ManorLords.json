@@ -1,0 +1,13 @@
+{
+  "Name": "Manor Lords",
+  "PackageName": "HoodedHorse.ManorLords_znaey1dw2bdpr",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Name}.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${Name}",
+      "ContainerName2": "${Name}",
+      "NamedRegexGroups": [ "(?<Name>[A-Za-z0-9_]+)" ]
+    }
+  ]
+}
