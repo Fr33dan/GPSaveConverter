@@ -84,6 +84,8 @@ A non-Xbox list in which every path starts with `\`, as in `\saveslot0\flags.sav
 With the data in hand:
 
 1. Write the translation. `CLAUDE.md` explains how the templates and groups work. Prefer one rule with a named group over one rule per file.
+
+   Check first whether the reporter needs one at all. The **+** button in **View ▸ Show File Translations** adds a translation that gives the Xbox container, its second name and the blob the file's own name. When the Xbox table names everything like the file, as Gunfire Reborn does (#68), that works as it is. When only the containers are named differently, changing **Container Name 1** or **2** in it is enough (#41, #54). A few steps in a reply are quicker for the reporter than a staged entry. Its pattern takes almost any name, so tell them to select only the save files when they transfer.
 2. Check it with the test harness, not by eye:
    - Save the translation as a Game Profile file in `GPSaveConverter.Tests/Fixtures/RequestedTranslations/`.
    - Add a section for the game to `GPSaveConverter.Tests/RequestedTranslationTests.cs` holding the tables exactly as posted, and assert where each file goes in both directions. `TranslationSimulator` replays the application's own matching steps on those tables.
@@ -93,7 +95,7 @@ With the data in hand:
    - Give the game a row in the wiki's Game Compatibility table: 🟦 **Being tested** with the issue linked, or a mention in the note if the game already has a row. See the statuses further down.
 3. Reply and label `translation-provided`. Use the first snippet below. For someone on a version before v.0.4.13, or who does not allow the tool internet access, use the second one and give them the translation as a Game Profile: paste the fixture file's exact contents, do not retype it.
 4. If the reporter says it does not work, change the entry and tell them to start the tool again. They get the new translation in place of the old one, with nothing to remove.
-5. When the reporter confirms it works, open a pull request that moves the entry into `GPSaveConverter/Resources/GameLibrary.json`, bumps `Version` there to today's date, takes it out of the preview file, and says `Closes #N`. Ask the maintainer to merge it. Once it is merged, turn the game's row 🟩 and drop "being tested" from its note. If the game turns out to reject the save instead, take the entry out of the preview file and turn the row 🟥, or 🟨 if someone found a way round.
+5. When the reporter confirms it works, open a pull request that moves the entry into `GPSaveConverter/Resources/GameLibrary.json`, bumps `Version` there to today's date, takes it out of the preview file, and says `Closes #N`. If the library already changed today, use the next day's date: a second change with the same date reaches nobody who took the first. Ask the maintainer to merge it. Once it is merged, turn the game's row 🟩 and drop "being tested" from its note. If the game turns out to reject the save instead, take the entry out of the preview file and turn the row 🟥, or 🟨 if someone found a way round.
 
 If the thread already holds a translation someone says works, treat it as step 2 onward: check it, then ask its author or the reporter to confirm before it goes in the library.
 
