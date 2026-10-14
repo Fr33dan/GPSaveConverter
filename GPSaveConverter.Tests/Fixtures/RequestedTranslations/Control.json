@@ -1,0 +1,15 @@
+{
+  "Name": "Control",
+  "PackageName": "505GAMESS.P.A.ControlPCGP_tefn33qh9azfc",
+  "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\870780\\remote\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Container}_${Blob}",
+      "XboxFileID": "${Blob}",
+      "ContainerName1": "${Container}",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<Container>savegame-slot-[0-9]{2}|preferences)", "(?<Blob>[a-z]+)" ]
+    }
+  ]
+}

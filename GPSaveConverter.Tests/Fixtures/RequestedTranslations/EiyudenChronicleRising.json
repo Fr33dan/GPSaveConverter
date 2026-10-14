@@ -1,0 +1,13 @@
+{
+  "Name": "Eiyuden Chronicle: Rising",
+  "PackageName": "505GAMESS.P.A.EiyudenChronicleRising_tefn33qh9azfc",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Name}.sav",
+      "XboxFileID": "${Name}",
+      "ContainerName1": "EiyudenSaveContainer",
+      "ContainerName2": "EiyudenSaveContainer",
+      "NamedRegexGroups": [ "(?<Name>Ecr\\w+)" ]
+    }
+  ]
+}

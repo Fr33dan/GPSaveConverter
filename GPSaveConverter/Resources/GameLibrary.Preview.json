@@ -23,6 +23,22 @@
       ]
     },
     {
+      "Name": "Control",
+      "PackageName": "505GAMESS.P.A.ControlPCGP_tefn33qh9azfc",
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\870780\\remote\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "Issues": [ 82 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Container}_${Blob}",
+          "XboxFileID": "${Blob}",
+          "ContainerName1": "${Container}",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<Container>savegame-slot-[0-9]{2}|preferences)", "(?<Blob>[a-z]+)" ]
+        }
+      ]
+    },
+    {
       "Name": "DIRT 5",
       "PackageName": "CodemastersSoftwareCompan.DiRT5_4cfye3zbe1gaw",
       "Issues": [ 108 ],
@@ -54,6 +70,20 @@
           "ContainerName1": "SystemSave",
           "ContainerName2": "SystemSave",
           "NamedRegexGroups": []
+        }
+      ]
+    },
+    {
+      "Name": "Eiyuden Chronicle: Rising",
+      "PackageName": "505GAMESS.P.A.EiyudenChronicleRising_tefn33qh9azfc",
+      "Issues": [ 17 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Name}.sav",
+          "XboxFileID": "${Name}",
+          "ContainerName1": "EiyudenSaveContainer",
+          "ContainerName2": "EiyudenSaveContainer",
+          "NamedRegexGroups": [ "(?<Name>Ecr\\w+)" ]
         }
       ]
     },
