@@ -1,0 +1,22 @@
+{
+  "Name": "Persona 4 Golden",
+  "PackageName": "SEGAofAmericaInc.D0cb6b3aet_s751p9cej88mt",
+  "TargetProfileTypes": [ "Steam" ],
+  "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1113000\\remote\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "data${FileNumber}.bin",
+      "XboxFileID": "progress",
+      "ContainerName1": "data${FileNumber}.bin",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<FileNumber>[0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "data${FileNumber}.binslot",
+      "XboxFileID": "progress",
+      "ContainerName1": "data${FileNumber}.binslot",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<FileNumber>[0-9]+)" ]
+    }
+  ]
+}

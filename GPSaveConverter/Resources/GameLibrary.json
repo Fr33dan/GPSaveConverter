@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-14",
+  "Version": "2026-10-15",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -507,6 +507,28 @@
           "ContainerName1": "${FileName}",
           "ContainerName2": "${FileName}",
           "NamedRegexGroups": [ "(?<FileName>[A-Z0-9]+-Journey[0-9]-day-[0-9]+-v-[0-9])" ]
+        }
+      ]
+    },
+    {
+      "Name": "Persona 4 Golden",
+      "PackageName": "SEGAofAmericaInc.D0cb6b3aet_s751p9cej88mt",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1113000\\remote\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "data${FileNumber}.bin",
+          "XboxFileID": "progress",
+          "ContainerName1": "data${FileNumber}.bin",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileNumber>[0-9]+)" ]
+        },
+        {
+          "NonXboxFilename": "data${FileNumber}.binslot",
+          "XboxFileID": "progress",
+          "ContainerName1": "data${FileNumber}.binslot",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileNumber>[0-9]+)" ]
         }
       ]
     }
