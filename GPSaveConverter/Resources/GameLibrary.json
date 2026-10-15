@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-15",
+  "Version": "2026-10-16",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -529,6 +529,21 @@
           "ContainerName1": "data${FileNumber}.binslot",
           "ContainerName2": "",
           "NamedRegexGroups": [ "(?<FileNumber>[0-9]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "RoadCraft",
+      "PackageName": "FocusHomeInteractiveSA.Roadbuilder_4hny5m903y3g0",
+      "TargetProfileTypes": [ "Steam" ],
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Saber\\RoadCraftGame\\storage\\steam\\user\\<user-id>\\Main\\save\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "SLOT_${SlotNumber}\\\\${FileName}",
+          "XboxFileID": "save\\\\SLOT_${SlotNumber}/${FileName}",
+          "ContainerName1": "MainSave",
+          "ContainerName2": "MainSave",
+          "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
         }
       ]
     }
