@@ -1,5 +1,5 @@
 {
-  "Version": "2026-10-14",
+  "Version": "2026-10-15",
   "GameInfo": [
     {
       "Name": "Call of the Wild: The Angler",
@@ -246,20 +246,6 @@
           "ContainerName1": "UserProfile",
           "ContainerName2": "UserProfile",
           "NamedRegexGroups": [ "(?<File>Prefs\\.json|save\\.bin|Savegame[0-9]+\\.(?:png|save))" ]
-        }
-      ]
-    },
-    {
-      "Name": "RoadCraft",
-      "PackageName": "FocusHomeInteractiveSA.Roadbuilder_4hny5m903y3g0",
-      "Issues": [ 164 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "SLOT_${SlotNumber}\\\\${FileName}",
-          "XboxFileID": "save\\\\SLOT_${SlotNumber}/${FileName}",
-          "ContainerName1": "MainSave",
-          "ContainerName2": "MainSave",
-          "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
         }
       ]
     }
