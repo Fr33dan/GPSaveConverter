@@ -108,6 +108,14 @@ A translation has four templates and a list of named regex groups:
 - The first matching translation in a game's list wins.
 - A file whose container the Xbox save does not have can still be copied to Xbox. The app asks first, and on a yes creates the container. Its names come from `ContainerName1` and `ContainerName2`, so those have to spell out one name. A pattern such as `Save.*` finds containers that exist and cannot name a new one.
 
+A game's entry can also list `FilesLeftOut`: files a transfer must not copy, each with a `Reason` the app shows before the transfer starts.
+
+- Its names are patterns like a translation's, without `${Name}`.
+- An Xbox file is left out when every Xbox name the entry gives matches it. A non-Xbox file is left out when `NonXboxFilename` matches its path.
+- An entry here wins over a translation that covers the file.
+- A file no translation covers is left out too, under a reason of its own, so the user is told once rather than meeting an error for each file.
+- Versions before v.0.4.16 ignore the field. An entry with the field replaces the game's list when the library is merged; one without it leaves the list alone.
+
 `BaseNonXboxSaveLocation` takes environment variables, `<Steam-folder>`, and profile markers. `<user-id>` stands for a per-user folder the app lists and lets the user pick; a second level is `<user-id2>`. Each marker needs a matching entry in `TargetProfileTypes` (`Steam` or `Xbox`). For an `Xbox` entry, `<user-id2_XboxInt>` inserts the Xbox profile ID as a decimal number. The logic is in `NonXboxProfile.ExpandSaveLocation` and `getProfileOptions`; read it before using a marker form the library does not already use.
 
 ## Releases

@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-16",
+  "Version": "2026-10-16A",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -486,6 +486,9 @@
       "PackageName": "4063811bitstudios.TheAlters_gwy9gn5q9j1y6",
       "TargetProfileTypes": [ "Steam" ],
       "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\11bitstudios\\TheAlters\\Steam\\Saved\\SaveGames\\<user-id>\\",
+      "FilesLeftOut": [
+        { "ContainerName1": "PlayerProfile", "NonXboxFilename": "PlayerProfile\\.sav", "Reason": "The player profile. A copied one crashed the game (#135)." }
+      ],
       "FileTranslations": [
         {
           "NonXboxFilename": "${FileName}.sav",
@@ -537,6 +540,9 @@
       "PackageName": "FocusHomeInteractiveSA.Roadbuilder_4hny5m903y3g0",
       "TargetProfileTypes": [ "Steam" ],
       "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Saber\\RoadCraftGame\\storage\\steam\\user\\<user-id>\\Main\\save\\",
+      "FilesLeftOut": [
+        { "ContainerName1": "MainConfig", "Reason": "Settings, which the Steam version keeps in another folder. The save carries over without them (#164)." }
+      ],
       "FileTranslations": [
         {
           "NonXboxFilename": "SLOT_${SlotNumber}\\\\${FileName}",

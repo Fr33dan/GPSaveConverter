@@ -99,6 +99,8 @@ With the data in hand:
 
 If the thread already holds a translation someone says works, treat it as step 2 onward: check it, then ask its author or the reporter to confirm before it goes in the library.
 
+When a report shows that copying a file does harm, give the game's entry a `FilesLeftOut` item with a short reason and the issue number. Do the same for a file that belongs outside the save folder. From v.0.4.16 the tool then leaves the file out of every transfer, and says why before anything is copied. The Alters' `PlayerProfile`, which crashed the game when copied (#135), and RoadCraft's `MainConfig`, settings that the Steam version keeps in another folder (#164), are the first two. `CLAUDE.md` describes the field.
+
 Traps the harness has caught. Each has a test in `RequestedTranslationTests.cs`:
 
 - **The fields are patterns.** A `+`, `(`, `[` or similar in a real name has to be written with a backslash in front. A container named `Disgaea 4 Complete+` only matches `Disgaea 4 Complete\+`.

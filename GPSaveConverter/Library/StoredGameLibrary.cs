@@ -45,6 +45,15 @@ namespace GPSaveConverter.Library
                     string problem = translation == null ? "A file translation is empty." : translation.FindProblem();
                     if (problem != null) return game.PackageName + ": " + problem;
                 }
+
+                if (game.FilesLeftOut != null)
+                {
+                    foreach (FileLeftOut leftOut in game.FilesLeftOut)
+                    {
+                        string problem = leftOut == null ? "A file left out is empty." : leftOut.FindProblem();
+                        if (problem != null) return game.PackageName + ": " + problem;
+                    }
+                }
             }
 
             return null;
