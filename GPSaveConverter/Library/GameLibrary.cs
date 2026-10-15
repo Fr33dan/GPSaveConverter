@@ -245,6 +245,24 @@ namespace GPSaveConverter.Library
             }
         }
 
+        /// <summary>
+        /// The game library's warnings about a game. They come from the newest library downloaded, so
+        /// they are in force before the user merges it into their own.
+        /// </summary>
+        internal static List<GameWarning> WarningsFor(string packageName)
+        {
+            try
+            {
+                return Default.WarningsFor(packageName);
+            }
+            catch (Exception e)
+            {
+                // Never a reason to stop: a warning is a help, not a step the transfer needs.
+                logger.Warn(e, "The game library's warnings could not be read");
+                return new List<GameWarning>();
+            }
+        }
+
         private static void ApplyPreviewTranslations(GameInfo game)
         {
             GameInfo preview;

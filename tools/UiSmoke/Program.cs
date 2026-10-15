@@ -964,6 +964,54 @@ namespace GPSaveConverter.UiSmoke
             Select(form, packages, form.ActiveGame);
             await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "the lists without the two files");
 
+            Say("== A game the library warns about: told once when it is selected, and before each transfer the warning is about");
+            SortedDictionary<string, string> xboxBeforeWarnings = FolderContents.Read(save.ProfileFolder);
+            SortedDictionary<string, string> filesBeforeWarnings = FolderContents.Read(save.NonXboxFolder);
+            string libraryBefore = settings.DefaultGameLibrary;
+            List<GameWarning> madeUpWarnings = new List<GameWarning>
+            {
+                new GameWarning { Name = "Test Game", PackageName = package, Text = "Made up for this test, either way (#0)." },
+                new GameWarning { Name = "Test Game", PackageName = package, Direction = GameWarning.FromXbox, Text = "Made up for this test, from Xbox only (#0)." }
+            };
+            settings.DefaultGameLibrary = libraryBefore.Substring(0, libraryBefore.LastIndexOf('}')) + ", \"Warnings\": " + System.Text.Json.JsonSerializer.Serialize(madeUpWarnings) + " }";
+            // Setting it again makes the library be read again, as a newly downloaded one would be.
+            GameLibrary.Settings = settings;
+
+            boxesBefore = responder.Transcript.Count;
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Known problem]")) && !responder.AnyOpen(), "the notice about the game");
+            string warned = responder.Transcript.Skip(boxesBefore).First(t => t.Contains("[Known problem]"));
+            Check(warned.Contains("a problem with Test Game.") && warned.Contains("Made up for this test, either way (#0).") && warned.Contains("Copying from Xbox: Made up for this test, from Xbox only (#0)."), "the notice gives both warnings, the one about one way with its direction");
+            Check(warned.Contains("wiki/Game-Compatibility"), "and says where more is known");
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both lists");
+
+            boxesBefore = responder.Transcript.Count;
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both lists after selecting the game again");
+            await Task.Delay(300);
+            Check(!responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Known problem]")), "selected again: the notice does not come up a second time");
+
+            responder.AnswerByTitle["Are you sure?"] = Answer.No;
+            boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            allToXbox.PerformClick();
+            await WaitUntil(() => status.Text == "Transfer canceled" && !responder.AnyOpen(), "the transfer to Xbox to be called off");
+            question = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Are you sure?]")) ?? string.Empty;
+            Check(question.Contains("Players have reported a problem with this:") && question.Contains("either way (#0).") && !question.Contains("from Xbox only"), "to Xbox: the question gives the warning about either way, not the one about the other way");
+
+            boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            allFromXbox.PerformClick();
+            await WaitUntil(() => status.Text == "Transfer canceled" && !responder.AnyOpen(), "the transfer from Xbox to be called off");
+            responder.AnswerByTitle.Remove("Are you sure?");
+            question = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Are you sure?]")) ?? string.Empty;
+            Check(question.Contains("either way (#0).") && question.Contains("from Xbox only (#0)."), "from Xbox: the question gives both");
+            CheckSame(xboxBeforeWarnings, FolderContents.Read(save.ProfileFolder), "answered No both times: the Xbox save is untouched");
+            CheckSame(filesBeforeWarnings, FolderContents.Read(save.NonXboxFolder), "and so is the non-Xbox folder");
+
+            settings.DefaultGameLibrary = libraryBefore;
+            GameLibrary.Settings = settings;
+
             Say("== An Xbox save that cannot be read");
             ListBox profiles = Field<ListBox>(form, "xboxProfileListBox");
             string indexFile = Path.Combine(save.ProfileFolder, "containers.index");

@@ -54,6 +54,7 @@ it out.
   the library that gets stored.
 - A mistyped pattern in a translation: the status line says so and no window opens.
 - Files a transfer leaves out, in both directions: the question before the transfer names them under their reasons, one from the game's entry and one for a file no translation covers, and no error box comes up. When every selected file is left out, a notice says so, and nothing is asked or copied.
+- A game the library warns about: a notice gives its warnings when it is selected, once only. The question before a transfer gives the warnings for that direction, and leaves out a warning about the other one.
 - An Xbox save that cannot be read: the error window names the profile, and no profile stays open.
 - An error nothing handles: the error window comes up and the main window survives.
 

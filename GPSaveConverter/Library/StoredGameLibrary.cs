@@ -13,6 +13,21 @@ namespace GPSaveConverter.Library
         public string Version { get; set; }
 
         /// <summary>
+        /// What players have reported about games whose saves do not carry over. Null when the library
+        /// has none. Kept apart from <see cref="GameInfo"/>, so that a game needs no entry of its own
+        /// to be warned about.
+        /// </summary>
+        public IList<GameWarning> Warnings { get; set; }
+
+        /// <summary>
+        /// The library's warnings about a game, in the order they are listed.
+        /// </summary>
+        internal List<GameWarning> WarningsFor(string packageName)
+        {
+            return Warnings == null ? new List<GameWarning>() : Warnings.Where(w => w != null && w.IsFor(packageName)).ToList();
+        }
+
+        /// <summary>
         /// Checks the library for mistakes that would stop the application loading or using it.
         /// </summary>
         /// <param name="mayBeEmpty">
@@ -53,6 +68,15 @@ namespace GPSaveConverter.Library
                         string problem = leftOut == null ? "A file left out is empty." : leftOut.FindProblem();
                         if (problem != null) return game.PackageName + ": " + problem;
                     }
+                }
+            }
+
+            if (Warnings != null)
+            {
+                foreach (GameWarning warning in Warnings)
+                {
+                    string problem = warning == null ? "A warning is empty." : warning.FindProblem();
+                    if (problem != null) return problem;
                 }
             }
 
