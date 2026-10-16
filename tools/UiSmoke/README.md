@@ -53,6 +53,7 @@ it out.
   serves is in use at once and the status line says so; unticked, it is gone; nothing of it is in
   the library that gets stored.
 - A mistyped pattern in a translation: the status line says so and no window opens.
+- Files a transfer leaves out, in both directions: the question before the transfer names them under their reasons, one from the game's entry and one for a file no translation covers, and no error box comes up. When every selected file is left out, a notice says so, and nothing is asked or copied.
 - An Xbox save that cannot be read: the error window names the profile, and no profile stays open.
 - An error nothing handles: the error window comes up and the main window survives.
 

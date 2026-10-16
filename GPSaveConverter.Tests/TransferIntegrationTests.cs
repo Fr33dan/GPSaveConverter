@@ -951,5 +951,40 @@ namespace GPSaveConverter.Tests
         }
 
         #endregion
+
+        #region Files a transfer leaves out
+
+        private XboxFileInfo XboxFile(GameInfo game, string containerName1, string fileID)
+        {
+            return new XboxContainerIndex(game, FakeXboxSave.ProfileID).getFileList().Single(f => f.ContainerName1 == containerName1 && f.FileID == fileID);
+        }
+
+        [Fact]
+        public void ReasonToLeaveOut_XboxFileTheLibraryLeavesOut_IsLeftOutEvenWithATranslation()
+        {
+            // RoadCraft's settings: a container the save carries over without (#164).
+            save.WithXboxFile("MainConfig", "MainConfig", "config\\user_settings.cfg", "xbox settings")
+                .WithXboxFile("MainSave", "MainSave", "save\\SLOT_0/CompleteSave", "xbox progress")
+                .Build();
+            GameInfo game = Game(Translation("${Container}", "${Container}", "${File}", "${File}", "(?<Container>\\w+)", "(?<File>.+)"));
+            game.FilesLeftOut = new List<FileLeftOut> { new FileLeftOut { ContainerName1 = "MainConfig", Reason = "Settings." } };
+
+            Assert.Equal("Settings.", game.ReasonToLeaveOut(XboxFile(game, "MainConfig", "config\\user_settings.cfg")));
+            Assert.Null(game.ReasonToLeaveOut(XboxFile(game, "MainSave", "save\\SLOT_0/CompleteSave")));
+        }
+
+        [Fact]
+        public void ReasonToLeaveOut_XboxFileNoTranslationCovers_IsLeftOut()
+        {
+            save.WithXboxFile("SaveGame", "", "SaveSlot0", "xbox progress")
+                .WithXboxFile("Profile", "Profile", "settings", "xbox settings")
+                .Build();
+            GameInfo game = Game(Translation("SaveGame", "", "SaveSlot${FileSlot}", "saveFile${FileSlot}.sav", "(?<FileSlot>[0-9]+)"));
+
+            Assert.Null(game.ReasonToLeaveOut(XboxFile(game, "SaveGame", "SaveSlot0")));
+            Assert.Equal(GameInfo.NoTranslationReason, game.ReasonToLeaveOut(XboxFile(game, "Profile", "settings")));
+        }
+
+        #endregion
     }
 }

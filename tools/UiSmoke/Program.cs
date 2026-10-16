@@ -910,6 +910,60 @@ namespace GPSaveConverter.UiSmoke
             CheckEqual(0, responder.ErrorWindowsSeen, "no window came up for either");
             form.ActiveGame.FileTranslations.Remove(mistyped);
 
+            Say("== Files a transfer leaves out: named, with the reason, before anything is copied (#164)");
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "notes.txt"), "steam notes");
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "saveFile9.sav"), "steam slot 9");
+            form.ActiveGame.FilesLeftOut = new List<FileLeftOut>
+            {
+                new FileLeftOut { NonXboxFilename = "saveFile9\\.sav", Reason = "Left out for this test, Steam side." },
+                new FileLeftOut { ContainerName1 = "SaveGame", XboxFileID = "SaveSlot3", Reason = "Left out for this test, Xbox side." }
+            };
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 5, "the lists with the two new files in them");
+            SortedDictionary<string, string> xboxBeforeLeavingOut = FolderContents.Read(save.ProfileFolder);
+            SortedDictionary<string, string> filesBeforeLeavingOut = FolderContents.Read(save.NonXboxFolder);
+
+            responder.AnswerByTitle["Are you sure?"] = Answer.No;
+            boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            allToXbox.PerformClick();
+            await WaitUntil(() => status.Text == "Transfer canceled" && !responder.AnyOpen(), "the transfer to Xbox to be called off");
+            question = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Are you sure?]")) ?? string.Empty;
+            Check(question.Contains("2 of the 5 files are left out."), "to Xbox: the question says how many files are left out");
+            Check(question.Contains("Left out for this test, Steam side.") && question.Contains("    saveFile9.sav"), "it gives the library's reason for the file the library leaves out");
+            Check(question.Contains(GameInfo.NoTranslationReason) && question.Contains("    notes.txt"), "and says that no translation covers the other one");
+            Check(!responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Error]")), "no error box came up for either of them");
+            CheckSame(xboxBeforeLeavingOut, FolderContents.Read(save.ProfileFolder), "answered No: the Xbox save is untouched");
+
+            boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            allFromXbox.PerformClick();
+            await WaitUntil(() => status.Text == "Transfer canceled" && !responder.AnyOpen(), "the transfer from Xbox to be called off");
+            responder.AnswerByTitle.Remove("Are you sure?");
+            question = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Are you sure?]")) ?? string.Empty;
+            Check(question.Contains("1 of the 2 files is left out.") && question.Contains("Left out for this test, Xbox side.") && question.Contains("    SaveGame / SaveSlot3"), "from Xbox: the question names the file the library leaves out, with its reason");
+            CheckSame(filesBeforeLeavingOut, FolderContents.Read(save.NonXboxFolder), "answered No: the non-Xbox folder is untouched");
+
+            Say("== Every selected file is left out: said so, and nothing is asked or copied");
+            foreach (DataGridViewRow row in nonXboxFiles.Rows)
+            {
+                row.Selected = ((NonXboxFileInfo)row.DataBoundItem).RelativePath == "notes.txt";
+            }
+            boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            selectionToXbox.PerformClick();
+            await WaitUntil(() => status.Text == "Nothing copied" && !responder.AnyOpen(), "the notice that nothing is copied");
+            string notice = responder.Transcript.Skip(boxesBefore).FirstOrDefault(t => t.Contains("[Nothing to copy]")) ?? string.Empty;
+            Check(notice.Contains("The file is left out.") && notice.Contains("    notes.txt") && notice.Contains("wiki/File-Translations"), "the notice names the file and says where translations are explained");
+            Check(!responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Are you sure?]") || t.Contains("[Error]")), "nothing else came up");
+            CheckSame(xboxBeforeLeavingOut, FolderContents.Read(save.ProfileFolder), "the Xbox save is untouched");
+
+            form.ActiveGame.FilesLeftOut = null;
+            File.Delete(Path.Combine(save.NonXboxFolder, "notes.txt"));
+            File.Delete(Path.Combine(save.NonXboxFolder, "saveFile9.sav"));
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "the lists without the two files");
+
             Say("== An Xbox save that cannot be read");
             ListBox profiles = Field<ListBox>(form, "xboxProfileListBox");
             string indexFile = Path.Combine(save.ProfileFolder, "containers.index");

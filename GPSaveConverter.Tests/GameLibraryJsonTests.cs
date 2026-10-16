@@ -144,6 +144,25 @@ namespace GPSaveConverter.Tests
         }
 
         [Fact]
+        public void FindProblem_FileLeftOutWithAMistake_NamesTheGame()
+        {
+            StoredGameLibrary library = Library("2026-01-31", "{ \"PackageName\": \"Publisher.Game_abc\", \"FileTranslations\": [ " + ValidTranslation + " ], \"FilesLeftOut\": [ { \"ContainerName1\": \"MainConfig\" } ] }");
+
+            string problem = library.FindProblem();
+
+            Assert.StartsWith("Publisher.Game_abc", problem);
+            Assert.Contains("Reason", problem);
+        }
+
+        [Fact]
+        public void FindProblem_FileLeftOutThatIsComplete_ReturnsNull()
+        {
+            StoredGameLibrary library = Library("2026-01-31", "{ \"PackageName\": \"Publisher.Game_abc\", \"FileTranslations\": [ " + ValidTranslation + " ], \"FilesLeftOut\": [ { \"ContainerName1\": \"MainConfig\", \"Reason\": \"Settings.\" } ] }");
+
+            Assert.Null(library.FindProblem());
+        }
+
+        [Fact]
         public void FindProblem_NoGames_IsReported()
         {
             StoredGameLibrary library = Library("2026-01-31");

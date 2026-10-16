@@ -114,12 +114,31 @@ namespace GPSaveConverter.Library
         }
 
         /// <summary>
+        /// Files the library says not to copy, and why. A transfer leaves them out in either direction,
+        /// even if a translation covers them. Null when the library says nothing of them.
+        /// </summary>
+        [Browsable(false)]
+        public List<FileLeftOut> FilesLeftOut { get; set; }
+
+        /// <summary>
         /// Translations that are still being tested, from the preview library. They are tried before
         /// <see cref="FileTranslations"/>, and are never stored with the user's library: they are
         /// in force only while the option for them is on.
         /// </summary>
         [Browsable(false), JsonIgnore]
         internal List<FileTranslation> PreviewTranslations { get; private set; } = new List<FileTranslation>();
+
+        /// <summary>
+        /// The files the preview library's entry says not to copy. Like its translations, they are in
+        /// force only while the option for them is on.
+        /// </summary>
+        [Browsable(false), JsonIgnore]
+        internal List<FileLeftOut> PreviewFilesLeftOut { get; private set; } = new List<FileLeftOut>();
+
+        private IEnumerable<FileLeftOut> FilesLeftOutInOrder
+        {
+            get { return this.PreviewFilesLeftOut.Concat(this.FilesLeftOut ?? Enumerable.Empty<FileLeftOut>()); }
+        }
 
         /// <summary>
         /// Every translation of the game in the order they are tried. The first that matches is used.
@@ -136,6 +155,7 @@ namespace GPSaveConverter.Library
         internal void ApplyPreview(GameInfo preview)
         {
             this.PreviewTranslations = preview == null ? new List<FileTranslation>() : preview.FileTranslations.ToList();
+            this.PreviewFilesLeftOut = preview == null || preview.FilesLeftOut == null ? new List<FileLeftOut>() : preview.FilesLeftOut.ToList();
 
             // A save location is taken from the entry only when the game has none. One the user
             // chose, or the library gave, stays.
@@ -241,6 +261,13 @@ namespace GPSaveConverter.Library
             }
             this.WGSProfileSuffix = deserializedInfo.WGSProfileSuffix;
 
+            // Taken whole, so that the library can change one or drop it. An entry that says nothing
+            // of them, such as a game profile a user loads, leaves them as they are.
+            if (deserializedInfo.FilesLeftOut != null)
+            {
+                this.FilesLeftOut = deserializedInfo.FilesLeftOut.ToList();
+            }
+
             if (deserializedInfo.TargetProfileTypes != null)
             {
                 setProfileTypes(deserializedInfo.TargetProfileTypes);
@@ -279,6 +306,36 @@ namespace GPSaveConverter.Library
                 }
             }
             return null;
+        }
+
+        /// <summary>Why a transfer leaves out a file that no translation covers.</summary>
+        internal const string NoTranslationReason = "No file translation covers these files.";
+
+        /// <summary>
+        /// Why a transfer should leave an Xbox file out, or null if it can be copied. What the library
+        /// says of the file comes first. After that, a file no translation covers is left out too.
+        /// </summary>
+        internal string ReasonToLeaveOut(Xbox.XboxFileInfo file)
+        {
+            FileLeftOut entry = FilesLeftOutInOrder.FirstOrDefault(f => f.MatchesXbox(file.ContainerName1, file.ContainerName2, file.FileID));
+            if (entry != null)
+            {
+                return entry.Reason;
+            }
+            return findTranslation(file) == null ? NoTranslationReason : null;
+        }
+
+        /// <summary>
+        /// Why a transfer should leave a non-Xbox file out, or null if it can be copied.
+        /// </summary>
+        internal string ReasonToLeaveOut(NonXboxFileInfo file, string xboxProfileID)
+        {
+            FileLeftOut entry = FilesLeftOutInOrder.FirstOrDefault(f => f.MatchesNonXbox(file.RelativePath));
+            if (entry != null)
+            {
+                return entry.Reason;
+            }
+            return findTranslation(file, xboxProfileID) == null ? NoTranslationReason : null;
         }
 
         internal async Task refreshNonXboxSaveFiles()

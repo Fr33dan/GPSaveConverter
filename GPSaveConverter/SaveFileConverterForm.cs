@@ -392,12 +392,21 @@ namespace GPSaveConverter
                 return;
             }
 
+            int selected = files.Count;
+            string xboxProfileID = this.currentContainer.XboxProfileID;
+            List<KeyValuePair<NonXboxFileInfo, string>> leftOut = leaveOut(files, file => ActiveGame.ReasonToLeaveOut(file, xboxProfileID));
+            if (files.Count == 0)
+            {
+                showNothingToCopy(leftOut, file => file.RelativePath);
+                return;
+            }
+
             bool backUp = Settings.BackupBeforeTransfer;
-            string question = backUp
+            string question = leftOutIntro(leftOut, selected, file => file.RelativePath) + (backUp
                 ? "This will overwrite files in your Xbox save data." + Environment.NewLine + Environment.NewLine
                     + "The Xbox save is backed up first. To undo the transfer, choose File > Backups." + Environment.NewLine + Environment.NewLine
                     + "Continue?"
-                : "This could overwrite files in your Xbox save data which cannot be undone. Are you sure?";
+                : "This could overwrite files in your Xbox save data which cannot be undone. Are you sure?");
             DialogResult res = MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo);
             if (res != DialogResult.Yes)
             {
@@ -553,12 +562,20 @@ namespace GPSaveConverter
                 return;
             }
 
+            int selected = files.Count;
+            List<KeyValuePair<Xbox.XboxFileInfo, string>> leftOut = leaveOut(files, file => ActiveGame.ReasonToLeaveOut(file));
+            if (files.Count == 0)
+            {
+                showNothingToCopy(leftOut, xboxFileName);
+                return;
+            }
+
             bool backUp = Settings.BackupBeforeTransfer;
-            string question = backUp
+            string question = leftOutIntro(leftOut, selected, xboxFileName) + (backUp
                 ? "This will overwrite save files in your non-Xbox save data." + Environment.NewLine + Environment.NewLine
                     + "Each file is backed up before it is replaced. To undo the transfer, choose File > Backups." + Environment.NewLine + Environment.NewLine
                     + "Continue?"
-                : "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?";
+                : "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?");
             DialogResult res = MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo);
             if (res != DialogResult.Yes)
             {
@@ -605,6 +622,96 @@ namespace GPSaveConverter
         private static string countFiles(int count)
         {
             return count == 1 ? "1 file" : count + " files";
+        }
+
+        private static string xboxFileName(Xbox.XboxFileInfo file)
+        {
+            return file.ContainerName1 + " / " + file.FileID;
+        }
+
+        /// <summary>
+        /// Takes the files a transfer is not to copy out of the list, with the reason for each.
+        /// </summary>
+        /// <returns>The files taken out, each with its reason, in the order they were in.</returns>
+        private static List<KeyValuePair<T, string>> leaveOut<T>(List<T> files, Func<T, string> reasonToLeaveOut)
+        {
+            List<KeyValuePair<T, string>> leftOut = new List<KeyValuePair<T, string>>();
+            foreach (T file in files.ToList())
+            {
+                string reason;
+                try
+                {
+                    reason = reasonToLeaveOut(file);
+                }
+                catch (Exception e)
+                {
+                    // A mistake in a translation. The transfer itself reports it, file by file.
+                    logger.Debug(e, "Whether to leave a file out could not be worked out");
+                    reason = null;
+                }
+
+                if (reason != null)
+                {
+                    leftOut.Add(new KeyValuePair<T, string>(file, reason));
+                    files.Remove(file);
+                }
+            }
+            return leftOut;
+        }
+
+        /// <summary>
+        /// Names the files a transfer leaves out under the reason for each, a few of each reason.
+        /// </summary>
+        private static string leftOutText<T>(List<KeyValuePair<T, string>> leftOut, Func<T, string> name)
+        {
+            const int namesShown = 10;
+            StringBuilder text = new StringBuilder();
+            foreach (IGrouping<string, KeyValuePair<T, string>> reason in leftOut.GroupBy(file => file.Value))
+            {
+                text.AppendLine(reason.Key);
+                foreach (KeyValuePair<T, string> file in reason.Take(namesShown))
+                {
+                    text.AppendLine("    " + name(file.Key));
+                }
+                int more = reason.Count() - namesShown;
+                if (more > 0)
+                {
+                    text.AppendLine("    and " + more + " more");
+                }
+                text.AppendLine();
+            }
+            return text.ToString();
+        }
+
+        /// <summary>
+        /// The start of the question asked before a transfer, when it leaves some of the selected files out.
+        /// </summary>
+        private static string leftOutIntro<T>(List<KeyValuePair<T, string>> leftOut, int selected, Func<T, string> name)
+        {
+            if (leftOut.Count == 0)
+            {
+                return String.Empty;
+            }
+            return (leftOut.Count == 1 ? "1 of the " + selected + " files is" : leftOut.Count + " of the " + selected + " files are") + " left out." + Environment.NewLine + Environment.NewLine
+                + leftOutText(leftOut, name);
+        }
+
+        /// <summary>
+        /// Says that every selected file is left out, and why, in place of the transfer.
+        /// </summary>
+        private void showNothingToCopy<T>(List<KeyValuePair<T, string>> leftOut, Func<T, string> name)
+        {
+            StringBuilder text = new StringBuilder();
+            text.AppendLine(leftOut.Count == 1 ? "The file is left out." : "All " + leftOut.Count + " files are left out.");
+            text.AppendLine();
+            text.Append(leftOutText(leftOut, name));
+            if (leftOut.Any(file => file.Value == Library.GameInfo.NoTranslationReason))
+            {
+                text.Append("You may need to add file translations via https://github.com/Fr33dan/GPSaveConverter/wiki/File-Translations");
+            }
+
+            logger.Info("Nothing copied");
+            MessageBox.Show(this, text.ToString().TrimEnd(), "Nothing to copy");
         }
 
         /// <summary>
