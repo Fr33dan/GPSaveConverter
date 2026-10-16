@@ -402,12 +402,13 @@ namespace GPSaveConverter
             }
 
             bool backUp = Settings.BackupBeforeTransfer;
-            string question = leftOutIntro(leftOut, selected, file => file.RelativePath) + (backUp
+            List<string> warnings = warningsAbout(true);
+            string question = warningsIntro(warnings) + leftOutIntro(leftOut, selected, file => file.RelativePath) + (backUp
                 ? "This will overwrite files in your Xbox save data." + Environment.NewLine + Environment.NewLine
                     + "The Xbox save is backed up first. To undo the transfer, choose File > Backups." + Environment.NewLine + Environment.NewLine
                     + "Continue?"
                 : "This could overwrite files in your Xbox save data which cannot be undone. Are you sure?");
-            DialogResult res = MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo);
+            DialogResult res = askToGoAhead(question, warnings.Count > 0);
             if (res != DialogResult.Yes)
             {
                 logger.Info("Transfer canceled");
@@ -571,12 +572,13 @@ namespace GPSaveConverter
             }
 
             bool backUp = Settings.BackupBeforeTransfer;
-            string question = leftOutIntro(leftOut, selected, xboxFileName) + (backUp
+            List<string> warnings = warningsAbout(false);
+            string question = warningsIntro(warnings) + leftOutIntro(leftOut, selected, xboxFileName) + (backUp
                 ? "This will overwrite save files in your non-Xbox save data." + Environment.NewLine + Environment.NewLine
                     + "Each file is backed up before it is replaced. To undo the transfer, choose File > Backups." + Environment.NewLine + Environment.NewLine
                     + "Continue?"
                 : "This could overwrite save files in your non-Xbox save data which cannot be undone. Are you sure?");
-            DialogResult res = MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo);
+            DialogResult res = askToGoAhead(question, warnings.Count > 0);
             if (res != DialogResult.Yes)
             {
                 logger.Info("Transfer canceled");
@@ -627,6 +629,38 @@ namespace GPSaveConverter
         private static string xboxFileName(Xbox.XboxFileInfo file)
         {
             return file.ContainerName1 + " / " + file.FileID;
+        }
+
+        /// <summary>
+        /// What players have reported about copying the selected game's saves in this direction.
+        /// </summary>
+        private List<string> warningsAbout(bool toXbox)
+        {
+            return Library.GameLibrary.WarningsFor(ActiveGame.PackageName).Where(w => w.AppliesTo(ActiveGame.PackageName, toXbox)).Select(w => w.Text).ToList();
+        }
+
+        /// <summary>
+        /// The start of the question asked before a transfer, when players have reported a problem
+        /// with copying this game's saves in this direction.
+        /// </summary>
+        private static string warningsIntro(List<string> warnings)
+        {
+            if (warnings.Count == 0)
+            {
+                return String.Empty;
+            }
+            return "Players have reported a problem with this:" + Environment.NewLine
+                + String.Join(Environment.NewLine, warnings) + Environment.NewLine + Environment.NewLine;
+        }
+
+        /// <summary>
+        /// Asks whether to go ahead with a transfer. When the question carries a warning, Enter answers No.
+        /// </summary>
+        private DialogResult askToGoAhead(string question, bool warned)
+        {
+            return warned
+                ? MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
+                : MessageBox.Show(this, question, "Are you sure?", MessageBoxButtons.YesNo);
         }
 
         /// <summary>
@@ -856,6 +890,36 @@ namespace GPSaveConverter
 
             // Last, so that it is what the status line is left showing.
             showPreviewTranslationsNote();
+
+            // After the lists are filled, so that the game's files are what the notice comes up over.
+            showWarnings();
+        }
+
+        /// <summary>The games whose warnings have been shown this session. Each comes up once.</summary>
+        private readonly HashSet<string> gamesWarnedAbout = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Says what players have reported about the selected game, once a session, before any work
+        /// goes into it.
+        /// </summary>
+        private void showWarnings()
+        {
+            List<Library.GameWarning> warnings = Library.GameLibrary.WarningsFor(ActiveGame.PackageName);
+            if (warnings.Count == 0 || !gamesWarnedAbout.Add(ActiveGame.PackageName))
+            {
+                return;
+            }
+
+            StringBuilder text = new StringBuilder();
+            text.AppendLine("Players have reported a problem with " + ActiveGame.Name + ".");
+            text.AppendLine();
+            foreach (Library.GameWarning warning in warnings)
+            {
+                text.AppendLine(warning.WithDirection());
+                text.AppendLine();
+            }
+            text.Append("You can still copy files. What is known about each game is on https://github.com/Fr33dan/GPSaveConverter/wiki/Game-Compatibility");
+            MessageBox.Show(this, text.ToString(), "Known problem", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private async void promptNonXboxLocationButton_Click(object sender, EventArgs e)

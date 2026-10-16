@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-16A",
+  "Version": "2026-10-16B",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -553,5 +553,26 @@
         }
       ]
     }
+  ],
+  "Warnings": [
+    { "Name": "A Plague Tale: Requiem", "PackageName": "FocusHomeInteractiveSA.APlagueTaleRequiem-Windows_4hny5m903y3g0", "Text": "The game calls a copied save corrupt (#24, #166)." },
+    { "Name": "Abiotic Factor", "PackageName": "PlayStack.AbioticFactor_3wcqaesafpzfy", "Direction": "FromXbox", "Text": "A dedicated server keeps a world as a folder of files and the Game Pass version as one file, so a world copied to a server does not work (#143)." },
+    { "Name": "Avowed", "PackageName": "Microsoft.Avowed_8wekyb3d8bbwe", "Text": "The Game Pass version keeps a save in three parts and the Steam version in one file. A Steam save copied in their place crashed the game (#119)." },
+    { "Name": "Day of the Tentacle Remastered", "PackageName": "Microsoft.DayoftheTentacleRemastered_8wekyb3d8bbwe", "Direction": "ToXbox", "Text": "The Xbox version lists a copied Steam save, and loading it closes the game (#11)." },
+    { "Name": "DOOM Eternal", "PackageName": "BethesdaSoftworks.DOOMEternal-PC_3275kfvn8vcwc", "Direction": "FromXbox", "Text": "The Steam version finds the profile and save slot copied from Game Pass, and calls both corrupt (#120)." },
+    { "Name": "Dragon Ball Xenoverse 2", "PackageName": "NAMCOBANDAIGamesInc.DBXV2BaseGame_gdy2aq6ez762w", "Text": "The game calls a copied save corrupt, whichever way it was copied (#155)." },
+    { "Name": "Eiyuden Chronicle: Hundred Heroes", "PackageName": "505GAMESS.P.A.EiyudenChronicleHundredHeroes_tefn33qh9azfc", "Text": "The two versions write the save differently. The game called a copied save corrupt and deleted it (#93)." },
+    { "Name": "Forza Horizon 4", "PackageName": "Microsoft.SunriseBaseGame_8wekyb3d8bbwe", "Text": "The game rejects a copied save (#146)." },
+    { "Name": "Halo Infinite", "PackageName": "Microsoft.254428597CFE2_8wekyb3d8bbwe", "Direction": "FromXbox", "Text": "The Steam version loads a save copied from Game Pass only after the first 272 bytes of one of its own saves are added to it with a hex editor. #76 describes how." },
+    { "Name": "Kunitsu-Gami: Path of the Goddess", "PackageName": "F024294D.Kunitsu-Gami_8fty0by30jkny", "Direction": "FromXbox", "Text": "The Steam version reports \"Failed to load system saved data\" for a save copied from Game Pass (#156)." },
+    { "Name": "Monster Hunter Rise", "PackageName": "F024294D.50755C2F12831_8fty0by30jkny", "Text": "The game hangs on loading a copied save, or calls it corrupt (#34)." },
+    { "Name": "Persona 3 Reload", "PackageName": "SEGAofAmericaInc.L0cb6b3aea_s751p9cej88mt", "Direction": "ToXbox", "Text": "Steam saves copied to Game Pass show up as empty slots (#165)." },
+    { "Name": "PlateUp!", "PackageName": "YogscastGames.PlateUp_68gs7gbvws9cw", "Text": "The Game Pass version keeps the whole save in one file and the Steam version in a folder of many files, so a copied save does not work (#81)." },
+    { "Name": "Resonance: A Plague Tale Legacy", "PackageName": "FocusHomeInteractiveSA.APlagueTaleFelons_4hny5m903y3g0", "Direction": "ToXbox", "Text": "The Xbox version discards a copied Steam save and starts a new one (#182)." },
+    { "Name": "Starfield", "PackageName": "BethesdaSoftworks.ProjectGold_3275kfvn8vcwc", "Text": "The Game Pass version keeps each save in many parts and the Steam version in one file, so a copied save does not work (#64)." },
+    { "Name": "Teenage Mutant Ninja Turtles: Shredder's Revenge", "PackageName": "DotEmu.TeenageMutantNinjaTurtlesShreddersRevenge_map6zyh9ym1xy", "Direction": "FromXbox", "Text": "The Steam version does not load a save copied from Game Pass, and starts a new game (#183)." },
+    { "Name": "The Outer Worlds: Spacer's Choice Edition", "PackageName": "PrivateDivision.64850D0BF098F_hv3d7yfbgr2rp", "Text": "The Microsoft Store version keeps its save in a different file from the Steam and Epic versions, so a copied save does not work (#154)." },
+    { "Name": "Tunic", "PackageName": "Finji.TUNIC_tys0ffscxatjj", "Text": "The Game Pass version keeps every save slot in one file and the Steam version keeps one file per slot, so a copied save does not work (#6)." },
+    { "Name": "Wo Long: Fallen Dynasty", "PackageName": "946B6A6E.WoLongFallenDynasty_dkffhzhmh6pmy", "Text": "The game calls a copied save corrupt until the start of the file is patched with a hex editor. #45 describes how." }
   ]
 }

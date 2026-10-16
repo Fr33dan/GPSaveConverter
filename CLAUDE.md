@@ -116,6 +116,13 @@ A game's entry can also list `FilesLeftOut`: files a transfer must not copy, eac
 - A file no translation covers is left out too, under a reason of its own, so the user is told once rather than meeting an error for each file.
 - Versions before v.0.4.16 ignore the field. An entry with the field replaces the game's list when the library is merged; one without it leaves the list alone.
 
+The library also has a top-level `Warnings` list. It records what players reported about games whose saves do not carry over, or carry over only after a step the tool does not do.
+
+- Each item has a `PackageName`, a `Text` with the issue number, a `Name` for whoever reads the file, and a `Direction`: `ToXbox`, `FromXbox`, or left out for both.
+- The app reads the list from the newest library downloaded, so a warning is in force before the user merges that library into theirs. A game needs no entry of its own to be warned about.
+- The app shows a game's warnings once a session when it is selected. It also puts the ones for the transfer's direction at the top of the question before the transfer, with No as the default answer.
+- Versions before v.0.4.16 ignore the list. Keep it in step with the 🟥 and 🟨 rows of the wiki's Game Compatibility table.
+
 `BaseNonXboxSaveLocation` takes environment variables, `<Steam-folder>`, and profile markers. `<user-id>` stands for a per-user folder the app lists and lets the user pick; a second level is `<user-id2>`. Each marker needs a matching entry in `TargetProfileTypes` (`Steam` or `Xbox`). For an `Xbox` entry, `<user-id2_XboxInt>` inserts the Xbox profile ID as a decimal number. The logic is in `NonXboxProfile.ExpandSaveLocation` and `getProfileOptions`; read it before using a marker form the library does not already use.
 
 ## Releases

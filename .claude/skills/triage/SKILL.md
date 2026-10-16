@@ -124,7 +124,7 @@ Three checks tell the two apart without the game:
 
 Either way, the save they had before can be put back with **File ▸ Backups**, if the transfer was made with v.0.4.12 or later. Say so: it is usually what they want first.
 
-When a result is settled either way, add the game to the Game Compatibility table in the wiki, with a link to the issue it comes from. The wiki is its own repository, `Fr33dan/GPSaveConverter.wiki`. Keep the table alphabetical and keep the file's CRLF line endings.
+When a result is settled either way, add the game to the Game Compatibility table in the wiki, with a link to the issue it comes from. For a game that turns 🟥 or 🟨, also give `GameLibrary.json` a `Warnings` item when the game's package name is known, from a pasted table or the Microsoft Store row on PCGamingWiki. Set its `Direction` when only one way was seen to fail. From v.0.4.16 the tool shows the warning when the game is selected and before a transfer. It is a change to the game library, so ask the maintainer to merge it. The wiki is its own repository, `Fr33dan/GPSaveConverter.wiki`. Keep the table alphabetical and keep the file's CRLF line endings.
 
 The table has four statuses, explained in a legend above it. The maintainer added 🟨 and 🟦 on 2026-10-14. The colour is always the save's outcome as far as anyone knows it:
 
