@@ -89,6 +89,7 @@
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showFileTranslationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newVersionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileTranslationPanel = new System.Windows.Forms.Panel();
             this.fileTranslationPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.removeTranslationButton = new System.Windows.Forms.Button();
@@ -563,7 +564,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.viewToolStripMenuItem});
+            this.viewToolStripMenuItem,
+            this.newVersionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(934, 24);
@@ -687,7 +689,16 @@
             this.creditsToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.creditsToolStripMenuItem.Text = "Credits";
             this.creditsToolStripMenuItem.Click += new System.EventHandler(this.creditsToolStripMenuItem_Click);
-            // 
+            //
+            // newVersionToolStripMenuItem
+            //
+            this.newVersionToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.newVersionToolStripMenuItem.Name = "newVersionToolStripMenuItem";
+            this.newVersionToolStripMenuItem.Size = new System.Drawing.Size(105, 20);
+            this.newVersionToolStripMenuItem.Text = "Update available";
+            this.newVersionToolStripMenuItem.Visible = false;
+            this.newVersionToolStripMenuItem.Click += new System.EventHandler(this.newVersionToolStripMenuItem_Click);
+            //
             // fileTranslationPanel
             // 
             this.fileTranslationPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -892,6 +903,7 @@
         private System.Windows.Forms.ToolStripMenuItem exportGameLibraryToolStripMenuItem;
         private System.Windows.Forms.Label fileTranslationsMarkerLabel;
         private System.Windows.Forms.ToolStripMenuItem creditsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newVersionToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn RelativePath;
         private System.Windows.Forms.DataGridViewTextBoxColumn Timestamp;
         private System.Windows.Forms.TabControl tabControl1;

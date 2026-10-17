@@ -57,6 +57,7 @@ it out.
 - A game the library warns about: a notice gives its warnings when it is selected, once only. The question before a transfer gives the warnings for that direction, and leaves out a warning about the other one.
 - **File ▸ Request a Translation**: answered No, nothing opens. Answered Yes, the translation request form is opened with the game and both file lists, and the user's own folders are hidden in it. **Copy Save File Table(s)** copies the same tables. Stand-ins take the place of the browser and the clipboard.
 - **File ▸ Suggest a Translation**: with no names in common, nothing is suggested. With files named alike on both sides, the question shows the pairs and the files it would also cover. Answered No, nothing is added. Answered Yes, the translation is added first and the files match.
+- A newer release: with internet access off, as at the start of the run, there is no link. With it on, the stand-in network answers for GitHub. When the newest release is this copy, there is still no link. When it is newer, **Update available** at the right of the menu bar names it, the status line says it is out, and a click opens the download page. The step asks the way the window does when it opens.
 - An Xbox save that cannot be read: the error window names the profile, and no profile stays open.
 - An error nothing handles: the error window comes up and the main window survives.
 
