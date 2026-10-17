@@ -52,20 +52,28 @@ namespace GPSaveConverter.UiSmoke
     }
 
     /// <summary>
-    /// Stands in for the network. It serves the translations that are being tested, and any other
-    /// address is a mistake in the test: nothing here may reach the real network.
+    /// Stands in for the network. It serves the translations that are being tested and, once the
+    /// script sets it, GitHub's answer about the newest release. Any other address is a mistake in
+    /// the test: nothing here may reach the real network.
     /// </summary>
-    internal class StagedTranslationsOnly : IHttpClient
+    internal class StandInNetwork : IHttpClient
     {
         public string Library = string.Empty;
 
+        /// <summary>GitHub's answer about the newest release. Null until a step asks for it.</summary>
+        public string LatestRelease = null;
+
         public string DownloadString(string address)
         {
-            if (address != GameLibrary.PreviewLibraryURL)
+            if (address == GameLibrary.PreviewLibraryURL)
             {
-                throw new InvalidOperationException("The window test asked the network for " + address);
+                return Library;
             }
-            return Library;
+            if (address == ReleaseCheck.LatestReleaseAddress && LatestRelease != null)
+            {
+                return LatestRelease;
+            }
+            throw new InvalidOperationException("The window test asked the network for " + address);
         }
 
         public Task<string> DownloadStringAsync(string address)
@@ -578,7 +586,7 @@ namespace GPSaveConverter.UiSmoke
                 BackupsForm.Settings = settings;
                 GameLibrary.Settings = settings;
                 GameLibrary.ScriptRunner = new NoScripts();
-                GameLibrary.HttpClient = new StagedTranslationsOnly();
+                GameLibrary.HttpClient = new StandInNetwork();
                 XboxPackageList.Environment = new FakeEnvironment(save.LocalAppData);
                 SaveBackupStore store = new SaveBackupStore(save.BackupFolder);
                 SaveFileConverterForm.Backups = store;
@@ -869,7 +877,7 @@ namespace GPSaveConverter.UiSmoke
             Say("== A translation that is still being tested: a tick in Preferences brings it in, and unticking takes it out");
             Label translationsLabel = Field<Label>(form, "fileTranslationsMarkerLabel");
             File.WriteAllText(Path.Combine(save.NonXboxFolder, "quick.dat"), "steam quick save");
-            ((StagedTranslationsOnly)GameLibrary.HttpClient).Library = "{ \"Version\": \"2026-01-01\", \"GameInfo\": [ { \"PackageName\": \"" + package + "\", \"FileTranslations\": [ "
+            ((StandInNetwork)GameLibrary.HttpClient).Library ="{ \"Version\": \"2026-01-01\", \"GameInfo\": [ { \"PackageName\": \"" + package + "\", \"FileTranslations\": [ "
                 + "{ \"NamedRegexGroups\": [], \"ContainerName1\": \"SaveGame\", \"ContainerName2\": \"\", \"XboxFileID\": \"SaveSlot0\", \"NonXboxFilename\": \"quick\\\\.dat\" } ] } ] }";
             Select(form, packages, form.ActiveGame);
             await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 4, "the lists with quick.dat in them");
@@ -1087,6 +1095,31 @@ namespace GPSaveConverter.UiSmoke
             File.Delete(Path.Combine(save.NonXboxFolder, "SaveSlot3"));
             Select(form, packages, form.ActiveGame);
             await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "the lists as they were");
+
+            Say("== A newer release: a link to it at the right of the menu bar, and none while this copy is the newest");
+            // The window asks once, as it opens. These steps ask again the same way, with internet access allowed.
+            ToolStripMenuItem newVersionMenu = Field<ToolStripMenuItem>(form, "newVersionToolStripMenuItem");
+            StandInNetwork network = (StandInNetwork)GameLibrary.HttpClient;
+            Check(!newVersionMenu.Available, "internet access was not allowed at the start: there is no link");
+
+            settings.AllowWebDataFetch = true;
+            network.LatestRelease = "{ \"tag_name\": \"v." + ErrorReport.Version() + "\", \"draft\": false, \"prerelease\": false }";
+            await form.checkForNewerRelease();
+            Check(!newVersionMenu.Available, "the newest release is this copy: no link");
+
+            network.LatestRelease = "{ \"tag_name\": \"v.99.0\", \"draft\": false, \"prerelease\": false }";
+            status.Text = string.Empty;
+            await form.checkForNewerRelease();
+            Check(newVersionMenu.Available, "a newer release: the link is shown");
+            CheckEqual("Update available: v.99.0", newVersionMenu.Text, "it names the release");
+            await WaitUntil(() => status.Text.Contains("v.99.0"), "the status line to say v.99.0 is out");
+            Check(true, "and the status line says it is out: \"" + status.Text + "\"");
+            pagesOpened.Clear();
+            newVersionMenu.PerformClick();
+            CheckEqual(ReleaseCheck.DownloadPage, pagesOpened.SingleOrDefault(), "a click opens the download page");
+
+            network.LatestRelease = null;
+            settings.AllowWebDataFetch = false;
 
             Say("== An Xbox save that cannot be read");
             ListBox profiles = Field<ListBox>(form, "xboxProfileListBox");

@@ -251,7 +251,7 @@ namespace GPSaveConverter
             {
                 DialogResult res;
                 do {
-                    res = MessageBox.Show(this, "Xbox Save File Converter can lookup save file locations online from pcgamingwiki.com." + Environment.NewLine + Environment.NewLine + "Do you allow this? (Can be changed any time in preferences)", "Allow internet access?", MessageBoxButtons.YesNo);
+                    res = MessageBox.Show(this, "Xbox Save File Converter can look up save file locations on pcgamingwiki.com, download new file translations from GitHub, and check there for a newer version of itself." + Environment.NewLine + Environment.NewLine + "Do you allow this? (Can be changed any time in preferences)", "Allow internet access?", MessageBoxButtons.YesNo);
                 }while (res == DialogResult.Cancel);
                 Settings.AllowWebDataFetch = res == DialogResult.Yes;
                 Settings.FirstRun = false;
@@ -261,6 +261,9 @@ namespace GPSaveConverter
 
         private async void SaveFileConverterForm_Shown(object sender, EventArgs e)
         {
+            // Asked while the rest starts up, so that a slow answer does not hold up the list of games.
+            Task releaseCheck = checkForNewerRelease();
+
             await Library.GameLibrary.Initialize();
 
             if (Library.GameLibrary.Default.Version.CompareTo(Library.GameLibrary.UserLibraryVersion) > 0)
@@ -281,6 +284,37 @@ namespace GPSaveConverter
             this.packagesDataGridView.Height = Math.Max(252, gameInfo.Length * 75 + 10);
 
             this.packagesDataGridView.DataSource = gameInfo;
+
+            await releaseCheck;
+        }
+
+        /// <summary>
+        /// If internet access is allowed, asks GitHub whether a newer release is out. If one is, a
+        /// link to it shows at the right of the menu bar.
+        /// </summary>
+        internal async Task checkForNewerRelease()
+        {
+            if (!Settings.AllowWebDataFetch)
+            {
+                return;
+            }
+
+            string thisVersion = ErrorReport.Version();
+            string newer = await Task.Run(() => ReleaseCheck.NewerRelease(Library.GameLibrary.HttpClient, thisVersion));
+
+            this.newVersionToolStripMenuItem.Visible = newer != null;
+            if (newer != null)
+            {
+                this.newVersionToolStripMenuItem.Text = "Update available: " + newer;
+                this.newVersionToolStripMenuItem.ToolTipText = "Opens the download page for " + newer + " in your browser.";
+                this.newVersionToolStripMenuItem.Font = new Font(this.menuStrip1.Font, FontStyle.Bold);
+                logger.Info("A newer version, {0}, is out.", newer);
+            }
+        }
+
+        private void newVersionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenWebPage(ReleaseCheck.DownloadPage);
         }
 
         private void SaveFileConverterForm_FormClosing(object sender, FormClosingEventArgs e)

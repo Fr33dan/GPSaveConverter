@@ -38,6 +38,7 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 | `GPSaveConverter/SaveFileConverterForm.cs` | The one main window |
 | `GPSaveConverter/BackupsForm.cs` | The **File ▸ Backups** window |
 | `GPSaveConverter/ErrorReport.cs` | Shows an error nothing handled in a window with details to copy into an issue |
+| `GPSaveConverter/ReleaseCheck.cs` | Asks GitHub whether a newer release is out, for the **Update available** link in the menu bar |
 | `GPSaveConverter/Library/PCGameWiki.cs` | Looks up a game's save folder on pcgamingwiki.com when the library has none |
 | `GPSaveConverter/Interfaces/` | Seams for file system, registry, HTTP, settings and PowerShell |
 | `GPSaveConverter/Resources/GameLibrary.json` | The game library |
@@ -139,6 +140,8 @@ At most one release a day. A fix merged on a day that already had a release wait
 3. The maintainer reads the generated notes and publishes the draft. Nothing is public before that.
 
 The same workflow can be run by hand from the Actions tab to check the build without making a release.
+
+Publishing is also what tells users. A copy of the app that may use the internet asks GitHub for the newest release when it starts (`ReleaseCheck`). If that release is newer than the copy, **Update available** shows at the right of the menu bar and opens the download page. GitHub leaves drafts and pre-releases out of that answer, so a build that is only for trying out goes up as a pre-release.
 
 ## GitHub issues and PRs
 
