@@ -475,6 +475,12 @@ namespace GPSaveConverter.Library
                 return null;
             }
 
+            // A save opened from a folder picked by hand may be a backup or someone else's. It is only read.
+            if (createOrUpdate && index.IsPickedFolder)
+            {
+                throw new InvalidOperationException("Files are copied from an Xbox save opened from a folder picked by hand, never to it.");
+            }
+
             FileTranslation t = findTranslation(file, index.XboxProfileID);
 
             Xbox.XboxFileInfo matchedFile = null;

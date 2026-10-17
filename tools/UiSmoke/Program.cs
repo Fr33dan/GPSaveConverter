@@ -1121,6 +1121,67 @@ namespace GPSaveConverter.UiSmoke
             network.LatestRelease = null;
             settings.AllowWebDataFetch = false;
 
+            Say("== File > Open Xbox Save Folder: a copy of the save is opened and copied from, and nothing is written to it (#138)");
+            ToolStripMenuItem openFolderMenu = Field<ToolStripMenuItem>(form, "openXboxSaveFolderToolStripMenuItem");
+            Label xboxLabel = Field<Label>(form, "xboxFileLabel");
+            Button exploreXbox = Field<Button>(form, "viewXboxFilesButton");
+            ListBox xboxProfiles = Field<ListBox>(form, "xboxProfileListBox");
+            Func<XboxContainerIndex> openSave = () => Field<XboxContainerIndex>(form, "currentContainer");
+            Check(openFolderMenu.Enabled, "the menu item is on once the library is loaded");
+            // The window's folder picker cannot be worked from here. These steps start where it ends.
+            string copies = Path.Combine(Path.GetDirectoryName(save.BackupFolder), "C");
+            Directory.CreateDirectory(Path.Combine(copies, "empty"));
+
+            boxesBefore = responder.Transcript.Count;
+            await form.openXboxSaveFolder(Path.Combine(copies, "empty"));
+            await WaitUntil(() => !responder.AnyOpen(), "the notice about the empty folder");
+            Check(responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Open Xbox save folder]") && t.Contains("There is no Xbox save in")), "a folder with no save in it: the user is told what to pick");
+            Check(!openSave().IsPickedFolder, "and the Xbox save open is still the Xbox app's");
+
+            string keptCopy = Path.Combine(copies, "kept", Path.GetFileName(save.ProfileFolder));
+            CopyFolder(save.ProfileFolder, keptCopy);
+            SortedDictionary<string, string> xboxBeforePicking = FolderContents.Read(save.ProfileFolder);
+            string steamSlot0 = File.ReadAllText(Path.Combine(save.NonXboxFolder, "saveFile0.sav"));
+            await form.openXboxSaveFolder(Path.Combine(copies, "kept"));
+            await WaitUntil(() => openSave().IsPickedFolder && xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "the save in the copy");
+            Check(openSave().getFileList().All(f => f.getFilePath().StartsWith(keptCopy)), "the folder above the copy was picked: the copy is the Xbox save open");
+            CheckEqual(package, form.ActiveGame.PackageName, "the game is the one the copy's index names");
+            CheckEqual(FakeXboxSave.ProfileID, xboxProfiles.SelectedItem as string, "the profile is read from the copy's folder name");
+            CheckEqual("Xbox Save Files: from a folder you picked, read only", xboxLabel.Text, "the label over the Xbox files says where they are from");
+            Check(xboxLabel.Right < exploreXbox.Left, "and ends before the Explore Xbox Files button");
+
+            // Told apart from the Xbox app's own copy of the file by what is in it.
+            File.WriteAllText(openSave().getFileList().First(f => f.FileID == "SaveSlot0").getFilePath(), "kept slot 0");
+            foreach (DataGridViewRow row in xboxFiles.Rows)
+            {
+                row.Selected = ((XboxFileInfo)row.DataBoundItem).FileID == "SaveSlot0";
+            }
+            status.Text = string.Empty;
+            selectionFromXbox.PerformClick();
+            await WaitUntil(() => status.Text.StartsWith("Transfer complete") && !responder.AnyOpen(), "the copy from the picked save");
+            CheckEqual("kept slot 0", File.ReadAllText(Path.Combine(save.NonXboxFolder, "saveFile0.sav")), "copying from Xbox takes the file from the picked save");
+
+            SortedDictionary<string, string> copyBefore = FolderContents.Read(keptCopy);
+            boxesBefore = responder.Transcript.Count;
+            status.Text = string.Empty;
+            allToXbox.PerformClick();
+            await WaitUntil(() => status.Text == "Nothing copied" && !responder.AnyOpen(), "the transfer to the picked save to be refused");
+            Check(responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Copy to Xbox]") && t.Contains("never to it") && t.Contains("select the game in the list")), "copying to Xbox is refused, and the user is told how to copy to the Xbox app's save");
+            Check(!responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Are you sure?]")), "before anything else is asked");
+            CheckSame(copyBefore, FolderContents.Read(keptCopy), "the picked save is untouched");
+            CheckSame(xboxBeforePicking, FolderContents.Read(save.ProfileFolder), "and so is the Xbox app's save");
+
+            SaveBackup xboxBackup = store.List(package).FirstOrDefault(b => b.Side == BackupSide.Xbox);
+            Check(xboxBackup != null, "a backup of the Xbox save is there from the transfers before");
+            await form.openXboxSaveFolder(xboxBackup.Folder);
+            await WaitUntil(() => openSave().xboxProfileFolder == xboxBackup.FilesFolder, "the save in the backup");
+            CheckEqual(FakeXboxSave.ProfileID, xboxProfiles.SelectedItem as string, "a backup the tool made opens too, with the profile its record names");
+
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => !openSave().IsPickedFolder && xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "the Xbox app's save again");
+            CheckEqual("Xbox Save Files:", xboxLabel.Text, "selecting the game in the list goes back to the Xbox app's save");
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "saveFile0.sav"), steamSlot0);
+
             Say("== An Xbox save that cannot be read");
             ListBox profiles = Field<ListBox>(form, "xboxProfileListBox");
             string indexFile = Path.Combine(save.ProfileFolder, "containers.index");
@@ -1150,6 +1211,19 @@ namespace GPSaveConverter.UiSmoke
             Check(lastWindow.Contains(ErrorReport.UnexpectedProblem), "the window says the tool did not expect the problem");
             Check(lastWindow.Contains("DirectoryNotFoundException") && lastWindow.Contains("Game: Missing.Game_0000000000000"), "its details name the error and the game");
             Check(form.Enabled && !form.IsDisposed, "the main window is still there and usable");
+        }
+
+        private static void CopyFolder(string from, string to)
+        {
+            Directory.CreateDirectory(to);
+            foreach (string file in Directory.GetFiles(from))
+            {
+                File.Copy(file, Path.Combine(to, Path.GetFileName(file)));
+            }
+            foreach (string folder in Directory.GetDirectories(from))
+            {
+                CopyFolder(folder, Path.Combine(to, Path.GetFileName(folder)));
+            }
         }
 
         /// <summary>Selects a game the way a click on it in the package list does.</summary>

@@ -33,6 +33,7 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 | `GPSaveConverter/Library/TranslationSuggester.cs` | Works out a translation from the names of a game's files on both sides |
 | `GPSaveConverter/TranslationRequest.cs` | Builds the GitHub address for **File ▸ Request a Translation** |
 | `GPSaveConverter/Xbox/` | Reads and writes the `wgs` container format (`containers.index`, `container.N`) |
+| `GPSaveConverter/Xbox/PickedXboxSave.cs` | Finds the Xbox save in a folder picked with **File ▸ Open Xbox Save Folder** |
 | `GPSaveConverter/SaveBackups/` | Backs up save files before a transfer and restores them |
 | `GPSaveConverter/TransferLoop.cs` | Copies a list of files, with abort, retry or skip after a failure |
 | `GPSaveConverter/SaveFileConverterForm.cs` | The one main window |
@@ -81,6 +82,7 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 - Copying to Xbox: the whole profile folder is copied before the first file is written. Restoring makes the folder identical to that copy, so it deletes whatever was added since. `SaveBackup.Verify` therefore refuses any folder that is not `...\Packages\<package>\SystemAppData\wgs\<profile>`. Do not loosen that check.
 - Copying from Xbox: `GameInfo.getNonXboxFileVersion` calls `SaveBackup.Preserve` just before it writes a file. Restoring puts those files back and removes the ones the transfer created. It touches no other file. New code that writes into the non-Xbox save folder must call `Preserve` first as well.
 - A restore backs up what it replaces, so it can be undone the same way.
+- An Xbox save opened with **File ▸ Open Xbox Save Folder** is only read. It may be a backup or someone else's save, and the check above refuses to back it up. `XboxContainerIndex.IsPickedFolder` stops every write to it: the window refuses a transfer to it, and `GameInfo.getXboxFileVersion`, `CreateContainer` and `UpdateIndex` throw. Keep every one of those guards.
 - The folder is called `SaveBackups` because `.gitignore` ignores any folder named `Backup*`.
 
 **`containers.index` is also the Xbox app's record of what it has uploaded.** The game never reads that file. The Xbox services do, when the game starts and when it closes, and they act on what it says. So what the tool writes there has to be what those services would have written themselves.

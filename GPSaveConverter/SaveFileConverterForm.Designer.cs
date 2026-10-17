@@ -80,6 +80,7 @@
             this.saveGameProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadGameProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editNonXboxLocationToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.openXboxSaveFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportGameLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copySaveFileTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -578,6 +579,7 @@
             this.saveGameProfileToolStripMenuItem,
             this.loadGameProfileToolStripMenuItem,
             this.editNonXboxLocationToolStripMenuItem1,
+            this.openXboxSaveFolderToolStripMenuItem,
             this.copySaveFileTablesToolStripMenuItem,
             this.suggestTranslationToolStripMenuItem,
             this.requestTranslationToolStripMenuItem,
@@ -613,7 +615,16 @@
             this.editNonXboxLocationToolStripMenuItem1.Size = new System.Drawing.Size(214, 22);
             this.editNonXboxLocationToolStripMenuItem1.Text = "Edit non-Xbox Location";
             this.editNonXboxLocationToolStripMenuItem1.Click += new System.EventHandler(this.editNonXboxLocationToolStripMenuItem_Click);
-            // 
+            //
+            // openXboxSaveFolderToolStripMenuItem
+            //
+            this.openXboxSaveFolderToolStripMenuItem.Enabled = false;
+            this.openXboxSaveFolderToolStripMenuItem.Name = "openXboxSaveFolderToolStripMenuItem";
+            this.openXboxSaveFolderToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.openXboxSaveFolderToolStripMenuItem.Text = "Open Xbox Save Folder...";
+            this.openXboxSaveFolderToolStripMenuItem.ToolTipText = "Open an Xbox save kept somewhere else, such as a copy of one, to copy files from it.";
+            this.openXboxSaveFolderToolStripMenuItem.Click += new System.EventHandler(this.openXboxSaveFolderToolStripMenuItem_Click);
+            //
             // exportGameLibraryToolStripMenuItem
             // 
             this.exportGameLibraryToolStripMenuItem.Enabled = false;
@@ -901,6 +912,7 @@
         private System.Windows.Forms.ToolStripMenuItem saveGameProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadGameProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportGameLibraryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openXboxSaveFolderToolStripMenuItem;
         private System.Windows.Forms.Label fileTranslationsMarkerLabel;
         private System.Windows.Forms.ToolStripMenuItem creditsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newVersionToolStripMenuItem;
