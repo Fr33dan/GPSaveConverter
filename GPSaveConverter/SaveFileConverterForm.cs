@@ -376,6 +376,7 @@ namespace GPSaveConverter
             this.xboxFileLabel.Text = XboxFilesLabel;
             this.fileTranslationListBox.Items.Clear();
             this.fileTranslationPropertyGrid.SelectedObject = null;
+            this.editTranslationButton.Enabled = false;
 
             this.promptNonXboxLocationButton.Enabled = false;
             this.fileTranslationListBox.Enabled = false;
@@ -1222,6 +1223,48 @@ namespace GPSaveConverter
         private void fileTranslationListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.fileTranslationPropertyGrid.SelectedObject = this.fileTranslationListBox.SelectedItem;
+            this.editTranslationButton.Enabled = this.fileTranslationListBox.SelectedItem != null;
+        }
+
+        /// <summary>
+        /// Opens the selected translation in plain words. On OK the changed one takes its place, in
+        /// the game's list and in the window's.
+        /// </summary>
+        private void editTranslationButton_Click(object sender, EventArgs e)
+        {
+            Library.FileTranslation selected = this.fileTranslationListBox.SelectedItem as Library.FileTranslation;
+            if (selected == null)
+            {
+                return;
+            }
+
+            Library.PlainTranslation words = Library.PlainTranslation.From(selected);
+            if (words == null)
+            {
+                MessageBox.Show(this, "This translation uses patterns that plain words cannot show, such as .* for any text. Change it in the list of its fields next to the translations.", "Edit translation");
+                return;
+            }
+
+            using (TranslationEditorForm editor = new TranslationEditorForm(words, listedXboxFiles(), listedNonXboxFiles(), xboxProfileForMatching()))
+            {
+                if (editor.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                // By reference: two translations can be equal, and only the one selected is replaced.
+                int inGame = ActiveGame.FileTranslations.FindIndex(t => ReferenceEquals(t, selected));
+                int inList = this.fileTranslationListBox.SelectedIndex;
+                if (inGame < 0 || inList < 0)
+                {
+                    return;
+                }
+                ActiveGame.FileTranslations[inGame] = editor.Translation;
+                this.fileTranslationListBox.Items[inList] = editor.Translation;
+                this.fileTranslationListBox.SelectedIndex = inList;
+                this.fileTranslationPropertyGrid.SelectedObject = editor.Translation;
+                logger.Info("The translation was changed.");
+            }
         }
 
         private void showFileTranslationsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1249,6 +1292,10 @@ namespace GPSaveConverter
             
             ActiveGame.FileTranslations.Add(newItem);
             fileTranslationListBox.Items.Add(newItem);
+
+            // Selected, so that its fields show and Edit... opens it. By place: it is equal to any
+            // other added this way, and selecting by item would pick the first of them.
+            fileTranslationListBox.SelectedIndex = fileTranslationListBox.Items.Count - 1;
         }
 
         private void removeTranslationButton_Click(object sender, EventArgs e)
@@ -1436,22 +1483,39 @@ namespace GPSaveConverter
             logger.Info("The translation request is open in your browser. Sending it there adds it to the project's issues on GitHub.");
         }
 
-        private void suggestTranslationToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>The Xbox files listed now, as the translation simulator takes them.</summary>
+        private List<Library.TranslationSimulator.XboxFile> listedXboxFiles()
         {
-            List<Library.TranslationSimulator.XboxFile> xboxFiles = this.xboxFilesTable.DataSource == null
+            return this.xboxFilesTable.DataSource == null
                 ? new List<Library.TranslationSimulator.XboxFile>()
                 : ((IEnumerable<Xbox.XboxFileInfo>)this.xboxFilesTable.DataSource).Select(f => new Library.TranslationSimulator.XboxFile(f.ContainerName1, f.ContainerName2, f.FileID)).ToList();
-            List<string> nonXboxFiles = this.nonXboxFilesTable.DataSource == null
+        }
+
+        /// <summary>The non-Xbox files listed now, as paths relative to the save folder.</summary>
+        private List<string> listedNonXboxFiles()
+        {
+            return this.nonXboxFilesTable.DataSource == null
                 ? new List<string>()
                 : ((IEnumerable<NonXboxFileInfo>)this.nonXboxFilesTable.DataSource).Select(f => f.RelativePath).ToList();
+        }
+
+        /// <summary>The profile ${XboxProfileID} stands for: the open one, or a stand-in when none is open.</summary>
+        private string xboxProfileForMatching()
+        {
+            return this.currentContainer == null ? Library.TranslationSimulator.XboxProfileID : this.currentContainer.XboxProfileID;
+        }
+
+        private void suggestTranslationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<Library.TranslationSimulator.XboxFile> xboxFiles = listedXboxFiles();
+            List<string> nonXboxFiles = listedNonXboxFiles();
             if (xboxFiles.Count == 0 || nonXboxFiles.Count == 0)
             {
                 MessageBox.Show(this, "A suggestion needs the files of both sides. Select your Xbox profile. If the non-Xbox list is empty, click Select non-Xbox Location and pick the folder the other version saves to.", "Suggest a translation");
                 return;
             }
 
-            string xboxProfileID = this.currentContainer == null ? Library.TranslationSimulator.XboxProfileID : this.currentContainer.XboxProfileID;
-            Library.TranslationSuggester.Suggestion suggestion = Library.TranslationSuggester.Suggest(xboxFiles, nonXboxFiles, xboxProfileID);
+            Library.TranslationSuggester.Suggestion suggestion = Library.TranslationSuggester.Suggest(xboxFiles, nonXboxFiles, xboxProfileForMatching());
             if (suggestion == null)
             {
                 MessageBox.Show(this, "None of the usual kinds of translation pairs this game's files by their names. File > Request a Translation asks for one on GitHub.", "Suggest a translation");
