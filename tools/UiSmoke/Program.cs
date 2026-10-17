@@ -1012,6 +1012,38 @@ namespace GPSaveConverter.UiSmoke
             settings.DefaultGameLibrary = libraryBefore;
             GameLibrary.Settings = settings;
 
+            Say("== File > Request a Translation: the GitHub form opens with both file lists, after a question");
+            ToolStripMenuItem requestMenu = Field<ToolStripMenuItem>(form, "requestTranslationToolStripMenuItem");
+            ToolStripMenuItem copyTablesMenu = Field<ToolStripMenuItem>(form, "copySaveFileTablesToolStripMenuItem");
+            // Stand-ins: the clipboard is the user's, and no browser may open.
+            List<string> pagesOpened = new List<string>();
+            List<string> copied = new List<string>();
+            form.OpenWebPage = address => pagesOpened.Add(address);
+            form.SetClipboardText = text => copied.Add(text);
+            Check(requestMenu.Enabled, "the menu item is on once a game is selected");
+
+            responder.AnswerByTitle["Request a translation"] = Answer.No;
+            boxesBefore = responder.Transcript.Count;
+            requestMenu.PerformClick();
+            await WaitUntil(() => responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Request a translation]")) && !responder.AnyOpen(), "the question before the request");
+            CheckEqual(0, pagesOpened.Count, "answered No: no page is opened");
+            responder.AnswerByTitle.Remove("Request a translation");
+
+            boxesBefore = responder.Transcript.Count;
+            requestMenu.PerformClick();
+            await WaitUntil(() => pagesOpened.Count == 1 && !responder.AnyOpen(), "the request page");
+            string asked = responder.Transcript.Skip(boxesBefore).First(t => t.Contains("[Request a translation]"));
+            Check(asked.Contains("The request is public") && asked.Contains("filled in for you"), "the question says the request is public and comes filled in");
+            string page = Uri.UnescapeDataString(pagesOpened[0]);
+            Check(pagesOpened[0].StartsWith("https://github.com/Fr33dan/GPSaveConverter/issues/new?template=translation-request.yml&"), "answered Yes: the page is the translation request form");
+            Check(page.Contains("&game=Test Game&") && page.Contains("| SaveGame |  | SaveSlot0 |") && page.Contains("| saveFile0.sav |"), "it is filled in with the game and both file lists");
+            string hiddenLocation = "Non-Xbox save location: " + TranslationRequest.HideUserFolders(form.ActiveGame.BaseNonXboxSaveLocation, TranslationRequest.UserFolders());
+            Check(page.Contains(hiddenLocation), "the save folder is written with the user's own folders hidden: \"" + hiddenLocation + "\"");
+            CheckEqual(0, copied.Count, "nothing is put on the clipboard, as the lists fit in the page");
+
+            copyTablesMenu.PerformClick();
+            Check(copied.Count == 1 && copied[0].Contains("| saveFile0.sav |") && copied[0].Contains(hiddenLocation), "File > Copy Save File Table(s) copies the same tables, folders hidden");
+
             Say("== An Xbox save that cannot be read");
             ListBox profiles = Field<ListBox>(form, "xboxProfileListBox");
             string indexFile = Path.Combine(save.ProfileFolder, "containers.index");

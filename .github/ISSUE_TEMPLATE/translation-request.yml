@@ -1,0 +1,56 @@
+name: Request a translation
+description: Ask for a file translation for a game the tool cannot copy yet.
+title: "Translation request: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The quickest way to fill this in is from the tool: select the game, then choose **File ▸ Request a Translation**. That opens this form with the game and its file lists filled in.
+
+        Older versions do not have that menu item. Select the game in the tool, choose **File ▸ Copy Save File Table(s)**, and paste the result into **Save file tables** below.
+
+        Check the [Game Compatibility](https://github.com/Fr33dan/GPSaveConverter/wiki/Game-Compatibility) list first. Some games' saves do not carry over, whatever the translation.
+  - type: input
+    id: game
+    attributes:
+      label: Game
+      description: The game's name, as the tool lists it.
+    validations:
+      required: true
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Which way are you copying?
+      options:
+        - From Game Pass to another store
+        - From another store to Game Pass
+    validations:
+      required: true
+  - type: dropdown
+    id: store
+    attributes:
+      label: The other store
+      options:
+        - Steam
+        - Epic Games Store
+        - GOG
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: tables
+    attributes:
+      label: Save file tables
+      description: What the tool lists for the game on both sides. A translation needs both lists. If the non-Xbox list is empty, click **Select non-Xbox Location** in the tool and pick the folder the other version saves to.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Tool version
+      placeholder: "0.4.17.0"
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: What you have tried already, or an error the tool showed.

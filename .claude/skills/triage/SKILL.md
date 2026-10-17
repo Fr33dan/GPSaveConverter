@@ -76,6 +76,8 @@ To write one you need four things:
 
 The app produces all four. The reporter selects the game, then chooses **File ▸ Copy Save File Table(s)** and pastes the result. If any of the four is missing, ask for that paste and label `needs-info`. Do not guess file names.
 
+From v.0.4.17, **File ▸ Request a Translation** opens a new issue on the translation request form (`.github/ISSUE_TEMPLATE/translation-request.yml`) with the game, the version and the tables filled in. Such an issue is titled "Translation request: <game>", says which way the reporter is copying and to which store, and arrives with no label, like any other. The tool writes the user's own folders as `%LOCALAPPDATA%`, `%APPDATA%` and `%USERPROFILE%` in the tables it produces, so the location line no longer carries a user name.
+
 A paste with the Xbox table filled in and "Non-Xbox save location:" empty means the tool has no folder for the game yet. The reporter has to click **Select non-Xbox Location**, pick the folder with the other version's saves, and paste again. Versions up to v.0.4.12 found no folder on pcgamingwiki.com for a game whose name the Xbox app writes differently from the wiki, such as `FINAL FANTASY VII REMAKE INTERGRADE` (#180), so this is common and not the reporter's mistake.
 
 Do not leave them to find that folder. Look the game up on pcgamingwiki.com, and put the folder from its "Save game data location" section in the same reply, with a link to the page as the source. Say why the tool showed none, if you know.

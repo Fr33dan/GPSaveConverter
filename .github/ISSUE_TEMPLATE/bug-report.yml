@@ -1,0 +1,31 @@
+name: Report a bug
+description: The tool crashed, showed an error, or did something wrong.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the tool showed an error window, press **Copy Details** in it and paste the text below. It names the version, the Windows build and the selected game.
+
+        If a game needs a file translation, use **Request a translation** instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Error details
+      description: The text from **Copy Details** in the error window, if one came up.
+      render: text
+  - type: input
+    id: game
+    attributes:
+      label: Game
+  - type: input
+    id: version
+    attributes:
+      label: Tool version
+      description: The error details name it. Otherwise right-click GPSaveConverter.exe and choose Properties ▸ Details.
