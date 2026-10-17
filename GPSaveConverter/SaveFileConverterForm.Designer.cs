@@ -95,6 +95,7 @@
             this.fileTranslationPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.removeTranslationButton = new System.Windows.Forms.Button();
             this.addTranslationButton = new System.Windows.Forms.Button();
+            this.editTranslationButton = new System.Windows.Forms.Button();
             this.fileTranslationListBox = new System.Windows.Forms.ListBox();
             this.fileTranslationsMarkerLabel = new System.Windows.Forms.Label();
             this.nonXboxMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -716,6 +717,7 @@
             this.fileTranslationPanel.Controls.Add(this.fileTranslationPropertyGrid);
             this.fileTranslationPanel.Controls.Add(this.removeTranslationButton);
             this.fileTranslationPanel.Controls.Add(this.addTranslationButton);
+            this.fileTranslationPanel.Controls.Add(this.editTranslationButton);
             this.fileTranslationPanel.Controls.Add(this.fileTranslationListBox);
             this.fileTranslationPanel.Controls.Add(this.fileTranslationsMarkerLabel);
             this.fileTranslationPanel.Location = new System.Drawing.Point(9, 326);
@@ -755,7 +757,20 @@
             this.addTranslationButton.Text = "+";
             this.addTranslationButton.UseVisualStyleBackColor = true;
             this.addTranslationButton.Click += new System.EventHandler(this.addTranslationButton_Click);
-            // 
+            //
+            // editTranslationButton
+            //
+            this.editTranslationButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.editTranslationButton.Enabled = false;
+            this.editTranslationButton.Location = new System.Drawing.Point(27, 194);
+            this.editTranslationButton.Name = "editTranslationButton";
+            this.editTranslationButton.Size = new System.Drawing.Size(78, 23);
+            this.editTranslationButton.TabIndex = 5;
+            this.editTranslationButton.Text = "Edit...";
+            this.buttonsToolTip.SetToolTip(this.editTranslationButton, "Change the selected translation in plain words, and see which files it pairs");
+            this.editTranslationButton.UseVisualStyleBackColor = true;
+            this.editTranslationButton.Click += new System.EventHandler(this.editTranslationButton_Click);
+            //
             // fileTranslationListBox
             // 
             this.fileTranslationListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -766,6 +781,7 @@
             this.fileTranslationListBox.Size = new System.Drawing.Size(132, 173);
             this.fileTranslationListBox.TabIndex = 0;
             this.fileTranslationListBox.SelectedIndexChanged += new System.EventHandler(this.fileTranslationListBox_SelectedIndexChanged);
+            this.fileTranslationListBox.DoubleClick += new System.EventHandler(this.editTranslationButton_Click);
             // 
             // fileTranslationsMarkerLabel
             // 
@@ -906,6 +922,7 @@
         private System.Windows.Forms.PropertyGrid fileTranslationPropertyGrid;
         private System.Windows.Forms.Button removeTranslationButton;
         private System.Windows.Forms.Button addTranslationButton;
+        private System.Windows.Forms.Button editTranslationButton;
         private System.Windows.Forms.ListBox fileTranslationListBox;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showFileTranslationsToolStripMenuItem;

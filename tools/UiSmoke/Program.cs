@@ -1182,6 +1182,79 @@ namespace GPSaveConverter.UiSmoke
             CheckEqual("Xbox Save Files:", xboxLabel.Text, "selecting the game in the list goes back to the Xbox app's save");
             File.WriteAllText(Path.Combine(save.NonXboxFolder, "saveFile0.sav"), steamSlot0);
 
+            Say("== Edit... in the translations panel: a translation in plain words, with the pairs it makes shown as the names are typed");
+            ToolStripMenuItem showTranslationsMenu = Field<ToolStripMenuItem>(form, "showFileTranslationsToolStripMenuItem");
+            Button editTranslation = Field<Button>(form, "editTranslationButton");
+            List<FileTranslation> translationsBefore = form.ActiveGame.FileTranslations.ToList();
+            FileTranslation slotTranslation = translationsBefore[0];
+            showTranslationsMenu.PerformClick();
+            await WaitUntil(() => editTranslation.Visible, "the translations panel");
+            Check(!editTranslation.Enabled, "Edit... is off while no translation is selected");
+            translationList.SelectedIndex = 0;
+            Check(editTranslation.Enabled, "and on once one is");
+
+            string editorLayout = null;
+            Task editing = DriveTranslationEditor(async editor =>
+            {
+                editorLayout = LayoutProblems(editor);
+                TextBox fileBox = Field<TextBox>(editor, "fileBox");
+                ListBox previewList = Field<ListBox>(editor, "previewList");
+                Label summary = Field<Label>(editor, "summaryLabel");
+                Label problemLabel = Field<Label>(editor, "problemLabel");
+                Button ok = Field<Button>(editor, "okButton");
+                CheckEqual("SaveGame |  | SaveSlot{FileSlot} | saveFile{FileSlot}.sav",
+                    Field<TextBox>(editor, "container1Box").Text + " | " + Field<TextBox>(editor, "container2Box").Text + " | " + Field<TextBox>(editor, "blobBox").Text + " | " + fileBox.Text,
+                    "the names are shown as they are written, with the translation's own placeholder");
+                Check(Field<Label>(editor, "introLabel").Text.Contains("{FileSlot}"), "and the words above them name that placeholder");
+                CheckEqual("SaveGame / SaveSlot0   <->   saveFile0.sav | SaveGame / SaveSlot3   <->   saveFile3.sav | saveFile7.sav   ->   SaveGame / SaveSlot7   (new on Xbox)",
+                    string.Join(" | ", previewList.Items.Cast<string>()), "it lists the pairs it makes of the files listed now, and the file it would make on Xbox");
+                CheckEqual("It covers 2 of the 2 Xbox files and 3 of the 3 files on this PC.", summary.Text, "and says how many it covers");
+
+                fileBox.Text = "steam{FileSlot}.sav";
+                Check(previewList.Items.Cast<string>().Contains("SaveGame / SaveSlot0   ->   steam0.sav   (new on this PC)"), "a changed name changes the list at once");
+                CheckEqual("It covers 2 of the 2 Xbox files and 0 of the 3 files on this PC.", summary.Text, "and the count");
+
+                fileBox.Text = "steam{slot}.sav";
+                Check(problemLabel.Text.StartsWith("{slot} is not a placeholder.") && !ok.Enabled, "a placeholder it does not know is named, and OK is off: \"" + problemLabel.Text + "\"");
+
+                Field<Button>(editor, "cancelButton").PerformClick();
+                await Task.Yield();
+            });
+            editTranslation.PerformClick();
+            await editing;
+            CheckEqual(string.Empty, editorLayout, "nothing in the editor sticks out of it or overlaps");
+            Check(ReferenceEquals(slotTranslation, form.ActiveGame.FileTranslations[0]) && slotTranslation.NonXboxFilename == "saveFile${FileSlot}.sav", "Cancel: the translation is as it was");
+
+            editing = DriveTranslationEditor(async editor =>
+            {
+                Field<TextBox>(editor, "fileBox").Text = "steam{FileSlot}.sav";
+                Field<Button>(editor, "okButton").PerformClick();
+                await Task.Yield();
+            });
+            translationList.SelectedIndex = 0;
+            editTranslation.PerformClick();
+            await editing;
+            FileTranslation edited = form.ActiveGame.FileTranslations[0];
+            CheckEqual("SaveSlot${FileSlot} | steam${FileSlot}.sav | (?<FileSlot>[0-9]+)", edited.XboxFileID + " | " + edited.NonXboxFilename + " | " + string.Join(",", edited.NamedRegexGroups), "OK: the changed translation takes the old one's place, with its placeholder kept");
+            Check(ReferenceEquals(edited, translationList.Items[0]) && !form.ActiveGame.FileTranslations.Contains(slotTranslation), "in the game's list and in the panel's");
+            CheckEqual(string.Empty, await MatchOnXbox(nonXboxFiles, xboxFiles, "saveFile0.sav"), "saveFile0.sav no longer matches an Xbox file");
+
+            FileTranslation pattern = new FileTranslation { NamedRegexGroups = new string[0], ContainerName1 = "Save.*", ContainerName2 = "", XboxFileID = "data", NonXboxFilename = "save.dat" };
+            form.ActiveGame.FileTranslations.Insert(0, pattern);
+            translationList.Items.Insert(0, pattern);
+            translationList.SelectedIndex = 0;
+            boxesBefore = responder.Transcript.Count;
+            editTranslation.PerformClick();
+            await WaitUntil(() => !responder.AnyOpen(), "the answer about the pattern");
+            Check(responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Edit translation]") && t.Contains("plain words cannot show")), "a translation with a pattern in it is not opened, and the user is told why");
+            Check(!Application.OpenForms.OfType<TranslationEditorForm>().Any(), "and no editor opens");
+
+            form.ActiveGame.FileTranslations.Clear();
+            form.ActiveGame.FileTranslations.AddRange(translationsBefore);
+            showTranslationsMenu.PerformClick();
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3 && translationList.Items.Count == 1, "the game with its own translation again");
+
             Say("== An Xbox save that cannot be read");
             ListBox profiles = Field<ListBox>(form, "xboxProfileListBox");
             string indexFile = Path.Combine(save.ProfileFolder, "containers.index");
@@ -1322,6 +1395,27 @@ namespace GPSaveConverter.UiSmoke
             transfer.PerformClick();
             await WaitUntil(() => (refused() && !responder.AnyOpen()) || status.Text.StartsWith("Transfer complete"), "the transfer, or its refusal");
             return refused();
+        }
+
+        /// <summary>
+        /// Works the translation editor while the button that opened it is waiting for it to close.
+        /// </summary>
+        private static async Task DriveTranslationEditor(Func<TranslationEditorForm, Task> work)
+        {
+            TranslationEditorForm editor = null;
+            try
+            {
+                await WaitUntil(() => Application.OpenForms.OfType<TranslationEditorForm>().Any(f => f.Visible), "the translation editor");
+                editor = Application.OpenForms.OfType<TranslationEditorForm>().Single();
+                await work(editor);
+            }
+            finally
+            {
+                if (editor != null && !editor.IsDisposed && editor.Visible)
+                {
+                    editor.Close();
+                }
+            }
         }
 
         /// <summary>
