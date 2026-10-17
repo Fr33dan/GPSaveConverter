@@ -1044,6 +1044,50 @@ namespace GPSaveConverter.UiSmoke
             copyTablesMenu.PerformClick();
             Check(copied.Count == 1 && copied[0].Contains("| saveFile0.sav |") && copied[0].Contains(hiddenLocation), "File > Copy Save File Table(s) copies the same tables, folders hidden");
 
+            Say("== File > Suggest a Translation: nothing when no names agree, and one that pairs the files when they do");
+            ToolStripMenuItem suggestMenu = Field<ToolStripMenuItem>(form, "suggestTranslationToolStripMenuItem");
+            ListBox translationList = Field<ListBox>(form, "fileTranslationListBox");
+            List<FileTranslation> ownTranslations = form.ActiveGame.FileTranslations.ToList();
+            form.ActiveGame.FileTranslations.Clear();
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "both lists, with the game's translation set aside");
+            Check(suggestMenu.Enabled, "the menu item is on once a game is selected");
+
+            boxesBefore = responder.Transcript.Count;
+            suggestMenu.PerformClick();
+            await WaitUntil(() => responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Suggest a translation]")) && !responder.AnyOpen(), "the answer to the first suggestion");
+            Check(responder.Transcript.Skip(boxesBefore).First(t => t.Contains("[Suggest a translation]")).Contains("None of the usual kinds"), "SaveSlot0 and saveFile0.sav share no name: nothing is suggested");
+            CheckEqual(0, form.ActiveGame.FileTranslations.Count, "and nothing is added");
+
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "SaveSlot0"), "steam copy of slot 0");
+            File.WriteAllText(Path.Combine(save.NonXboxFolder, "SaveSlot3"), "steam copy of slot 3");
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 5, "the lists with SaveSlot0 and SaveSlot3 in them");
+
+            responder.AnswerByTitle["Suggest a translation"] = Answer.No;
+            boxesBefore = responder.Transcript.Count;
+            suggestMenu.PerformClick();
+            await WaitUntil(() => responder.Transcript.Skip(boxesBefore).Any(t => t.Contains("[Suggest a translation]")) && !responder.AnyOpen(), "the suggestion");
+            responder.AnswerByTitle.Remove("Suggest a translation");
+            string suggested = responder.Transcript.Skip(boxesBefore).First(t => t.Contains("[Suggest a translation]"));
+            Check(suggested.Contains("pairs 2 of the 2 Xbox files") && suggested.Contains("SaveGame / SaveSlot0   with   SaveSlot0") && suggested.Contains("SaveGame / SaveSlot3   with   SaveSlot3"), "the question shows the pairs it found");
+            Check(suggested.Contains("It also covers 3 files on this PC that the Xbox save has nothing for"), "and says how many other files it covers that have no Xbox copy");
+            CheckEqual(0, form.ActiveGame.FileTranslations.Count, "answered No: nothing is added");
+
+            suggestMenu.PerformClick();
+            await WaitUntil(() => form.ActiveGame.FileTranslations.Count == 1 && !responder.AnyOpen(), "the suggestion to be added");
+            FileTranslation added = form.ActiveGame.FileTranslations[0];
+            CheckEqual("${FileName} | SaveGame |  | ${FileName}", added.NonXboxFilename + " | " + added.ContainerName1 + " | " + added.ContainerName2 + " | " + added.XboxFileID, "answered Yes: the translation is added to the game's");
+            CheckEqual(1, translationList.Items.Count, "and the translations panel lists it");
+            CheckEqual("SaveSlot3", await MatchOnXbox(nonXboxFiles, xboxFiles, "SaveSlot3"), "with it, SaveSlot3 is matched to its Xbox file");
+
+            form.ActiveGame.FileTranslations.Clear();
+            form.ActiveGame.FileTranslations.AddRange(ownTranslations);
+            File.Delete(Path.Combine(save.NonXboxFolder, "SaveSlot0"));
+            File.Delete(Path.Combine(save.NonXboxFolder, "SaveSlot3"));
+            Select(form, packages, form.ActiveGame);
+            await WaitUntil(() => xboxFiles.RowCount == 2 && nonXboxFiles.RowCount == 3, "the lists as they were");
+
             Say("== An Xbox save that cannot be read");
             ListBox profiles = Field<ListBox>(form, "xboxProfileListBox");
             string indexFile = Path.Combine(save.ProfileFolder, "containers.index");

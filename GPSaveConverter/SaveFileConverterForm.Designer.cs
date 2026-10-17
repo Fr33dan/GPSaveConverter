@@ -84,6 +84,7 @@
             this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copySaveFileTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.requestTranslationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.suggestTranslationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.backupsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showFileTranslationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -576,6 +577,7 @@
             this.loadGameProfileToolStripMenuItem,
             this.editNonXboxLocationToolStripMenuItem1,
             this.copySaveFileTablesToolStripMenuItem,
+            this.suggestTranslationToolStripMenuItem,
             this.requestTranslationToolStripMenuItem,
             this.backupsToolStripMenuItem,
             this.exportGameLibraryToolStripMenuItem,
@@ -642,6 +644,15 @@
             this.requestTranslationToolStripMenuItem.Text = "Request a Translation...";
             this.requestTranslationToolStripMenuItem.ToolTipText = "Ask for a file translation on GitHub, with this game's file lists filled in.";
             this.requestTranslationToolStripMenuItem.Click += new System.EventHandler(this.requestTranslationToolStripMenuItem_Click);
+            //
+            // suggestTranslationToolStripMenuItem
+            //
+            this.suggestTranslationToolStripMenuItem.Enabled = false;
+            this.suggestTranslationToolStripMenuItem.Name = "suggestTranslationToolStripMenuItem";
+            this.suggestTranslationToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.suggestTranslationToolStripMenuItem.Text = "Suggest a Translation...";
+            this.suggestTranslationToolStripMenuItem.ToolTipText = "Work out a file translation from the names of this game's files on both sides.";
+            this.suggestTranslationToolStripMenuItem.Click += new System.EventHandler(this.suggestTranslationToolStripMenuItem_Click);
             //
             // backupsToolStripMenuItem
             //
@@ -866,6 +877,7 @@
         private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copySaveFileTablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem requestTranslationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem suggestTranslationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem backupsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editNonXboxLocationToolStripMenuItem;
         private System.Windows.Forms.Panel fileTranslationPanel;

@@ -56,6 +56,7 @@ it out.
 - Files a transfer leaves out, in both directions: the question before the transfer names them under their reasons, one from the game's entry and one for a file no translation covers, and no error box comes up. When every selected file is left out, a notice says so, and nothing is asked or copied.
 - A game the library warns about: a notice gives its warnings when it is selected, once only. The question before a transfer gives the warnings for that direction, and leaves out a warning about the other one.
 - **File ▸ Request a Translation**: answered No, nothing opens. Answered Yes, the translation request form is opened with the game and both file lists, and the user's own folders are hidden in it. **Copy Save File Table(s)** copies the same tables. Stand-ins take the place of the browser and the clipboard.
+- **File ▸ Suggest a Translation**: with no names in common, nothing is suggested. With files named alike on both sides, the question shows the pairs and the files it would also cover. Answered No, nothing is added. Answered Yes, the translation is added first and the files match.
 - An Xbox save that cannot be read: the error window names the profile, and no profile stays open.
 - An error nothing handles: the error window comes up and the main window survives.
 
