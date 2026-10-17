@@ -311,6 +311,7 @@ namespace GPSaveConverter
             this.viewXboxFilesButton.Enabled = false;
             this.viewNonXboxFileButton.Enabled = false;
             this.copySaveFileTablesToolStripMenuItem.Enabled = false;
+            this.requestTranslationToolStripMenuItem.Enabled = false;
             GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Clear();
             GPSaveConverter.Library.GameLibrary.xboxFiles.Clear();
             GPSaveConverter.Library.GameLibrary.nonXboxFiles.Clear();
@@ -848,6 +849,7 @@ namespace GPSaveConverter
             this.loadGameProfileToolStripMenuItem.Enabled = true;
             this.editNonXboxLocationToolStripMenuItem1.Enabled = true;
             this.copySaveFileTablesToolStripMenuItem.Enabled = true;
+            this.requestTranslationToolStripMenuItem.Enabled = true;
             this.backupsToolStripMenuItem.Enabled = true;
             this.editNonXboxLocationToolStripMenuItem2.Enabled = true;
             this.copyPackageIDToolStripMenuItem.Enabled = true;
@@ -1219,7 +1221,74 @@ namespace GPSaveConverter
                 }
             }
         }
+        /// <summary>Opens a web page in the user's browser. The window test puts a stand-in here.</summary>
+        internal Action<string> OpenWebPage { get; set; } = address => System.Diagnostics.Process.Start(address);
+
+        /// <summary>Puts text on the clipboard. The window test puts a stand-in here, as the clipboard is the user's.</summary>
+        internal Action<string> SetClipboardText { get; set; } = text => Clipboard.SetText(text);
+
         private void copySaveFileTablesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            copyToClipboard(saveFileTables());
+        }
+
+        /// <returns>False if another program was holding the clipboard, which the user is told.</returns>
+        private bool copyToClipboard(string text)
+        {
+            try
+            {
+                SetClipboardText(text);
+                return true;
+            }
+            catch (System.Runtime.InteropServices.ExternalException)
+            {
+                MessageBox.Show(this, "Another program is using the clipboard, so nothing was copied. Try again in a moment.", "Clipboard in use");
+                return false;
+            }
+        }
+
+        private void requestTranslationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string tables = saveFileTables();
+            bool tablesIncluded;
+            string address = TranslationRequest.IssueAddress(ActiveGame.Name, ErrorReport.Version(), tables, out tablesIncluded);
+
+            StringBuilder question = new StringBuilder();
+            question.AppendLine("This opens a request for a file translation for " + ActiveGame.Name + " on GitHub, in your browser. The request is public. It lists the names of the game's save files and the folder they are in, with your user folder left out.");
+            question.AppendLine();
+            if (this.xboxFilesTable.RowCount == 0)
+            {
+                question.AppendLine("The Xbox file list is empty. Select your Xbox profile first, or the request will lack the Xbox side.");
+                question.AppendLine();
+            }
+            if (this.nonXboxFilesTable.RowCount == 0)
+            {
+                question.AppendLine("The non-Xbox file list is empty. A translation needs both lists: click Select non-Xbox Location first and pick the folder the other version saves to.");
+                question.AppendLine();
+            }
+            question.AppendLine(tablesIncluded
+                ? "The file lists are filled in for you."
+                : "The file lists are too long to fill in, so they are copied to the clipboard. Paste them into the \"Save file tables\" box.");
+            question.AppendLine();
+            question.Append("Sending it needs a GitHub account. Continue?");
+            if (MessageBox.Show(this, question.ToString(), "Request a translation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            if (!tablesIncluded && !copyToClipboard(tables))
+            {
+                return;
+            }
+            OpenWebPage(address);
+            logger.Info("The translation request is open in your browser. Sending it there adds it to the project's issues on GitHub.");
+        }
+
+        /// <summary>
+        /// The selected game's save files on both sides, as tables for a GitHub issue. The user's own
+        /// folders are written as the variables for them.
+        /// </summary>
+        private string saveFileTables()
         {
             StringBuilder sb = new StringBuilder();
 
@@ -1264,7 +1333,7 @@ namespace GPSaveConverter
                 }
             }
 
-            Clipboard.SetText(sb.ToString());
+            return TranslationRequest.HideUserFolders(sb.ToString(), TranslationRequest.UserFolders());
         }
 
         private void filterText_TextChanged(object sender, EventArgs e)

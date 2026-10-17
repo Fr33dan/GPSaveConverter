@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Game Compatibility list
+    url: https://github.com/Fr33dan/GPSaveConverter/wiki/Game-Compatibility
+    about: Whether a game's saves are known to carry over, and how.
+  - name: How file translations work
+    url: https://github.com/Fr33dan/GPSaveConverter/wiki/File-Translations
+    about: Write a translation for a game yourself.

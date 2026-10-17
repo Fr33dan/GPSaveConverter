@@ -91,7 +91,7 @@ namespace GPSaveConverter
         /// The release this is, as the tag names it: the file version, not the assembly version, which
         /// stays the same from release to release.
         /// </summary>
-        private static string Version()
+        internal static string Version()
         {
             object[] attributes = typeof(ErrorReport).Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyFileVersionAttribute), false);
             return attributes.Length == 0 ? "unknown" : ((System.Reflection.AssemblyFileVersionAttribute)attributes[0]).Version;
