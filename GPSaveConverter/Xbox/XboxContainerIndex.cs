@@ -45,12 +45,18 @@ namespace GPSaveConverter.Xbox
         private string indexID;
 
         internal XboxFileContainer[] Children { get; private set; }
+
+        /// <summary>
+        /// True for a save opened from a folder picked by hand. That may be a backup or someone
+        /// else's save, so nothing is ever written to it.
+        /// </summary>
+        internal bool IsPickedFolder { get; private set; }
+
         internal XboxContainerIndex(GameInfo info, string id)
         {
-            this.packageName = info.PackageName;
             this.xboxProfileID = id;
 
-            wgsFolder = XboxPackageList.getWGSFolder(packageName);
+            wgsFolder = XboxPackageList.getWGSFolder(info.PackageName);
             string[] profileFolders = FileSystem.GetDirectories(wgsFolder, xboxProfileID + "_*" + (info.WGSProfileSuffix != null ? info.WGSProfileSuffix : ""));
             if (profileFolders.Length == 0)
             {
@@ -60,6 +66,28 @@ namespace GPSaveConverter.Xbox
             // The Xbox app can leave several folders for one profile. Only one holds the containers.
             // The others have an index and nothing else, and opening one of those shows no files.
             xboxProfileFolder = profileFolders.FirstOrDefault(folder => FileSystem.GetDirectories(folder).Length > 0) ?? profileFolders[0];
+            read(info.PackageName);
+        }
+
+        private XboxContainerIndex() { }
+
+        /// <summary>
+        /// Opens the save in a folder picked by hand, to be read only. Its game is the one its index
+        /// names, which need not be installed.
+        /// </summary>
+        internal static XboxContainerIndex OpenPickedFolder(string profileFolder, string xboxProfileID)
+        {
+            XboxContainerIndex index = new XboxContainerIndex();
+            index.xboxProfileID = xboxProfileID;
+            index.xboxProfileFolder = profileFolder;
+            index.IsPickedFolder = true;
+            index.read(null);
+            return index;
+        }
+
+        /// <param name="expectedPackageName">The game the save has to belong to, or null to take the one the index names.</param>
+        private void read(string expectedPackageName)
+        {
             indexPath = Path.Combine(xboxProfileFolder, "containers.index");
             byte[] containerData = FileSystem.ReadAllBytes(indexPath);
 
@@ -82,10 +110,11 @@ namespace GPSaveConverter.Xbox
             // Usually the package name, "!" and an app ID. Issue #113 met an index with no "!" in it.
             int appIDStart = containerPackageID.IndexOf('!');
             string indexPackageName = appIDStart < 0 ? containerPackageID : containerPackageID.Substring(0, appIDStart);
-            if (indexPackageName != packageName)
+            if (expectedPackageName != null && indexPackageName != expectedPackageName)
             {
                 throw new FileFormatException("Container Index package name mismatch.");
             }
+            packageName = indexPackageName;
 
             DateTime timestamp = DateTime.FromFileTimeUtc(BitConverter.ToInt64(containerData, currentByte));
             currentByte += 8;
@@ -173,6 +202,7 @@ namespace GPSaveConverter.Xbox
         /// </summary>
         internal XboxFileContainer CreateContainer(string name1, string name2)
         {
+            refuseIfPicked();
             XboxFileContainer created = XboxFileContainer.Create(this, name1, name2);
 
             // The index is kept in order of name, capital letters first. A container the game makes
@@ -187,8 +217,17 @@ namespace GPSaveConverter.Xbox
             return created;
         }
 
+        private void refuseIfPicked()
+        {
+            if (IsPickedFolder)
+            {
+                throw new InvalidOperationException("Nothing is written to an Xbox save opened from a folder picked by hand: " + xboxProfileFolder);
+            }
+        }
+
         internal void UpdateIndex()
         {
+            refuseIfPicked();
             DateTime saveTime = DateTime.Now;
 
             // Put together in memory first. A failure part way must not leave half an index on disk.

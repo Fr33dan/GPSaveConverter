@@ -105,6 +105,18 @@ namespace GPSaveConverter
 
         private async Task fetchXboxProfiles()
         {
+            if (this.pickedXboxSave != null)
+            {
+                // The save in the folder the user picked. It is the only one, so it is opened at once.
+                this.xboxFileLabel.Text = PickedXboxFilesLabel;
+                this.foldersToolTip.SetToolTip(this.xboxFileLabel, this.pickedXboxSave.ProfileFolder);
+                this.xboxProfileListBox.Items.Clear();
+                this.xboxProfileListBox.Items.Add(this.pickedXboxSave.ProfileIDKnown ? this.pickedXboxSave.XboxProfileID : ProfileNotKnown);
+                this.xboxProfileListBox.Enabled = true;
+                this.xboxProfileListBox.SelectedIndex = 0;
+                return;
+            }
+
             bool failed = false;
             string wgsFolder = Xbox.XboxPackageList.getWGSFolder(ActiveGame.PackageName);
             this.xboxProfileListBox.Items.Clear();
@@ -145,6 +157,29 @@ namespace GPSaveConverter
         /// Shown in the Xbox profile list in place of a profile. Selecting it does nothing.
         /// </summary>
         private const string NoXboxProfiles = "No profiles found";
+
+        /// <summary>
+        /// Shown in the Xbox profile list for a save in a picked folder that does not say which
+        /// profile it belongs to.
+        /// </summary>
+        private const string ProfileNotKnown = "Profile not known";
+
+        private const string XboxFilesLabel = "Xbox Save Files:";
+        private const string PickedXboxFilesLabel = "Xbox Save Files: from a folder you picked, read only";
+
+        /// <summary>
+        /// The Xbox save opened with File > Open Xbox Save Folder, or null for the Xbox app's own
+        /// saves. Selecting a game in the list goes back to those.
+        /// </summary>
+        private Xbox.PickedXboxSave pickedXboxSave;
+
+        /// <summary>The save of this profile: the one in the picked folder, if a folder was picked.</summary>
+        private Xbox.XboxContainerIndex openXboxSave(string profile)
+        {
+            return this.pickedXboxSave != null
+                ? this.pickedXboxSave.Open()
+                : new Xbox.XboxContainerIndex(ActiveGame, profile);
+        }
 
         private async Task fetchNonXboxProfiles(int index)
         {
@@ -278,6 +313,7 @@ namespace GPSaveConverter
 
 
             this.exportGameLibraryToolStripMenuItem.Enabled = true;
+            this.openXboxSaveFolderToolStripMenuItem.Enabled = true;
 
             Library.GameInfo[] gameInfo = await LoadGameInfo();
 
@@ -337,6 +373,7 @@ namespace GPSaveConverter
         private void ClearForm()
         {
             this.foldersToolTip.RemoveAll();
+            this.xboxFileLabel.Text = XboxFilesLabel;
             this.fileTranslationListBox.Items.Clear();
             this.fileTranslationPropertyGrid.SelectedObject = null;
 
@@ -420,6 +457,16 @@ namespace GPSaveConverter
         private async Task moveFilesToXbox(System.Collections.IEnumerable rows)
         {
             if (!CheckReadyToMove()) return;
+
+            // It may be a backup or someone else's save. The backup a transfer to Xbox needs could
+            // not be made of it either: only the Xbox app's own save folder is backed up.
+            if (this.currentContainer.IsPickedFolder)
+            {
+                MessageBox.Show(this, "This Xbox save was opened from a folder you picked, so files are only copied from it, never to it." + Environment.NewLine + Environment.NewLine
+                    + "To copy files to the Xbox app's own save, select the game in the list on the left.", "Copy to Xbox");
+                logger.Info("Nothing copied");
+                return;
+            }
 
             List<NonXboxFileInfo> files = rows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem as NonXboxFileInfo).ToList();
             if (files.Count == 0)
@@ -535,7 +582,7 @@ namespace GPSaveConverter
             }
 
             // Reload to refresh UI.
-            currentContainer = new Xbox.XboxContainerIndex(ActiveGame, (string)this.xboxProfileListBox.SelectedItem);
+            currentContainer = openXboxSave((string)this.xboxProfileListBox.SelectedItem);
             this.xboxFilesTable.DataSource = currentContainer.getFileList();
         }
 
@@ -871,10 +918,72 @@ namespace GPSaveConverter
             {
                 return;
             }
+
+            // A game chosen in the list has its save where the Xbox app keeps it.
+            this.pickedXboxSave = null;
+            await selectGame((Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem);
+        }
+
+        private async void openXboxSaveFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog();
+            dialog.Description = "Pick the folder that holds the Xbox save, or a copy of it";
+            dialog.UseDescriptionForTitle = true;
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                await openXboxSaveFolder(dialog.SelectedPath);
+            }
+        }
+
+        /// <summary>
+        /// Opens the Xbox save in a folder the user picked, such as a copy of one, with the game it
+        /// belongs to. Files are copied from it only.
+        /// </summary>
+        internal async Task openXboxSaveFolder(string folder)
+        {
+            string problem = null;
+            Xbox.PickedXboxSave save = await Task.Run(() => Xbox.PickedXboxSave.Find(folder, out problem));
+            if (save == null)
+            {
+                MessageBox.Show(this, problem, "Open Xbox save folder");
+                return;
+            }
+
+            Xbox.XboxContainerIndex index;
+            try
+            {
+                index = save.Open();
+            }
+            catch (Exception ex)
+            {
+                ErrorReport.Show(this, "The Xbox save in " + save.ProfileFolder + " could not be read.", ex);
+                return;
+            }
+            if (string.IsNullOrEmpty(index.PackageName))
+            {
+                MessageBox.Show(this, "The Xbox save in " + save.ProfileFolder + " does not say which game it belongs to.", "Open Xbox save folder");
+                return;
+            }
+
+            Library.GameInfo game = Library.GameLibrary.getGameInfo(index.PackageName);
+            logger.Info("Opened the Xbox save of {0} in {1}. Files are copied from it only.", game.Name, save.ProfileFolder);
+
+            // The game is marked in the list if it is there. It need not be: its Xbox version may not be installed.
+            foreach (DataGridViewRow row in this.packagesDataGridView.Rows)
+            {
+                row.Selected = ((Library.GameInfo)row.DataBoundItem).PackageName == game.PackageName;
+            }
+
+            this.pickedXboxSave = save;
+            await selectGame(game);
+        }
+
+        private async Task selectGame(Library.GameInfo game)
+        {
             ClearForm();
 
-            ActiveGame = (Library.GameInfo)this.packagesDataGridView.SelectedRows[0].DataBoundItem;
-            
+            ActiveGame = game;
+
             // Do this before working with non-UWP data or the fetch won't be awaited.
             if (!ActiveGame.NonUWPDataPopulated)
             {
@@ -1044,7 +1153,7 @@ namespace GPSaveConverter
 
             try
             {
-                currentContainer = new Xbox.XboxContainerIndex(ActiveGame, profile);
+                currentContainer = openXboxSave(profile);
                 this.viewXboxFilesButton.Enabled = true;
                 //this.foldersToolTip.SetToolTip(this.xboxFileLabel, currentContainer.Children[0].getSaveFilePath());
                 this.xboxFilesTable.DataSource = currentContainer.getFileList();
@@ -1061,7 +1170,9 @@ namespace GPSaveConverter
                 currentContainer = null;
                 this.viewXboxFilesButton.Enabled = false;
                 this.xboxFilesTable.DataSource = GPSaveConverter.Library.GameLibrary.xboxFiles;
-                ErrorReport.Show(this, "The Xbox save of profile " + profile + " could not be read.", ex);
+                ErrorReport.Show(this, this.pickedXboxSave != null
+                    ? "The Xbox save in " + this.pickedXboxSave.ProfileFolder + " could not be read."
+                    : "The Xbox save of profile " + profile + " could not be read.", ex);
             }
         }
 
@@ -1076,11 +1187,15 @@ namespace GPSaveConverter
             prefsForm.Show(this);
         }
 
-        private void previewTranslationsChanged(object sender, EventArgs e)
+        private async void previewTranslationsChanged(object sender, EventArgs e)
         {
             // The game on screen may have gained or lost translations. Selecting it again shows its
             // files matched by the ones now in force.
-            if (ActiveGame != null && this.packagesDataGridView.SelectedRows.Count > 0)
+            if (ActiveGame != null && this.pickedXboxSave != null)
+            {
+                await selectGame(ActiveGame);
+            }
+            else if (ActiveGame != null && this.packagesDataGridView.SelectedRows.Count > 0)
             {
                 packagesDataGridView_Click(sender, e);
             }
@@ -1241,7 +1356,7 @@ namespace GPSaveConverter
                     // Reload to refresh UI.
                     if (this.currentContainer != null && this.currentContainer.PackageName == ActiveGame.PackageName)
                     {
-                        currentContainer = new Xbox.XboxContainerIndex(ActiveGame, this.currentContainer.XboxProfileID);
+                        currentContainer = openXboxSave(this.currentContainer.XboxProfileID);
                         this.xboxFilesTable.DataSource = currentContainer.getFileList();
                     }
 
