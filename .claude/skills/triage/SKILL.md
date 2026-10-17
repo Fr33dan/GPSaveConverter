@@ -89,6 +89,8 @@ With the data in hand:
 1. Write the translation. `CLAUDE.md` explains how the templates and groups work. Prefer one rule with a named group over one rule per file.
 
    Check first whether the reporter needs one at all. The **+** button in **View ▸ Show File Translations** adds a translation that gives the Xbox container, its second name and the blob the file's own name. When the Xbox table names everything like the file, as Gunfire Reborn does (#68), that works as it is. When only the containers are named differently, changing **Container Name 1** or **2** in it is enough (#41, #54). A few steps in a reply are quicker for the reporter than a staged entry. Its pattern takes almost any name, so tell them to select only the save files when they transfer.
+
+   From v.0.4.17, **File ▸ Suggest a Translation** tries the shapes most library entries have against the files on both sides. Those shapes are: the same name everywhere; one container with each file a blob of its name; a container per file holding a fixed blob such as `Data`; and a folder per container. It offers the one that pairs the most files, with the pairs and the other files it would cover shown before anything is added. When the tables show such a shape, point the reporter to it. It cannot help when the two sides hold different saves with nothing named alike, as in #54.
 2. Check it with the test harness, not by eye:
    - Save the translation as a Game Profile file in `GPSaveConverter.Tests/Fixtures/RequestedTranslations/`.
    - Add a section for the game to `GPSaveConverter.Tests/RequestedTranslationTests.cs` holding the tables exactly as posted, and assert where each file goes in both directions. `TranslationSimulator` replays the application's own matching steps on those tables.

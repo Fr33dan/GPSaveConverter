@@ -312,6 +312,7 @@ namespace GPSaveConverter
             this.viewNonXboxFileButton.Enabled = false;
             this.copySaveFileTablesToolStripMenuItem.Enabled = false;
             this.requestTranslationToolStripMenuItem.Enabled = false;
+            this.suggestTranslationToolStripMenuItem.Enabled = false;
             GPSaveConverter.Library.GameLibrary.nonXboxProfiles.Clear();
             GPSaveConverter.Library.GameLibrary.xboxFiles.Clear();
             GPSaveConverter.Library.GameLibrary.nonXboxFiles.Clear();
@@ -742,7 +743,8 @@ namespace GPSaveConverter
             text.Append(leftOutText(leftOut, name));
             if (leftOut.Any(file => file.Value == Library.GameInfo.NoTranslationReason))
             {
-                text.Append("You may need to add file translations via https://github.com/Fr33dan/GPSaveConverter/wiki/File-Translations");
+                text.AppendLine("File > Suggest a Translation can work one out from the names of the files on both sides, and File > Request a Translation asks for one on GitHub.");
+                text.Append("How translations work: https://github.com/Fr33dan/GPSaveConverter/wiki/File-Translations");
             }
 
             logger.Info("Nothing copied");
@@ -850,6 +852,7 @@ namespace GPSaveConverter
             this.editNonXboxLocationToolStripMenuItem1.Enabled = true;
             this.copySaveFileTablesToolStripMenuItem.Enabled = true;
             this.requestTranslationToolStripMenuItem.Enabled = true;
+            this.suggestTranslationToolStripMenuItem.Enabled = true;
             this.backupsToolStripMenuItem.Enabled = true;
             this.editNonXboxLocationToolStripMenuItem2.Enabled = true;
             this.copyPackageIDToolStripMenuItem.Enabled = true;
@@ -1282,6 +1285,57 @@ namespace GPSaveConverter
             }
             OpenWebPage(address);
             logger.Info("The translation request is open in your browser. Sending it there adds it to the project's issues on GitHub.");
+        }
+
+        private void suggestTranslationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<Library.TranslationSimulator.XboxFile> xboxFiles = this.xboxFilesTable.DataSource == null
+                ? new List<Library.TranslationSimulator.XboxFile>()
+                : ((IEnumerable<Xbox.XboxFileInfo>)this.xboxFilesTable.DataSource).Select(f => new Library.TranslationSimulator.XboxFile(f.ContainerName1, f.ContainerName2, f.FileID)).ToList();
+            List<string> nonXboxFiles = this.nonXboxFilesTable.DataSource == null
+                ? new List<string>()
+                : ((IEnumerable<NonXboxFileInfo>)this.nonXboxFilesTable.DataSource).Select(f => f.RelativePath).ToList();
+            if (xboxFiles.Count == 0 || nonXboxFiles.Count == 0)
+            {
+                MessageBox.Show(this, "A suggestion needs the files of both sides. Select your Xbox profile. If the non-Xbox list is empty, click Select non-Xbox Location and pick the folder the other version saves to.", "Suggest a translation");
+                return;
+            }
+
+            string xboxProfileID = this.currentContainer == null ? Library.TranslationSimulator.XboxProfileID : this.currentContainer.XboxProfileID;
+            Library.TranslationSuggester.Suggestion suggestion = Library.TranslationSuggester.Suggest(xboxFiles, nonXboxFiles, xboxProfileID);
+            if (suggestion == null)
+            {
+                MessageBox.Show(this, "None of the usual kinds of translation pairs this game's files by their names. File > Request a Translation asks for one on GitHub.", "Suggest a translation");
+                return;
+            }
+
+            const int pairsShown = 5;
+            StringBuilder question = new StringBuilder();
+            question.AppendLine("This translation pairs " + suggestion.Pairs.Count + " of the " + xboxFiles.Count + " Xbox files with files on the other side:");
+            question.AppendLine();
+            foreach (KeyValuePair<Library.TranslationSimulator.XboxFile, string> pair in suggestion.Pairs.Take(pairsShown))
+            {
+                question.AppendLine("    " + pair.Key.ContainerName1 + " / " + pair.Key.FileID + "   with   " + pair.Value);
+            }
+            if (suggestion.Pairs.Count > pairsShown)
+            {
+                question.AppendLine("    and " + (suggestion.Pairs.Count - pairsShown) + " more");
+            }
+            question.AppendLine();
+            if (suggestion.Unpaired.Count > 0)
+            {
+                question.AppendLine("It also covers " + countFiles(suggestion.Unpaired.Count) + " on this PC that the Xbox save has nothing for, such as " + suggestion.Unpaired[0] + ". Copying everything to Xbox would add " + (suggestion.Unpaired.Count == 1 ? "it" : "them") + ".");
+                question.AppendLine();
+            }
+            question.Append("Add it to the translations of " + ActiveGame.Name + "? It is tried before the others, and View > Show File Translations shows it.");
+            if (MessageBox.Show(this, question.ToString(), "Suggest a translation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            ActiveGame.FileTranslations.Insert(0, suggestion.Translation);
+            this.fileTranslationListBox.Items.Insert(0, suggestion.Translation);
+            logger.Info("The suggested translation was added. It pairs {0}.", countFiles(suggestion.Pairs.Count));
         }
 
         /// <summary>

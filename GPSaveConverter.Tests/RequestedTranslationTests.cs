@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text.Json;
 using Xunit;
 using GPSaveConverter.Library;
-using Outcome = GPSaveConverter.Tests.TranslationSimulator.Outcome;
-using XboxFile = GPSaveConverter.Tests.TranslationSimulator.XboxFile;
+using Outcome = GPSaveConverter.Library.TranslationSimulator.Outcome;
+using XboxFile = GPSaveConverter.Library.TranslationSimulator.XboxFile;
 
 namespace GPSaveConverter.Tests
 {

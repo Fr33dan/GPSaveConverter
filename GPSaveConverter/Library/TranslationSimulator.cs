@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using GPSaveConverter.Library;
 
-namespace GPSaveConverter.Tests
+namespace GPSaveConverter.Library
 {
     /// <summary>
     /// Follows the same steps as GameInfo.getNonXboxFileVersion and GameInfo.getXboxFileVersion,
     /// but on plain file tables, so a translation can be checked without a game's save containers.
-    /// The matching itself is the application's own code in FileTranslation. Only the few lines that
-    /// string those calls together are repeated here; if GameInfo changes them, change this to match.
+    /// The suggester scores its candidates with it, and the tests check translations against the
+    /// tables people posted. The matching itself is the application's own code in FileTranslation.
+    /// Only the few lines that string those calls together are repeated here; if GameInfo changes
+    /// them, change this to match.
     /// </summary>
     internal class TranslationSimulator
     {
@@ -64,19 +65,22 @@ namespace GPSaveConverter.Tests
             }
         }
 
-        /// <summary>The Xbox profile the simulated save belongs to.</summary>
+        /// <summary>The Xbox profile a simulated save belongs to unless another is given.</summary>
         internal const string XboxProfileID = "0009000000000001";
 
         private readonly IList<FileTranslation> translations;
         private readonly IList<XboxFile> xboxFiles;
         private readonly IList<string> nonXboxFiles;
+        private readonly string profileID;
 
         /// <param name="nonXboxFiles">Paths relative to the save folder, in the order the folder lists them.</param>
-        internal TranslationSimulator(IList<FileTranslation> translations, IList<XboxFile> xboxFiles, IList<string> nonXboxFiles)
+        /// <param name="xboxProfileID">The Xbox profile the save belongs to, as its folder names it.</param>
+        internal TranslationSimulator(IList<FileTranslation> translations, IList<XboxFile> xboxFiles, IList<string> nonXboxFiles, string xboxProfileID = XboxProfileID)
         {
             this.translations = translations;
             this.xboxFiles = xboxFiles;
             this.nonXboxFiles = nonXboxFiles;
+            this.profileID = xboxProfileID;
         }
 
         /// <summary>
@@ -87,7 +91,7 @@ namespace GPSaveConverter.Tests
             FileTranslation t = null;
             foreach (FileTranslation candidate in translations)
             {
-                candidate.XboxProfileID = XboxProfileID;
+                candidate.XboxProfileID = profileID;
                 if (Regex.Match(file.ContainerName1, candidate.ContainerName1Regex).Success
                     && Regex.Match(file.ContainerName2, candidate.ContainerName2Regex).Success
                     && Regex.Match(file.FileID, candidate.XboxFileIDRegex).Success)
@@ -99,7 +103,7 @@ namespace GPSaveConverter.Tests
             if (t == null) return new Result { Outcome = Outcome.NoTranslation };
 
             bool pathComplete;
-            string relativePath = t.FillNonXboxFilename(file.ContainerName1, file.ContainerName2, file.FileID, XboxProfileID, out pathComplete);
+            string relativePath = t.FillNonXboxFilename(file.ContainerName1, file.ContainerName2, file.FileID, profileID, out pathComplete);
             string pathAsWritten = t.NonXboxFilenameAsWritten(file.ContainerName1, file.ContainerName2, file.FileID);
 
             string existingPath = FileTranslation.FindNonXboxFile(nonXboxFiles, relativePath, pathAsWritten);
@@ -120,7 +124,7 @@ namespace GPSaveConverter.Tests
             FileTranslation t = null;
             foreach (FileTranslation candidate in translations)
             {
-                candidate.XboxProfileID = XboxProfileID;
+                candidate.XboxProfileID = profileID;
                 if (candidate.NonXboxFilenameRegex != null && Regex.Match(relativePath, candidate.NonXboxFilenameRegex).Success)
                 {
                     t = candidate;
@@ -130,7 +134,7 @@ namespace GPSaveConverter.Tests
             if (t == null) return new Result { Outcome = Outcome.NoTranslation };
 
             List<XboxFile> allContainers = xboxFiles.GroupBy(f => new { f.ContainerName1, f.ContainerName2 }).Select(g => g.First()).ToList();
-            List<XboxFile> containers = t.FindContainers(allContainers, c => c.ContainerName1, c => c.ContainerName2, relativePath, XboxProfileID);
+            List<XboxFile> containers = t.FindContainers(allContainers, c => c.ContainerName1, c => c.ContainerName2, relativePath, profileID);
 
             if (containers.Count > 1) return new Result { Outcome = Outcome.AmbiguousContainer };
             if (containers.Count == 0) return new Result { Outcome = Outcome.NoContainer };
@@ -140,7 +144,7 @@ namespace GPSaveConverter.Tests
 
             string xboxFileID;
             bool xboxFileIDComplete;
-            XboxFile matchedFile = t.FindXboxFile(containerFiles, f => f.FileID, relativePath, XboxProfileID, out xboxFileID, out xboxFileIDComplete);
+            XboxFile matchedFile = t.FindXboxFile(containerFiles, f => f.FileID, relativePath, profileID, out xboxFileID, out xboxFileIDComplete);
 
             if (matchedFile != null) return new Result { Outcome = Outcome.ExistingFile, XboxFile = matchedFile };
             if (!xboxFileIDComplete)
