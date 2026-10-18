@@ -91,6 +91,13 @@ With the data in hand:
    Check first whether the reporter needs one at all. The **+** button in **View ▸ Show File Translations** adds a translation that gives the Xbox container, its second name and the blob the file's own name. When the Xbox table names everything like the file, as Gunfire Reborn does (#68), that works as it is. When only the containers are named differently, changing **Container Name 1** or **2** in it is enough (#41, #54). A few steps in a reply are quicker for the reporter than a staged entry. Its pattern takes almost any name, so tell them to select only the save files when they transfer.
 
    From v.0.4.17, **File ▸ Suggest a Translation** tries the shapes most library entries have against the files on both sides. Those shapes are: the same name everywhere; one container with each file a blob of its name; a container per file holding a fixed blob such as `Data`; and a folder per container. It offers the one that pairs the most files, with the pairs and the other files it would cover shown before anything is added. When the tables show such a shape, point the reporter to it. It cannot help when the two sides hold different saves with nothing named alike, as in #54.
+
+   From v.0.4.17, **Edit...** under the translations list, or a double-click on a translation, shows it in plain words.
+   - Each name is written as it is, with `{number}`, `{name}` (no folders), `{profile}` or one of the translation's own placeholders such as `{FileSlot}` where it changes from file to file.
+   - As the names are typed, it lists the files the translation pairs.
+   - It does not open a translation with a pattern in a name, such as `.*`.
+
+   For names that differ but follow a rule, such as `SaveSlot0` on Xbox and `saveFile0.sav` on Steam, a reply can give the reporter four names to type after **+** and **Edit...**: here `SaveGame`, nothing, `SaveSlot{number}` and `saveFile{number}.sav`. Check those names with the harness first, as below. Stage the translation as well if it should reach the library.
 2. Check it with the test harness, not by eye:
    - Save the translation as a Game Profile file in `GPSaveConverter.Tests/Fixtures/RequestedTranslations/`.
    - Add a section for the game to `GPSaveConverter.Tests/RequestedTranslationTests.cs` holding the tables exactly as posted, and assert where each file goes in both directions. `TranslationSimulator` replays the application's own matching steps on those tables.
@@ -148,6 +155,7 @@ Check these before anything else:
   - Forza Horizon 4 and 5. The built-in translation gives every livery and tune a container of its own, and the compatibility table says they do not carry over. Say to answer No.
   - A game whose save is more than one file, such as Persona 3 Portable with its `.BIN` and `.BINslot`. There one save is two containers, so the first try is one pair, answered with Yes.
 - A game only appears in the list when its package folder holds local save data: `%LOCALAPPDATA%\Packages\<package>\SystemAppData\wgs` with a profile folder in it. The game does not have to be installed. Versions up to v.0.4.12 also wanted a second folder beside the profile folder, so a game that had been uninstalled could be missing from the list (#79).
+- When the package folder is gone, as it usually is after the Xbox version is uninstalled, the tool has nothing to list. From v.0.4.17, **File ▸ Open Xbox Save Folder** opens a copy of the save kept anywhere, if the user made one: the profile folder, the `wgs` folder or the whole package folder, or a backup the tool made (#138, #173). It is only ever read, so it helps copying from Xbox, never to it. Nothing reaches cloud saves.
 - If the user wrote several translations for the game, the first one that matches is used. Old attempts sitting earlier in the list hide newer ones.
 
 ### The Xbox file list is empty, or selecting the game fails
@@ -175,6 +183,8 @@ A screenshot that shows DLLs or a `DLC` folder in the non-Xbox list is the game'
 ### Bug reports
 
 Find the code from the stack trace. Reproduce the failure in a test, fix it on a branch, open a pull request, and link it in the issue. Label `bug`. If a later release already fixed it, say which version and ask the reporter to retry.
+
+From v.0.4.17 the tool shows **Update available** at the top right of its window when a newer release is out, if internet access is allowed in Preferences. A report from an older version comes from a copy that never says so. Name the release to get, with a link.
 
 From v.0.4.12 an error opens the tool's own window, which has a **Copy Details** button. Ask for that text. It names the version, the Windows build and the selected game, which a screenshot of the old .NET dialog did not.
 
