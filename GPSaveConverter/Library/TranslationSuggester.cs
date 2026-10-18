@@ -161,7 +161,7 @@ namespace GPSaveConverter.Library
         /// A name written so that a translation's pattern matches it alone. A dot stays as it is, the
         /// way the game library writes one.
         /// </summary>
-        private static string Literal(string name)
+        internal static string Literal(string name)
         {
             StringBuilder literal = new StringBuilder();
             foreach (char c in name)
