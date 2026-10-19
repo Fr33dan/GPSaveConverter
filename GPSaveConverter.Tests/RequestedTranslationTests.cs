@@ -46,6 +46,7 @@ namespace GPSaveConverter.Tests
         [InlineData("ReturnToMonkeyIsland")]
         [InlineData("DeathStranding")]
         [InlineData("Persona4Golden")]
+        [InlineData("TCGCardShopSimulator")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1379,6 +1380,82 @@ namespace GPSaveConverter.Tests
         {
             // Not part of what was reported working, so not copied.
             Assert.Equal(Outcome.NoTranslation, Persona4Golden().ToNonXbox(new XboxFile(container, "", "progress")).Outcome);
+        }
+
+        #endregion
+
+        #region TCG Card Shop Simulator (#254)
+
+        private static TranslationSimulator TCGCardShopSimulator()
+        {
+            // The tables posted in the issue. Each Xbox slot is a container GameData_N, named twice, holding
+            // one blob, PlayerData. The Steam folder has savedGames_Release0.gd and savedGames_Release1.gd,
+            // with logs, settings and Unity analytics beside them.
+            var xboxFiles = new[] { "GameData_0", "GameData_1", "GameData_2", "PlayerPrefs", "Settings" }
+                .Select(container => new XboxFile(container, container, "PlayerData")).ToArray();
+            var nonXboxFiles = new[]
+            {
+                "Player-prev.log",
+                "Player.log",
+                "SavedData.json",
+                "savedGames_KeybindSetting.gd",
+                "savedGames_Release0.gd",
+                "savedGames_Release0.json",
+                "savedGames_Release1.gd",
+                "savedGames_ReleaseBackupFile0.json",
+                "steam_autocloud.vdf",
+                "Unity\\73bc2d01-2024-47ff-8ef6-312e0a9ff94a\\Analytics\\config",
+                "Unity\\73bc2d01-2024-47ff-8ef6-312e0a9ff94a\\Analytics\\values",
+                "Unity\\ShaderVariantAnalytics\\ShaderRuntimeInfoEvent.json"
+            };
+
+            return new TranslationSimulator(Profile("TCGCardShopSimulator"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("0")]
+        [InlineData("1")]
+        public void TCGCardShopSimulator_SlotOnBothSides_MapsBothWays(string slot)
+        {
+            TranslationSimulator game = TCGCardShopSimulator();
+            string container = "GameData_" + slot;
+            string path = "savedGames_Release" + slot + ".gd";
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container, container, "PlayerData"));
+            var toXbox = game.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " | " + container + " | PlayerData", toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void TCGCardShopSimulator_XboxOnlySlot_IsCreatedOnSteam()
+        {
+            var toNonXbox = TCGCardShopSimulator().ToNonXbox(new XboxFile("GameData_2", "GameData_2", "PlayerData"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("savedGames_Release2.gd", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("PlayerPrefs")]
+        [InlineData("Settings")]
+        public void TCGCardShopSimulator_XboxSettings_AreLeftAlone(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, TCGCardShopSimulator().ToNonXbox(new XboxFile(container, container, "PlayerData")).Outcome);
+        }
+
+        [Theory]
+        [InlineData("savedGames_Release0.json")]
+        [InlineData("savedGames_ReleaseBackupFile0.json")]
+        [InlineData("savedGames_KeybindSetting.gd")]
+        [InlineData("SavedData.json")]
+        [InlineData("Player.log")]
+        public void TCGCardShopSimulator_OtherSteamFiles_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, TCGCardShopSimulator().ToXbox(path).Outcome);
         }
 
         #endregion
