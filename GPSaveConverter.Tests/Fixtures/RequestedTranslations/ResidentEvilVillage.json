@@ -1,0 +1,15 @@
+{
+  "Name": "Resident Evil Village",
+  "PackageName": "F024294D.Village_8fty0by30jkny",
+  "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1196590\\remote\\win64_save\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "data${Save}\\.bin",
+      "XboxFileID": "1230789541",
+      "ContainerName1": "SaveData${Save}",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<Save>[0-9]{2}-1|[0-9]{3}(?:Slot)?)" ]
+    }
+  ]
+}
