@@ -124,6 +124,12 @@ With the data in hand:
 
    Name the other file in the reply itself. A later pass, which may be an unattended run that only has the thread to go on, reads it there when it switches (#254).
 
+   Several blobs in one container do not by themselves mean a save split into parts. Tell the two cases apart by the blobs' names:
+   - **One file in parts.** Blobs named as pieces of one thing, such as `ChunkData0`, `ChunkData1` and a `toc`, are one save in parts (Fallout 4, #260; Starfield, #64). No translation can join them, so that alone makes the game incompatible.
+   - **Separate files.** Blobs with names of their own may be separate files: the save, and things kept beside it such as a header or a picture. The names can even be numbers that recur in every container, such as `1230789541` (Resident Evil, #262, #263).
+
+   When the containers of the second kind pair up with the other side's files by name, stage a translation that takes one blob from each container, the likeliest first, and name the others as candidates. Calling such a game incompatible needs a report that a copied save was refused. The maintainer corrected this on 2026-10-19, after both Resident Evil requests were first answered as incompatible.
+
    Check first whether the reporter needs one at all. The **+** button in **View ▸ Show File Translations** adds a translation that gives the Xbox container, its second name and the blob the file's own name. When the Xbox table names everything like the file, as Gunfire Reborn does (#68), that works as it is. When only the containers are named differently, changing **Container Name 1** or **2** in it is enough (#41, #54). A few steps in a reply are quicker for the reporter than a staged entry. Its pattern takes almost any name, so tell them to select only the save files when they transfer.
 
    From v.0.4.17, **File ▸ Suggest a Translation** tries the shapes most library entries have against the files on both sides. Those shapes are: the same name everywhere; one container with each file a blob of its name; a container per file holding a fixed blob such as `Data`; and a folder per container. It offers the one that pairs the most files, with the pairs and the other files it would cover shown before anything is added. When the tables show such a shape, point the reporter to it. It cannot help when the two sides hold different saves with nothing named alike, as in #54.
@@ -247,6 +253,7 @@ Neither age nor silence is a reason to close anything. If an old issue has a con
 - The exception is a release that changes what one of our replies told someone to do. Correct it on that issue once the release is out. #169 had steps for an error box that v.0.4.13 replaced with a question.
 - Find out why before you reply. When a paste is incomplete or the tool showed something odd, the cause is often the tool's, and the reporter should hear it, and the way around it, in the same reply. On #180 the first reply asked for the Steam files without saying where they are; the cause turned up afterwards and a second reply had to follow.
 - Do not state a fact about a particular game's save format unless the thread or the code shows it.
+- When a reply takes back an earlier one because the maintainer looked at it, say so in the first lines: the maintainer reviewed the earlier answer and changed the direction. Readers should know a person, not the automated run, made the call. The maintainer asked for this on 2026-10-19 (#262, #263).
 
 ### Snippet: asking for the tables
 
