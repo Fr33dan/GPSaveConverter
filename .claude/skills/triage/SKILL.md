@@ -117,6 +117,13 @@ With the data in hand:
 
    With all four in hand, pairing the posted names is the job, and a pairing nobody has confirmed yet is what testing is for. When the names line up on a likely rule, such as Xbox containers `Slot_0` to `Slot_2` each holding a `Data` blob against Steam files `save0.dat` and `save1.dat`, stage that rule. Leave settings, logs and analytics files out of it. Then ask the reporter to try one slot first. Their backup puts it back if it is wrong, and their answer settles it. Ask the reporter to find out which file is which by saving in each version only when nothing on the two sides pairs up. That is slow work for them, and the issue waits on it.
 
+   Sometimes more than one file could be the save, such as a `save0.dat` and a `save0.json` for the same slot. Stage the likelier one, and say so near the top of the reply, in this order:
+   - there are two candidates, which one is being tried, and which is next;
+   - if the game rejects the save, **File ▸ Backups** puts it back, and they should say so in the issue;
+   - the entry then changes to the other file, and they get it the next time they start the tool.
+
+   Name the other file in the reply itself. A later pass, which may be an unattended run that only has the thread to go on, reads it there when it switches (#254).
+
    Check first whether the reporter needs one at all. The **+** button in **View ▸ Show File Translations** adds a translation that gives the Xbox container, its second name and the blob the file's own name. When the Xbox table names everything like the file, as Gunfire Reborn does (#68), that works as it is. When only the containers are named differently, changing **Container Name 1** or **2** in it is enough (#41, #54). A few steps in a reply are quicker for the reporter than a staged entry. Its pattern takes almost any name, so tell them to select only the save files when they transfer.
 
    From v.0.4.17, **File ▸ Suggest a Translation** tries the shapes most library entries have against the files on both sides. Those shapes are: the same name everywhere; one container with each file a blob of its name; a container per file holding a fixed blob such as `Data`; and a folder per container. It offers the one that pairs the most files, with the pairs and the other files it would cover shown before anything is added. When the tables show such a shape, point the reporter to it. It cannot help when the two sides hold different saves with nothing named alike, as in #54.
