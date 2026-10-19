@@ -47,6 +47,8 @@ namespace GPSaveConverter.Tests
         [InlineData("DeathStranding")]
         [InlineData("Persona4Golden")]
         [InlineData("TCGCardShopSimulator")]
+        [InlineData("ResidentEvilVillage")]
+        [InlineData("ResidentEvil2")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1456,6 +1458,116 @@ namespace GPSaveConverter.Tests
         public void TCGCardShopSimulator_OtherSteamFiles_AreLeftAlone(string path)
         {
             Assert.Equal(Outcome.NoTranslation, TCGCardShopSimulator().ToXbox(path).Outcome);
+        }
+
+        #endregion
+
+        #region Resident Evil Village (#262) and Resident Evil 2 (#263)
+
+        // Each Game Pass container, SaveDataNNN, holds three or four blobs with numbers for names, and
+        // the Steam version keeps one dataNNN.bin for it. Blobs 1230789541 and 2246640833 are in every
+        // container of both games. Which blob is the save is not known, so the translation takes
+        // 1230789541 alone, to be tried; 2246640833 is the next candidate. Each container must give
+        // exactly one blob, or several would be written onto the same Steam file.
+
+        private static XboxFile[] Containers(params string[] rows)
+        {
+            // "SaveData000: 1230789541 2084659331" is a container and its blobs.
+            return rows.SelectMany(row =>
+            {
+                string[] parts = row.Split(':');
+                return parts[1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(blob => new XboxFile(parts[0], "", blob));
+            }).ToArray();
+        }
+
+        private static TranslationSimulator ResidentEvilVillage()
+        {
+            // The tables posted in #262.
+            var xboxFiles = Containers(
+                "SaveData00-1: 1230789541 2246640833 3789133773 926117261",
+                "SaveData000: 1230789541 2084659331 2246640833",
+                "SaveData001Slot: 1230789541 2084659331 2246640833",
+                "SaveData002Slot: 1230789541 2084659331 2246640833",
+                "SaveData003Slot: 1230789541 2084659331 2246640833",
+                "SaveData004Slot: 1230789541 2084659331 2246640833",
+                "SaveData030Slot: 1230789541 2084659331 2246640833",
+                "SaveData040Slot: 1230789541 2246640833 3789133773",
+                "SaveData041Slot: 1230789541 2084659331 2246640833",
+                "SaveData042Slot: 1230789541 2084659331 2246640833",
+                "SaveData043Slot: 1230789541 2084659331 2246640833",
+                "SaveData044Slot: 1230789541 2084659331 2246640833");
+            var nonXboxFiles = new[] { "data00-1.bin", "data030Slot.bin" };
+
+            return new TranslationSimulator(Profile("ResidentEvilVillage"), xboxFiles, nonXboxFiles);
+        }
+
+        private static TranslationSimulator ResidentEvil2()
+        {
+            // The tables posted in #263.
+            var xboxFiles = Containers(
+                "SaveData00-1: 1230789541 2246640833 3789133773",
+                "SaveData000: 1230789541 1779442705 2084659331 2246640833",
+                "SaveData001Slot: 1230789541 1779442705 2084659331 2246640833",
+                "SaveData021Slot: 1230789541 2246640833 4251998130");
+            var nonXboxFiles = new[] { "data00-1.bin", "data000.bin", "data021Slot.bin" };
+
+            return new TranslationSimulator(Profile("ResidentEvil2"), xboxFiles, nonXboxFiles);
+        }
+
+        private static TranslationSimulator ResidentEvil(string game)
+        {
+            return game == "ResidentEvilVillage" ? ResidentEvilVillage() : ResidentEvil2();
+        }
+
+        [Theory]
+        [InlineData("ResidentEvilVillage", "00-1")]
+        [InlineData("ResidentEvilVillage", "030Slot")]
+        [InlineData("ResidentEvil2", "00-1")]
+        [InlineData("ResidentEvil2", "000")]
+        [InlineData("ResidentEvil2", "021Slot")]
+        public void ResidentEvil_SaveOnBothSides_MapsBothWays(string game, string save)
+        {
+            TranslationSimulator simulator = ResidentEvil(game);
+            string container = "SaveData" + save;
+            string path = "data" + save + ".bin";
+
+            var toNonXbox = simulator.ToNonXbox(new XboxFile(container, "", "1230789541"));
+            var toXbox = simulator.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " |  | 1230789541", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("ResidentEvilVillage", "000")]
+        [InlineData("ResidentEvilVillage", "001Slot")]
+        [InlineData("ResidentEvilVillage", "044Slot")]
+        [InlineData("ResidentEvil2", "001Slot")]
+        public void ResidentEvil_XboxOnlySave_IsCreatedOnSteam(string game, string save)
+        {
+            var toNonXbox = ResidentEvil(game).ToNonXbox(new XboxFile("SaveData" + save, "", "1230789541"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("data" + save + ".bin", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("ResidentEvilVillage")]
+        [InlineData("ResidentEvil2")]
+        public void ResidentEvil_EachContainer_GivesOneBlobOnly(string game)
+        {
+            TranslationSimulator simulator = ResidentEvil(game);
+            XboxFile[] xboxFiles = game == "ResidentEvilVillage"
+                ? Containers("SaveData00-1: 1230789541 2246640833 3789133773 926117261", "SaveData000: 1230789541 2084659331 2246640833", "SaveData040Slot: 1230789541 2246640833 3789133773")
+                : Containers("SaveData000: 1230789541 1779442705 2084659331 2246640833", "SaveData021Slot: 1230789541 2246640833 4251998130");
+
+            foreach (var container in xboxFiles.GroupBy(f => f.ContainerName1))
+            {
+                var taken = container.Where(f => simulator.ToNonXbox(f).Outcome != Outcome.NoTranslation).Select(f => f.FileID).ToList();
+                Assert.Equal(new[] { "1230789541" }, taken);
+            }
         }
 
         #endregion
