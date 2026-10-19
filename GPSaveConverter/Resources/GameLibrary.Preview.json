@@ -248,6 +248,21 @@
           "NamedRegexGroups": [ "(?<File>Prefs\\.json|save\\.bin|Savegame[0-9]+\\.(?:png|save))" ]
         }
       ]
+    },
+    {
+      "Name": "TCG Card Shop Simulator",
+      "PackageName": "OPNEONGAMES.TCGCardShopSimulator_19j6by82ahhzr",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\OPNeonGames\\Card Shop Simulator\\",
+      "Issues": [ 254 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "savedGames_Release${Slot}\\.gd",
+          "XboxFileID": "PlayerData",
+          "ContainerName1": "GameData_${Slot}",
+          "ContainerName2": "GameData_${Slot}",
+          "NamedRegexGroups": [ "(?<Slot>[0-9]+)" ]
+        }
+      ]
     }
   ]
 }
