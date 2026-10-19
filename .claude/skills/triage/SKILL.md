@@ -101,7 +101,7 @@ To write one you need four things:
 3. The PC save files, as paths relative to the save folder.
 4. The PC save folder.
 
-The app produces all four. The reporter selects the game, then chooses **File ▸ Copy Save File Table(s)** and pastes the result. If any of the four is missing, ask for that paste and label `needs-info`. Do not guess file names.
+The app produces all four. The reporter selects the game, then chooses **File ▸ Copy Save File Table(s)** and pastes the result. If any of the four is missing, ask for that paste and label `needs-info`. Do not guess file names that were not posted.
 
 From v.0.4.17, **File ▸ Request a Translation** opens a new issue on the translation request form (`.github/ISSUE_TEMPLATE/translation-request.yml`) with the game, the version and the tables filled in. Such an issue is titled "Translation request: <game>", says which way the reporter is copying and to which store, and arrives with no label, like any other. The tool writes the user's own folders as `%LOCALAPPDATA%`, `%APPDATA%` and `%USERPROFILE%` in the tables it produces, so the location line no longer carries a user name.
 
@@ -114,6 +114,8 @@ A non-Xbox list in which every path starts with `\`, as in `\saveslot0\flags.sav
 With the data in hand:
 
 1. Write the translation. `CLAUDE.md` explains how the templates and groups work. Prefer one rule with a named group over one rule per file.
+
+   With all four in hand, pairing the posted names is the job, and a pairing nobody has confirmed yet is what testing is for. When the names line up on a likely rule, such as Xbox containers `Slot_0` to `Slot_2` each holding a `Data` blob against Steam files `save0.dat` and `save1.dat`, stage that rule. Leave settings, logs and analytics files out of it. Then ask the reporter to try one slot first. Their backup puts it back if it is wrong, and their answer settles it. Ask the reporter to find out which file is which by saving in each version only when nothing on the two sides pairs up. That is slow work for them, and the issue waits on it.
 
    Check first whether the reporter needs one at all. The **+** button in **View ▸ Show File Translations** adds a translation that gives the Xbox container, its second name and the blob the file's own name. When the Xbox table names everything like the file, as Gunfire Reborn does (#68), that works as it is. When only the containers are named differently, changing **Container Name 1** or **2** in it is enough (#41, #54). A few steps in a reply are quicker for the reporter than a staged entry. Its pattern takes almost any name, so tell them to select only the save files when they transfer.
 
