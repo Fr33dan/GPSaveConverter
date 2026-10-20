@@ -295,6 +295,29 @@
           "NamedRegexGroups": [ "(?<Save>[0-9]{2}-1|[0-9]{3}(?:Slot)?)" ]
         }
       ]
+    },
+    {
+      "Name": "ONE PIECE PIRATE WARRIORS 4",
+      "PackageName": "NAMCOBANDAIGamesInc.ONEPIECEPIRATEWARRIORS4Windows_gdy2aq6ez762w",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\BANDAI NAMCO Entertainment\\One Piece Pirate Warriors 4\\Saved\\SaveGames\\<user-id>\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "Issues": [ 267 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "OP4WINSLOT000${Slot}\\.dat",
+          "XboxFileID": "WholeData",
+          "ContainerName1": "SlotData${Slot}",
+          "ContainerName2": ".*",
+          "NamedRegexGroups": [ "(?<Slot>[0-9])" ]
+        },
+        {
+          "NonXboxFilename": "OP4WINUSER\\.dat",
+          "XboxFileID": "WholeData",
+          "ContainerName1": "SystemData",
+          "ContainerName2": ".*",
+          "NamedRegexGroups": [ ]
+        }
+      ]
     }
   ]
 }

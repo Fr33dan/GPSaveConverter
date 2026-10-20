@@ -1,0 +1,22 @@
+{
+  "Name": "ONE PIECE PIRATE WARRIORS 4",
+  "PackageName": "NAMCOBANDAIGamesInc.ONEPIECEPIRATEWARRIORS4Windows_gdy2aq6ez762w",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\BANDAI NAMCO Entertainment\\One Piece Pirate Warriors 4\\Saved\\SaveGames\\<user-id>\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "OP4WINSLOT000${Slot}\\.dat",
+      "XboxFileID": "WholeData",
+      "ContainerName1": "SlotData${Slot}",
+      "ContainerName2": ".*",
+      "NamedRegexGroups": [ "(?<Slot>[0-9])" ]
+    },
+    {
+      "NonXboxFilename": "OP4WINUSER\\.dat",
+      "XboxFileID": "WholeData",
+      "ContainerName1": "SystemData",
+      "ContainerName2": ".*",
+      "NamedRegexGroups": [ ]
+    }
+  ]
+}

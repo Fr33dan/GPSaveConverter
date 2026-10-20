@@ -1571,5 +1571,54 @@ namespace GPSaveConverter.Tests
         }
 
         #endregion
+
+        #region ONE PIECE PIRATE WARRIORS 4 (#267)
+
+        private static TranslationSimulator OnePiecePirateWarriors4()
+        {
+            // The tables posted in the issue. Each Game Pass container holds one blob, WholeData, and has a
+            // second name of numbers that differs between containers, so the translation matches any second
+            // name. The Steam folder has one file for the save slot and one for the user's data.
+            var xboxFiles = new[]
+            {
+                new XboxFile("SlotData0", "0000009 000 39 005 000 012", "WholeData"),
+                new XboxFile("SystemData", "0000000 000 39 005 000 012", "WholeData")
+            };
+            var nonXboxFiles = new[] { "OP4WINSLOT0000.dat", "OP4WINUSER.dat", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("OnePiecePirateWarriors4"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("OP4WINSLOT0000.dat", "SlotData0 | 0000009 000 39 005 000 012 | WholeData")]
+        [InlineData("OP4WINUSER.dat", "SystemData | 0000000 000 39 005 000 012 | WholeData")]
+        public void OnePiecePirateWarriors4_FileOnBothSides_MapsBothWays(string path, string xboxFile)
+        {
+            TranslationSimulator game = OnePiecePirateWarriors4();
+            string[] names = xboxFile.Split(new[] { " | " }, System.StringSplitOptions.None);
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(names[0], names[1], names[2]));
+            var toXbox = game.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(xboxFile, toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void OnePiecePirateWarriors4_SteamOnlySlot_HasNoContainerToName()
+        {
+            // The second name of a new container is not known, so a slot the Xbox save lacks cannot be made.
+            Assert.Equal(Outcome.NoContainer, OnePiecePirateWarriors4().ToXbox("OP4WINSLOT0001.dat").Outcome);
+        }
+
+        [Fact]
+        public void OnePiecePirateWarriors4_SteamCloudFile_IsLeftAlone()
+        {
+            Assert.Equal(Outcome.NoTranslation, OnePiecePirateWarriors4().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
     }
 }
