@@ -49,6 +49,7 @@ namespace GPSaveConverter.Tests
         [InlineData("TCGCardShopSimulator")]
         [InlineData("ResidentEvilVillage")]
         [InlineData("ResidentEvil2")]
+        [InlineData("ResidentEvil7")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1567,6 +1568,63 @@ namespace GPSaveConverter.Tests
                 var taken = container.Where(f => simulator.ToNonXbox(f).Outcome != Outcome.NoTranslation).Select(f => f.FileID).ToList();
                 Assert.Equal(new[] { "1230789541" }, taken);
             }
+        }
+
+        #endregion
+
+        #region Resident Evil 7 (#270)
+
+        // The same layout as Resident Evil 2 and Village above, except that each container's second
+        // name repeats its first. The posted Game Pass save has one container, and the Steam folder
+        // holds four .bin files and a .json file of the game's own. Blob 1230789541 is tried first,
+        // as for the other two games; 2246640833 is the next candidate.
+
+        private static TranslationSimulator ResidentEvil7()
+        {
+            // The tables posted in #270.
+            var xboxFiles = new[] { "1230789541", "2246640833", "85019829" }
+                .Select(blob => new XboxFile("SaveData001Slot", "SaveData001Slot", blob)).ToArray();
+            var nonXboxFiles = new[] { "data00-1.bin", "data00-3.bin", "data000.bin", "data001Slot.bin", "RESIDENT EVIL 7 biohazard.json" };
+
+            return new TranslationSimulator(Profile("ResidentEvil7"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void ResidentEvil7_SaveOnBothSides_MapsBothWays()
+        {
+            TranslationSimulator game = ResidentEvil7();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile("SaveData001Slot", "SaveData001Slot", "1230789541"));
+            var toXbox = game.ToXbox("data001Slot.bin");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("data001Slot.bin", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("SaveData001Slot | SaveData001Slot | 1230789541", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("2246640833")]
+        [InlineData("85019829")]
+        public void ResidentEvil7_OtherBlobs_AreLeftAlone(string blob)
+        {
+            Assert.Equal(Outcome.NoTranslation, ResidentEvil7().ToNonXbox(new XboxFile("SaveData001Slot", "SaveData001Slot", blob)).Outcome);
+        }
+
+        [Theory]
+        [InlineData("data00-1.bin")]
+        [InlineData("data000.bin")]
+        public void ResidentEvil7_SteamOnlySave_HasNoContainer(string path)
+        {
+            Assert.Equal(Outcome.NoContainer, ResidentEvil7().ToXbox(path).Outcome);
+        }
+
+        [Theory]
+        [InlineData("data00-3.bin")]
+        [InlineData("RESIDENT EVIL 7 biohazard.json")]
+        public void ResidentEvil7_OtherSteamFiles_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, ResidentEvil7().ToXbox(path).Outcome);
         }
 
         #endregion
