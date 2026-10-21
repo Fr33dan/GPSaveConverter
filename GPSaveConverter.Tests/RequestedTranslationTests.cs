@@ -519,16 +519,15 @@ namespace GPSaveConverter.Tests
         }
 
         [Theory]
-        [InlineData("ff7remakedevice.sav", "ff7remakedevice")]
-        [InlineData("ff7remakeplus000.sav", "ff7remakeplus000")]
-        public void FinalFantasyVIIRemake_SteamFileWithNoXboxContainer_NeedsOneOfItsOwnName(string file, string container)
+        [InlineData("ff7remakedevice.sav")]
+        [InlineData("ff7remakeplus000.sav")]
+        public void FinalFantasyVIIRemake_DeviceAndPlusFiles_AreLeftAlone(string file)
         {
-            // Versions up to v.0.4.12 refuse these two. Later ones ask whether to make the container.
-            Assert.Equal(Outcome.NoContainer, FinalFantasyVIIRemake().ToXbox(file).Outcome);
-
-            string problem;
-            string[] names = Profile("FinalFantasyVIIRemakeIntergrade").Single().NewContainerNames(file, TranslationSimulator.XboxProfileID, out problem);
-            Assert.Equal(new[] { container, container }, names);
+            // The Xbox save has no container for either. The device file is likely this PC's settings,
+            // and the plus files likely the DLC campaign's saves, which wait until the main saves work.
+            // Left uncovered, they are listed as left out before a transfer, and no container is offered
+            // for them (#180).
+            Assert.Equal(Outcome.NoTranslation, FinalFantasyVIIRemake().ToXbox(file).Outcome);
         }
 
         #endregion

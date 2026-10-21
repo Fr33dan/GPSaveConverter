@@ -118,7 +118,7 @@
           "XboxFileID": "Data",
           "ContainerName1": "ff7remake${Slot}",
           "ContainerName2": "ff7remake${Slot}",
-          "NamedRegexGroups": [ "(?<Slot>[a-z0-9]+)" ]
+          "NamedRegexGroups": [ "(?<Slot>[0-9]{3}|common)" ]
         }
       ]
     },
