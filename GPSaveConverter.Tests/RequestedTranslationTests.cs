@@ -50,6 +50,7 @@ namespace GPSaveConverter.Tests
         [InlineData("ResidentEvilVillage")]
         [InlineData("ResidentEvil2")]
         [InlineData("ResidentEvil7")]
+        [InlineData("CallOfDuty")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1674,6 +1675,97 @@ namespace GPSaveConverter.Tests
         public void OnePiecePirateWarriors4_SteamCloudFile_IsLeftAlone()
         {
             Assert.Equal(Outcome.NoTranslation, OnePiecePirateWarriors4().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region Call of Duty (#272)
+
+        private static TranslationSimulator CallOfDuty()
+        {
+            // The Xbox table posted in the issue. Call of Duty is several games in one package: the
+            // progression saves sit in a container per title folder (7300, 7301, 7500, 7501), beside
+            // settings, keybinds and profile files for each cod23 to cod26.
+            var containers = new[]
+            {
+                "7300/cerberus_savegame_progression_1", "7300/cerberus_savegame_progression_2", "7300/cerberus_savegame_progression_3", "7300/cerberus_savegame_shared_progression",
+                "7301/cerberus_savegame_progression_1", "7301/cerberus_savegame_progression_2", "7301/cerberus_savegame_progression_3", "7301/cerberus_savegame_shared_progression",
+                "7500/rex_savegame_progression_1", "7500/rex_savegame_progression_2", "7500/rex_savegame_progression_3",
+                "7501/rex_savegame_progression_1", "7501/rex_savegame_progression_2", "7501/rex_savegame_progression_3", "7501/rex_savegame_shared_progression",
+                "favoritesettings.cod25.pc.2.cdb", "favoritesettings.pc.2.cdb", "g.p.1.0.b0", "g.p.cod26.1.0.b", "gamerprofile.pc.0.csm",
+                "keybinds.pc.cod26.kb", "settingspresets.pc.cdb", "sp24/savegame_1.svg", "sp26/savegame_1.svg"
+            };
+            var xboxFiles = containers.Select(container => new XboxFile(container, "", "save")).ToArray();
+
+            // The reporter listed the files of the 7501 folder. The translation's save folder is the
+            // SteamCloud folder above it, so the same files are written here with their title folder.
+            var nonXboxFiles = new[]
+            {
+                "7501\\rex_savegame_progression_1.csf",
+                "7501\\rex_savegame_progression_2.csf",
+                "7501\\rex_savegame_progression_3.csf",
+                "7501\\rex_savegame_shared_progression.csf"
+            };
+
+            return new TranslationSimulator(Profile("CallOfDuty"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("rex_savegame_progression_1")]
+        [InlineData("rex_savegame_progression_3")]
+        [InlineData("rex_savegame_shared_progression")]
+        public void CallOfDuty_SaveOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = CallOfDuty();
+            string path = "7501\\" + name + ".csf";
+
+            var toXbox = game.ToXbox(path);
+            var toNonXbox = game.ToNonXbox(new XboxFile("7501/" + name, "", "save"));
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("7501/" + name + " |  | save", toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void CallOfDuty_AnotherTitlesSave_GoesToItsOwnFolder()
+        {
+            var toNonXbox = CallOfDuty().ToNonXbox(new XboxFile("7300/cerberus_savegame_progression_1", "", "save"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("7300\\cerberus_savegame_progression_1.csf", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void CallOfDuty_SteamSaveWithNoXboxContainer_CanHaveOneMade()
+        {
+            // 7500 has no shared_progression container on Xbox. The names spell out one container, so
+            // a transfer can offer to create it.
+            Assert.Equal(Outcome.NoContainer, CallOfDuty().ToXbox("7500\\rex_savegame_shared_progression.csf").Outcome);
+
+            string problem;
+            string[] names = Profile("CallOfDuty").Single().NewContainerNames("7500\\rex_savegame_shared_progression.csf", TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { "7500/rex_savegame_shared_progression", "" }, names);
+        }
+
+        [Theory]
+        [InlineData("favoritesettings.pc.2.cdb")]
+        [InlineData("g.p.1.0.b0")]
+        [InlineData("gamerprofile.pc.0.csm")]
+        [InlineData("keybinds.pc.cod26.kb")]
+        [InlineData("sp24/savegame_1.svg")]
+        public void CallOfDuty_SettingsAndProfileFiles_AreLeftAlone(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, CallOfDuty().ToNonXbox(new XboxFile(container, "", "save")).Outcome);
+        }
+
+        [Fact]
+        public void CallOfDuty_FileOutsideATitleFolder_IsLeftAlone()
+        {
+            // What the reporter's own location, the 7501 folder itself, lists. The tool has to be pointed
+            // at the SteamCloud folder for the translation to see the title folder.
+            Assert.Equal(Outcome.NoTranslation, CallOfDuty().ToXbox("rex_savegame_progression_1.csf").Outcome);
         }
 
         #endregion

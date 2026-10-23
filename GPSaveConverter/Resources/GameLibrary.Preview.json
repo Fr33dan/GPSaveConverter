@@ -334,6 +334,22 @@
           "NamedRegexGroups": [ "(?<Save>[0-9]{2}-1|[0-9]{3}(?:Slot)?)" ]
         }
       ]
+    },
+    {
+      "Name": "Call of Duty",
+      "PackageName": "38985CA0.COREBase_5bkah9njm3e9g",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Activision\\Call of Duty\\players\\<user-id_SteamID64>\\SteamCloud\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "Issues": [ 272 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Title}\\\\${Name}\\.csf",
+          "XboxFileID": "save",
+          "ContainerName1": "${Title}/${Name}",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<Title>[0-9]{4})", "(?<Name>[a-z0-9_]+)" ]
+        }
+      ]
     }
   ]
 }
