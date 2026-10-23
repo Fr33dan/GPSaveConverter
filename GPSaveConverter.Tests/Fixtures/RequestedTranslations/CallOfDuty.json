@@ -1,0 +1,15 @@
+{
+  "Name": "Call of Duty",
+  "PackageName": "38985CA0.COREBase_5bkah9njm3e9g",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Activision\\Call of Duty\\players\\<user-id_SteamID64>\\SteamCloud\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Title}\\\\${Name}\\.csf",
+      "XboxFileID": "save",
+      "ContainerName1": "${Title}/${Name}",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<Title>[0-9]{4})", "(?<Name>[a-z0-9_]+)" ]
+    }
+  ]
+}
