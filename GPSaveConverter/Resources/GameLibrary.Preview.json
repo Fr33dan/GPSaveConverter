@@ -350,6 +350,27 @@
           "NamedRegexGroups": [ "(?<Title>[0-9]{4})", "(?<Name>[a-z0-9_]+)" ]
         }
       ]
+    },
+    {
+      "Name": "DEATH STRANDING DIRECTOR'S CUT",
+      "PackageName": "KOJIMAPRODUCTIONSCo.Ltd.DSDC_98qq2hk7wynyj",
+      "Issues": [ 274 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Slot}\\\\checkpoint\\.dat",
+          "XboxFileID": "checkpoint\\.dat",
+          "ContainerName1": "${Slot}",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<Slot>(?:auto|manual|quick)save[0-9]+)" ]
+        },
+        {
+          "NonXboxFilename": "profile\\\\profile\\.dat",
+          "XboxFileID": "profile\\.dat",
+          "ContainerName1": "profile",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ ]
+        }
+      ]
     }
   ]
 }
