@@ -1,0 +1,20 @@
+{
+  "Name": "DEATH STRANDING DIRECTOR'S CUT",
+  "PackageName": "KOJIMAPRODUCTIONSCo.Ltd.DSDC_98qq2hk7wynyj",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Slot}\\\\checkpoint\\.dat",
+      "XboxFileID": "checkpoint\\.dat",
+      "ContainerName1": "${Slot}",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ "(?<Slot>(?:auto|manual|quick)save[0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "profile\\\\profile\\.dat",
+      "XboxFileID": "profile\\.dat",
+      "ContainerName1": "profile",
+      "ContainerName2": "",
+      "NamedRegexGroups": [ ]
+    }
+  ]
+}

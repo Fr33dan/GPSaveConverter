@@ -51,6 +51,7 @@ namespace GPSaveConverter.Tests
         [InlineData("ResidentEvil2")]
         [InlineData("ResidentEvil7")]
         [InlineData("CallOfDuty")]
+        [InlineData("DeathStrandingDirectorsCut")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1766,6 +1767,72 @@ namespace GPSaveConverter.Tests
             // What the reporter's own location, the 7501 folder itself, lists. The tool has to be pointed
             // at the SteamCloud folder for the translation to see the title folder.
             Assert.Equal(Outcome.NoTranslation, CallOfDuty().ToXbox("rex_savegame_progression_1.csf").Outcome);
+        }
+
+        #endregion
+
+        #region DEATH STRANDING DIRECTOR'S CUT (#274)
+
+        private static TranslationSimulator DeathStrandingDirectorsCut()
+        {
+            // The tables posted in the issue. The Xbox save has 23 slots of each kind; the other side has
+            // two of them and the profile folder, relative to the folder named with a long ID.
+            var slots = new[] { "autosave", "manualsave", "quicksave" }
+                .SelectMany(kind => Enumerable.Range(0, 23).Select(number => kind + number));
+            var xboxFiles = slots.Select(slot => new XboxFile(slot, "", "checkpoint.dat"))
+                .Concat(new[] { "bindings.cfg", "game_settings.cfg", "profile.dat" }.Select(file => new XboxFile("profile", "", file)))
+                .ToArray();
+            var nonXboxFiles = new[] { "manualsave0\\checkpoint.dat", "profile\\bindings.cfg", "profile\\game_settings.cfg", "profile\\profile.dat", "quicksave0\\checkpoint.dat" };
+
+            return new TranslationSimulator(Profile("DeathStrandingDirectorsCut"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("manualsave0", "checkpoint.dat")]
+        [InlineData("quicksave0", "checkpoint.dat")]
+        [InlineData("profile", "profile.dat")]
+        public void DeathStrandingDirectorsCut_FileOnBothSides_MapsBothWays(string container, string blob)
+        {
+            TranslationSimulator game = DeathStrandingDirectorsCut();
+            string path = container + "\\" + blob;
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container, "", blob));
+            var toXbox = game.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " |  | " + blob, toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("autosave0")]
+        [InlineData("autosave22")]
+        [InlineData("manualsave10")]
+        [InlineData("quicksave15")]
+        public void DeathStrandingDirectorsCut_XboxOnlySlot_IsCreatedInAFolderOfItsName(string slot)
+        {
+            var toNonXbox = DeathStrandingDirectorsCut().ToNonXbox(new XboxFile(slot, "", "checkpoint.dat"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(slot + "\\checkpoint.dat", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("bindings.cfg")]
+        [InlineData("game_settings.cfg")]
+        public void DeathStrandingDirectorsCut_Settings_AreLeftAlone(string file)
+        {
+            TranslationSimulator game = DeathStrandingDirectorsCut();
+
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("profile", "", file)).Outcome);
+            Assert.Equal(Outcome.NoTranslation, game.ToXbox("profile\\" + file).Outcome);
+        }
+
+        [Fact]
+        public void DeathStrandingDirectorsCut_DotInTheBlobName_IsNotAWildcard()
+        {
+            Assert.Equal(Outcome.NoTranslation, DeathStrandingDirectorsCut().ToNonXbox(new XboxFile("manualsave0", "", "checkpointXdat")).Outcome);
         }
 
         #endregion
