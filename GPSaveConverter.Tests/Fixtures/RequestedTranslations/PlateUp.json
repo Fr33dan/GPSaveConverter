@@ -1,0 +1,14 @@
+{
+  "Name": "PlateUp!",
+  "PackageName": "YogscastGames.PlateUp_68gs7gbvws9cw",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\It's Happening\\PlateUp\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Save}\\.plateupsave",
+      "XboxFileID": "${Save}\\.plateupsave",
+      "ContainerName1": "SaveContainer",
+      "ContainerName2": "Game Save",
+      "NamedRegexGroups": [ "(?<Save>(?:Full\\\\[0-9]+|Profile|Progress)\\\\[0-9]+)" ]
+    }
+  ]
+}

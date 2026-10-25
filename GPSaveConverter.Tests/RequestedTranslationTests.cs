@@ -52,6 +52,8 @@ namespace GPSaveConverter.Tests
         [InlineData("ResidentEvil7")]
         [InlineData("CallOfDuty")]
         [InlineData("DeathStrandingDirectorsCut")]
+        [InlineData("PlateUp")]
+        [InlineData("RogueTrader")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1833,6 +1835,147 @@ namespace GPSaveConverter.Tests
         public void DeathStrandingDirectorsCut_DotInTheBlobName_IsNotAWildcard()
         {
             Assert.Equal(Outcome.NoTranslation, DeathStrandingDirectorsCut().ToNonXbox(new XboxFile("manualsave0", "", "checkpointXdat")).Outcome);
+        }
+
+        #endregion
+
+        #region PlateUp! (#277)
+
+        private static readonly string[] PlateUpXboxBlobs =
+        {
+            "Full\\1\\1792900306.plateupsave", "Full\\1\\1792900383.plateupsave", "Full\\1\\1792900517.plateupsave", "Full\\1\\1792900523.plateupsave",
+            "Profile\\1792900264.plateupsave", "Profile\\1792900269.plateupsave",
+            "Progress\\1792900278.plateupsave", "Progress\\1792900306.plateupsave", "Progress\\1792900525.plateupsave"
+        };
+
+        private static TranslationSimulator PlateUp(params string[] extraSteamFiles)
+        {
+            // The tables posted in #277. The game now keeps each save file as a blob named with its path
+            // on Steam, in one container. In 2024 (#81) it kept the whole save in one blob instead.
+            var xboxFiles = PlateUpXboxBlobs.Select(blob => new XboxFile("SaveContainer", "Game Save", blob)).ToArray();
+            var nonXboxFiles = new[]
+            {
+                "Player-prev.log", "Player.log", "steam_autocloud.vdf",
+                "Full\\1\\1792897689.plateupsave", "Full\\1\\1792897893.plateupsave", "Full\\1\\1792897944.plateupsave", "Full\\1\\1792898154.plateupsave", "Full\\1\\1792898330.plateupsave",
+                "Profile\\1792895209.plateupsave", "Profile\\1792895210.plateupsave", "Profile\\1792895340.plateupsave", "Profile\\1792895341.plateupsave", "Profile\\1792895343.plateupsave",
+                "Progress\\1792722924.plateupsave", "Progress\\1792894752.plateupsave", "Progress\\1792895116.plateupsave", "Progress\\1792895369.plateupsave", "Progress\\1792898333.plateupsave"
+            }.Concat(extraSteamFiles).ToArray();
+
+            return new TranslationSimulator(Profile("PlateUp"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("Full\\1\\1792898154.plateupsave")]
+        [InlineData("Profile\\1792895343.plateupsave")]
+        [InlineData("Progress\\1792898333.plateupsave")]
+        public void PlateUp_SteamFile_IsAddedToTheXboxContainerUnderItsPath(string path)
+        {
+            var toXbox = PlateUp().ToXbox(path);
+
+            Assert.Equal(Outcome.NewFile, toXbox.Outcome);
+            Assert.Equal("SaveContainer | Game Save", toXbox.XboxFile.ContainerName1 + " | " + toXbox.XboxFile.ContainerName2);
+            Assert.Equal(path, toXbox.NewFileID);
+        }
+
+        [Theory]
+        [InlineData("Full\\1\\1792900306.plateupsave")]
+        [InlineData("Progress\\1792900525.plateupsave")]
+        public void PlateUp_XboxFile_GoesToTheSamePathOnSteam(string blob)
+        {
+            var toNonXbox = PlateUp().ToNonXbox(new XboxFile("SaveContainer", "Game Save", blob));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(blob, toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void PlateUp_FileOnBothSides_MapsBothWays()
+        {
+            // The posted tables share no file, so this one is put on the Steam side as well.
+            const string path = "Profile\\1792900264.plateupsave";
+            TranslationSimulator game = PlateUp(path);
+
+            var toXbox = game.ToXbox(path);
+            var toNonXbox = game.ToNonXbox(new XboxFile("SaveContainer", "Game Save", path));
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("SaveContainer | Game Save | " + path, toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("Player.log")]
+        [InlineData("steam_autocloud.vdf")]
+        public void PlateUp_LogsAndSteamFiles_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, PlateUp().ToXbox(path).Outcome);
+        }
+
+        #endregion
+
+        #region Warhammer 40,000: Rogue Trader (#276)
+
+        private static TranslationSimulator RogueTrader()
+        {
+            // The tables posted in #276. Each Game Pass save is a container named with its kind and an
+            // ID, second name Autosave1 and the like, holding header.json, header.png, highres.png and
+            // zip0. The Steam version keeps one .zks file for each save.
+            var saves = new[]
+            {
+                new[] { "Auto_c1ee9fa1fd62474e8ceac14551356b87", "Autosave1" },
+                new[] { "Auto_f37aca6e1d9b4e5a8e10a64eab33197f", "Autosave2" },
+                new[] { "Quick_9b122433953b46e6a4b56d1e66963851", "Quicksave2" },
+                new[] { "Quick_d8fbc85c0e6a4dd5893a5fefcc996863", "Quicksave1" }
+            };
+            var xboxFiles = saves.SelectMany(save => new[] { "header.json", "header.png", "highres.png", "zip0" }.Select(blob => new XboxFile(save[0], save[1], blob)))
+                                 .Concat(new[] { new XboxFile("settings", "Game Settings", "settings"), new XboxFile("settings-PC", "Game Settings", "settings-PC") })
+                                 .ToArray();
+            var nonXboxFiles = new[] { "Auto_1.zks", "Auto_2.zks" };
+
+            return new TranslationSimulator(Profile("RogueTrader"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("Auto_c1ee9fa1fd62474e8ceac14551356b87", "Autosave1", "Auto_1.zks")]
+        [InlineData("Auto_f37aca6e1d9b4e5a8e10a64eab33197f", "Autosave2", "Auto_2.zks")]
+        public void RogueTrader_SaveOnBothSides_MapsBothWays(string container, string secondName, string path)
+        {
+            TranslationSimulator game = RogueTrader();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container, secondName, "zip0"));
+            var toXbox = game.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container + " | " + secondName + " | zip0", toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("Quick_9b122433953b46e6a4b56d1e66963851", "Quicksave2", "Quick_2.zks")]
+        [InlineData("Quick_d8fbc85c0e6a4dd5893a5fefcc996863", "Quicksave1", "Quick_1.zks")]
+        public void RogueTrader_Quicksave_IsCreatedOnSteam(string container, string secondName, string path)
+        {
+            var toNonXbox = RogueTrader().ToNonXbox(new XboxFile(container, secondName, "zip0"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("header.json")]
+        [InlineData("header.png")]
+        [InlineData("highres.png")]
+        public void RogueTrader_HeaderAndPictures_AreLeftAlone(string blob)
+        {
+            Assert.Equal(Outcome.NoTranslation, RogueTrader().ToNonXbox(new XboxFile("Auto_c1ee9fa1fd62474e8ceac14551356b87", "Autosave1", blob)).Outcome);
+        }
+
+        [Fact]
+        public void RogueTrader_Settings_AreLeftAlone()
+        {
+            Assert.Equal(Outcome.NoTranslation, RogueTrader().ToNonXbox(new XboxFile("settings", "Game Settings", "settings")).Outcome);
         }
 
         #endregion
