@@ -1,0 +1,14 @@
+{
+  "Name": "Warhammer 40,000: Rogue Trader",
+  "PackageName": "OwlcatGames.3387926822CE4_197r75gc6ce9t",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\Owlcat Games\\Warhammer 40000 Rogue Trader\\Saved Games\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Kind}_${Number}\\.zks",
+      "XboxFileID": "zip0",
+      "ContainerName1": "${Kind}_[0-9a-f]{32}",
+      "ContainerName2": "${Kind}save${Number}",
+      "NamedRegexGroups": [ "(?<Kind>Auto|Quick)", "(?<Number>[0-9]+)" ]
+    }
+  ]
+}
