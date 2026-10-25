@@ -1,0 +1,21 @@
+{
+  "Name": "Cyberpunk 2077",
+  "PackageName": "CDPROJEKTSA.4d0e9834-20b1-4580-9bdc-4501ef2ffaac_0xkrdv0gjmk28",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\Saved Games\\CD Projekt Red\\Cyberpunk 2077\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Slot}\\\\sav\\.dat",
+      "XboxFileID": "${Slot}",
+      "ContainerName1": "Save-${Slot}",
+      "ContainerName2": "${Slot}:[0-9a-f]{32}",
+      "NamedRegexGroups": [ "(?<Slot>[A-Za-z]+Save-[0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "${Slot}\\\\${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "Save-${Slot}",
+      "ContainerName2": "${Slot}:[0-9a-f]{32}",
+      "NamedRegexGroups": [ "(?<Slot>[A-Za-z]+Save-[0-9]+)", "(?<File>metadata\\.9\\.json|screenshot\\.png)" ]
+    }
+  ]
+}

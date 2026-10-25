@@ -54,6 +54,8 @@ namespace GPSaveConverter.Tests
         [InlineData("DeathStrandingDirectorsCut")]
         [InlineData("PlateUp")]
         [InlineData("RogueTrader")]
+        [InlineData("FinalFantasyResonanceDemo")]
+        [InlineData("Cyberpunk2077")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -1976,6 +1978,183 @@ namespace GPSaveConverter.Tests
         public void RogueTrader_Settings_AreLeftAlone()
         {
             Assert.Equal(Outcome.NoTranslation, RogueTrader().ToNonXbox(new XboxFile("settings", "Game Settings", "settings")).Outcome);
+        }
+
+        #endregion
+
+        #region FINAL FANTASY RESONANCE DEMO (#281)
+
+        private static TranslationSimulator FinalFantasyResonanceDemo()
+        {
+            // The tables posted in #281. Each Game Pass container is named after a Steam file without its
+            // .sav, twice, and holds one blob, Data. The input and option settings are left out.
+            var xboxFiles = new[]
+            {
+                new XboxFile("EnhancedInputUserSettings", "EnhancedInputUserSettings", "Data"),
+                new XboxFile("GameSaveData0", "GameSaveData0", "Data")
+            };
+            var nonXboxFiles = new[] { "EnhancedInputUserSettings.sav", "GameSaveData0.sav", "GameSaveData1.sav", "OptionSaveData.sav", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("FinalFantasyResonanceDemo"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void FinalFantasyResonanceDemo_SaveOnBothSides_MapsBothWays()
+        {
+            TranslationSimulator game = FinalFantasyResonanceDemo();
+
+            var toXbox = game.ToXbox("GameSaveData0.sav");
+            var toNonXbox = game.ToNonXbox(new XboxFile("GameSaveData0", "GameSaveData0", "Data"));
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("GameSaveData0 | GameSaveData0 | Data", toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("GameSaveData0.sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void FinalFantasyResonanceDemo_SteamOnlySlot_CanHaveAContainerMade()
+        {
+            Assert.Equal(Outcome.NoContainer, FinalFantasyResonanceDemo().ToXbox("GameSaveData1.sav").Outcome);
+
+            string problem;
+            string[] names = Profile("FinalFantasyResonanceDemo").Single().NewContainerNames("GameSaveData1.sav", TranslationSimulator.XboxProfileID, out problem);
+            Assert.Equal(new[] { "GameSaveData1", "GameSaveData1" }, names);
+        }
+
+        [Theory]
+        [InlineData("EnhancedInputUserSettings.sav")]
+        [InlineData("OptionSaveData.sav")]
+        [InlineData("steam_autocloud.vdf")]
+        public void FinalFantasyResonanceDemo_SettingsAndSteamFiles_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, FinalFantasyResonanceDemo().ToXbox(path).Outcome);
+        }
+
+        [Fact]
+        public void FinalFantasyResonanceDemo_XboxSettings_AreLeftAlone()
+        {
+            Assert.Equal(Outcome.NoTranslation, FinalFantasyResonanceDemo().ToNonXbox(new XboxFile("EnhancedInputUserSettings", "EnhancedInputUserSettings", "Data")).Outcome);
+        }
+
+        #endregion
+
+        #region Cyberpunk 2077 (#282)
+
+        private static TranslationSimulator Cyberpunk2077()
+        {
+            // Part of the tables posted in #282. Each Game Pass save is a container Save-<slot>, second name
+            // <slot>:<32 hex digits>, holding a blob named after the slot, metadata.9.json, screenshot.png
+            // and, for autosaves, reserved. The Steam version keeps a folder per slot with sav.dat,
+            // metadata.9.json and screenshot.png. Some Steam folders were listed with metadata only.
+            var saves = new[]
+            {
+                new[] { "AutoSave-0", "c8eff380578506a4042dd039fe650a49" },
+                new[] { "AutoSave-14", "0f9f2d58389fc6b4707d1a3a1ad6e3e8" },
+                new[] { "EndGameSave-0", "657e8ad97f5f77808b5a0033177aef2f" },
+                new[] { "ManualSave-2", "daf7a562b6bba97f13c64dac509f9cf6" },
+                new[] { "ManualSave-4", "1753a31d07b2ed8fb1b5fd984d411efd" },
+                new[] { "PointOfNoReturnSave-5", "745cb14860f4de73dd06eb3f316c4930" }
+            };
+            var xboxFiles = saves.SelectMany(save => new[] { save[0], "metadata.9.json", "reserved", "screenshot.png" }
+                                     .Select(blob => new XboxFile("Save-" + save[0], save[0] + ":" + save[1], blob)))
+                                 .Concat(new[]
+                                 {
+                                     new XboxFile("Save-QuickSave-Reserved", "QuickSave-:f1305d5afd73b0ea29b8eefa1952c376", "reserved"),
+                                     new XboxFile("ScreenshotsIds", "ScreenshotsIds", "ScreenshotsPackedIds"),
+                                     new XboxFile("Settings", "Settings", "settings.json"),
+                                     new XboxFile("SettingsWinGDK", "SettingsWinGDK", "settings.json"),
+                                     new XboxFile("UserFile", "UserFile", "user.gls")
+                                 })
+                                 .ToArray();
+            var nonXboxFiles = new[]
+            {
+                "EnabledMods.json", "EnabledModsWinGDK.json", "HDRUserSettings.json", "steam_autocloud.vdf", "user.gls",
+                "AutoSave-0\\metadata.9.json", "AutoSave-0\\sav.dat", "AutoSave-0\\screenshot.png",
+                "AutoSave-11\\metadata.9.json", "AutoSave-13\\metadata.9.json", "AutoSave-14\\metadata.9.json",
+                "AutoSave-16\\metadata.9.json", "AutoSave-19\\metadata.9.json",
+                "AutoSave-9\\metadata.9.json", "AutoSave-9\\screenshot.png",
+                "ManualSave-0\\metadata.9.json", "ManualSave-0\\sav.dat", "ManualSave-0\\screenshot.png",
+                "ManualSave-2\\metadata.9.json", "ManualSave-2\\sav.dat", "ManualSave-2\\screenshot.png",
+                "ManualSave-3\\metadata.9.json", "ManualSave-3\\sav.dat", "ManualSave-3\\screenshot.png"
+            };
+
+            return new TranslationSimulator(Profile("Cyberpunk2077"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("AutoSave-0", "c8eff380578506a4042dd039fe650a49", "AutoSave-0", "sav.dat")]
+        [InlineData("AutoSave-0", "c8eff380578506a4042dd039fe650a49", "metadata.9.json", "metadata.9.json")]
+        [InlineData("ManualSave-2", "daf7a562b6bba97f13c64dac509f9cf6", "ManualSave-2", "sav.dat")]
+        [InlineData("ManualSave-2", "daf7a562b6bba97f13c64dac509f9cf6", "screenshot.png", "screenshot.png")]
+        public void Cyberpunk2077_FileOnBothSides_MapsBothWays(string slot, string hash, string blob, string file)
+        {
+            TranslationSimulator game = Cyberpunk2077();
+            string path = slot + "\\" + file;
+            var xboxFile = new XboxFile("Save-" + slot, slot + ":" + hash, blob);
+
+            var toNonXbox = game.ToNonXbox(xboxFile);
+            var toXbox = game.ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(xboxFile.ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("ManualSave-4", "1753a31d07b2ed8fb1b5fd984d411efd", "ManualSave-4", "ManualSave-4\\sav.dat")]
+        [InlineData("ManualSave-4", "1753a31d07b2ed8fb1b5fd984d411efd", "metadata.9.json", "ManualSave-4\\metadata.9.json")]
+        [InlineData("EndGameSave-0", "657e8ad97f5f77808b5a0033177aef2f", "EndGameSave-0", "EndGameSave-0\\sav.dat")]
+        [InlineData("PointOfNoReturnSave-5", "745cb14860f4de73dd06eb3f316c4930", "screenshot.png", "PointOfNoReturnSave-5\\screenshot.png")]
+        [InlineData("AutoSave-14", "0f9f2d58389fc6b4707d1a3a1ad6e3e8", "AutoSave-14", "AutoSave-14\\sav.dat")]
+        public void Cyberpunk2077_XboxOnlyFile_IsCreatedInTheSlotsFolder(string slot, string hash, string blob, string path)
+        {
+            var toNonXbox = Cyberpunk2077().ToNonXbox(new XboxFile("Save-" + slot, slot + ":" + hash, blob));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void Cyberpunk2077_SlotFolderOnSteam_MatchesOnlyItsOwnContainer()
+        {
+            // AutoSave-1 must not be taken for AutoSave-14, nor AutoSave-14 for AutoSave-1.
+            var toNonXbox = Cyberpunk2077().ToNonXbox(new XboxFile("Save-AutoSave-14", "AutoSave-14:0f9f2d58389fc6b4707d1a3a1ad6e3e8", "metadata.9.json"));
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("AutoSave-14\\metadata.9.json", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void Cyberpunk2077_SteamOnlySlot_HasNoContainerToName()
+        {
+            // A new container's second name ends in an ID the tool cannot know, so none can be made.
+            Assert.Equal(Outcome.NoContainer, Cyberpunk2077().ToXbox("ManualSave-0\\sav.dat").Outcome);
+
+            string problem;
+            Assert.Null(Profile("Cyberpunk2077").First().NewContainerNames("ManualSave-0\\sav.dat", TranslationSimulator.XboxProfileID, out problem));
+        }
+
+        [Theory]
+        [InlineData("Save-AutoSave-0", "AutoSave-0:c8eff380578506a4042dd039fe650a49", "reserved")]
+        [InlineData("Save-QuickSave-Reserved", "QuickSave-:f1305d5afd73b0ea29b8eefa1952c376", "reserved")]
+        [InlineData("ScreenshotsIds", "ScreenshotsIds", "ScreenshotsPackedIds")]
+        [InlineData("Settings", "Settings", "settings.json")]
+        [InlineData("UserFile", "UserFile", "user.gls")]
+        public void Cyberpunk2077_OtherXboxFiles_AreLeftAlone(string container1, string container2, string blob)
+        {
+            Assert.Equal(Outcome.NoTranslation, Cyberpunk2077().ToNonXbox(new XboxFile(container1, container2, blob)).Outcome);
+        }
+
+        [Theory]
+        [InlineData("user.gls")]
+        [InlineData("EnabledMods.json")]
+        [InlineData("HDRUserSettings.json")]
+        [InlineData("steam_autocloud.vdf")]
+        public void Cyberpunk2077_OtherSteamFiles_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, Cyberpunk2077().ToXbox(path).Outcome);
         }
 
         #endregion
