@@ -1,0 +1,14 @@
+{
+  "Name": "Well Dweller",
+  "PackageName": "TopHatStudiosInc.WellDweller_93vj94f8vfryy",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\WellDweller\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "WellDweller1\\.sav",
+      "XboxFileID": "blob\\.sav",
+      "ContainerName1": "root/WELLDWELLER",
+      "ContainerName2": "root/WELLDWELLER",
+      "NamedRegexGroups": []
+    }
+  ]
+}
