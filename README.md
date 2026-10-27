@@ -9,6 +9,14 @@ From v.0.4.12 the application backs up what a transfer is about to change, and *
 
 ![Save File Converter v0 4 3 Screenshot](https://user-images.githubusercontent.com/4670572/159533555-dbc49599-7620-4774-bd78-501e997ac22c.png)
 
+## Getting help
+
+Open an [issue](https://github.com/Fr33dan/GPSaveConverter/issues). From v.0.4.17, **File > Request a Translation** opens one for the selected game with its file lists filled in.
+
+Issues are answered twice a day, at about 9:00 and 19:00 New York time. The replies are written by Claude, an AI assistant, on the maintainer's behalf. Adding a translation to the built-in library, closing an issue and making a release wait for the maintainer, so those can take longer.
+
+Nobody maintaining the tool owns most of the games, so a translation you are given has only been checked against the file lists you posted. Please say in the issue whether the game loaded your save. Once someone confirms it, the translation goes into the tool for everyone.
+
 If a game does not exist in the library, a custom file translation must be created. See the [video linked](https://youtu.be/EdCjEr4-jfc) below for an explanation of file translations and how to create them:
 
 [![File translations tutorial](http://img.youtube.com/vi/EdCjEr4-jfc/0.jpg)](https://youtu.be/EdCjEr4-jfc "File translations tutorial") 
