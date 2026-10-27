@@ -57,6 +57,7 @@ namespace GPSaveConverter.Tests
         [InlineData("FinalFantasyResonanceDemo")]
         [InlineData("Cyberpunk2077")]
         [InlineData("WellDweller")]
+        [InlineData("PalworldEveryWorld")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2200,6 +2201,96 @@ namespace GPSaveConverter.Tests
         {
             // The Xbox save holds one blob, so only the one Steam save the tables show is paired with it.
             Assert.Equal(Outcome.NoTranslation, WellDweller("WellDweller2.sav").ToXbox("WellDweller2.sav").Outcome);
+        }
+
+        #endregion
+
+        #region Palworld, every world (#286)
+
+        private static readonly string[] PalworldXboxWorlds = { "48CF5B2042E2165486FC6E8D334171BC", "797B4E9B47DA5BF152B6ACA083E0AFCC", "8C5B451A4F03D5AD187CE0B59B3C835C" };
+        private const string PalworldSteamOwnWorld = "40337ABF423B718C3A0D58AF54D49273";
+
+        private static TranslationSimulator PalworldEveryWorld()
+        {
+            // The tables posted in #286. Each of the three Game Pass worlds has five containers, and
+            // three backup copies of them marked Slot1 to Slot3, each holding one Data blob. The Steam
+            // version keeps a world as a folder named after its ID, with backups in a folder of its own.
+            // The Steam folder holds one world of its own, and none of the three from Game Pass.
+            string[] parts = { "-Level-01", "-LevelMeta", "-LocalData", "-Players-" + PalworldPlayer };
+            var xboxFiles = PalworldXboxWorlds
+                .SelectMany(world => new[] { "", "-Slot1", "-Slot2", "-Slot3" }.SelectMany(slot => parts.Select(part => world + slot + part)))
+                .Concat(PalworldXboxWorlds.Select(world => world + "-WorldOption"))
+                .Concat(new[] { "GDKBackupTimestamps", "GlobalPalStorage", "UserOption" })
+                .Select(c => new XboxFile(c, c, "Data"))
+                .ToArray();
+            var nonXboxFiles = new[]
+            {
+                "steam_autocloud.vdf",
+                PalworldSteamOwnWorld + "\\Level.sav",
+                PalworldSteamOwnWorld + "\\LevelMeta.sav",
+                PalworldSteamOwnWorld + "\\LocalData.sav",
+                PalworldSteamOwnWorld + "\\WorldOption.sav",
+                PalworldSteamOwnWorld + "\\backup\\local\\2026.10.26-17.55.34\\LocalData.sav",
+                PalworldSteamOwnWorld + "\\backup\\world\\2026.10.26-17.56.15\\Level.sav",
+                PalworldSteamOwnWorld + "\\backup\\world\\2026.10.26-17.56.15\\Players\\" + PalworldPlayer + ".sav",
+                PalworldSteamOwnWorld + "\\Players\\" + PalworldPlayer + ".sav"
+            };
+            return new TranslationSimulator(Profile("PalworldEveryWorld"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData(0, "-Level-01", "\\Level.sav")]
+        [InlineData(0, "-LevelMeta", "\\LevelMeta.sav")]
+        [InlineData(1, "-LocalData", "\\LocalData.sav")]
+        [InlineData(1, "-WorldOption", "\\WorldOption.sav")]
+        [InlineData(2, "-Players-" + PalworldPlayer, "\\Players\\" + PalworldPlayer + ".sav")]
+        public void PalworldEveryWorld_GamePassWorld_GoesToAFolderOfTheSameID(int world, string containerSuffix, string steamSuffix)
+        {
+            string container = PalworldXboxWorlds[world] + containerSuffix;
+
+            var toNonXbox = PalworldEveryWorld().ToNonXbox(new XboxFile(container, container, "Data"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(PalworldXboxWorlds[world] + steamSuffix, toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("-Slot1-Level-01")]
+        [InlineData("-Slot3-Players-" + PalworldPlayer)]
+        [InlineData("-Level-02")]
+        public void PalworldEveryWorld_BackupsAndFurtherParts_AreLeftAlone(string containerSuffix)
+        {
+            // Slot1 to Slot3 are backup copies. A Level-02 would be a second part of the world, which
+            // copied on its own would make no whole Level.sav, so only a world in one part is paired.
+            string container = PalworldXboxWorlds[0] + containerSuffix;
+            Assert.Equal(Outcome.NoTranslation, PalworldEveryWorld().ToNonXbox(new XboxFile(container, container, "Data")).Outcome);
+        }
+
+        [Theory]
+        [InlineData("GDKBackupTimestamps")]
+        [InlineData("GlobalPalStorage")]
+        [InlineData("UserOption")]
+        public void PalworldEveryWorld_FilesOutsideTheWorlds_AreLeftAlone(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, PalworldEveryWorld().ToNonXbox(new XboxFile(container, container, "Data")).Outcome);
+        }
+
+        [Theory]
+        [InlineData("\\Level.sav")]
+        [InlineData("\\Players\\" + PalworldPlayer + ".sav")]
+        public void PalworldEveryWorld_SteamWorld_HasNoContainersOnGamePass(string steamSuffix)
+        {
+            // The Steam world has no containers on Game Pass, so copying it that way asks to create them.
+            Assert.Equal(Outcome.NoContainer, PalworldEveryWorld().ToXbox(PalworldSteamOwnWorld + steamSuffix).Outcome);
+        }
+
+        [Theory]
+        [InlineData("steam_autocloud.vdf")]
+        [InlineData(PalworldSteamOwnWorld + "\\backup\\world\\2026.10.26-17.56.15\\Level.sav")]
+        [InlineData(PalworldSteamOwnWorld + "\\backup\\local\\2026.10.26-17.55.34\\LocalData.sav")]
+        public void PalworldEveryWorld_SteamBackupsAndCloudFile_AreLeftAlone(string steamPath)
+        {
+            Assert.Equal(Outcome.NoTranslation, PalworldEveryWorld().ToXbox(steamPath).Outcome);
         }
 
         #endregion
