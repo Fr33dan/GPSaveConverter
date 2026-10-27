@@ -73,6 +73,10 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 
 **The tool moves save files. It does not change what is in them.** Some games store a save differently on each store: several files stitched into one, or encrypted with a key tied to the account. Converting those is out of scope. The maintainer looked into it on 2026-10-10 and decided to leave the scope where it is. Creating an Xbox container is packaging, not conversion, and is in scope.
 
+- Joining a save that one store keeps in numbered parts, or splitting one into parts, is packaging too and is in scope, the maintainer decided on 2026-10-27. That holds when the parts are plain pieces of the other store's file, or follow a scheme that is the same across games. A scheme particular to one game is conversion.
+- Football Manager 26 (#291), Starfield (#64) and Fallout 4 (#260) keep a save in parts on Game Pass. Nobody has yet shown that any of them is a plain split, so they stay `incompatible-save` until the tool can join their parts.
+- The scheme goes in the tool's code. The library may only name which scheme a game uses, as the rule below about running nothing from `GameLibrary.json` requires.
+
 **Nothing in `GameLibrary.json` is ever run.** Every copy of the app downloads that file from `master`. Anything executable in it, a script or a plugin to load, would run on every user's PC.
 
 **Nothing secret goes in the exe.** A resource or constant in a released binary is public. A Steam Web API key shipped that way once and had to be revoked.
