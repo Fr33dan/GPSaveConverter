@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-26",
+  "Version": "2026-10-27",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -575,6 +575,7 @@
     { "Name": "Teenage Mutant Ninja Turtles: Shredder's Revenge", "PackageName": "DotEmu.TeenageMutantNinjaTurtlesShreddersRevenge_map6zyh9ym1xy", "Direction": "FromXbox", "Text": "The Steam version does not load a save copied from Game Pass, and starts a new game (#183)." },
     { "Name": "The Outer Worlds: Spacer's Choice Edition", "PackageName": "PrivateDivision.64850D0BF098F_hv3d7yfbgr2rp", "Text": "The Microsoft Store version keeps its save in a different file from the Steam and Epic versions, so a copied save does not work (#154)." },
     { "Name": "Tunic", "PackageName": "Finji.TUNIC_tys0ffscxatjj", "Text": "The Game Pass version keeps every save slot in one file and the Steam version keeps one file per slot, so a copied save does not work (#6)." },
+    { "Name": "Well Dweller", "PackageName": "TopHatStudiosInc.WellDweller_93vj94f8vfryy", "Direction": "FromXbox", "Text": "A Game Pass save copied to the Steam version crashes the game at its menu (#287)." },
     { "Name": "Wo Long: Fallen Dynasty", "PackageName": "946B6A6E.WoLongFallenDynasty_dkffhzhmh6pmy", "Text": "The game calls a copied save corrupt until the start of the file is patched with a hex editor. #45 describes how." }
   ]
 }
