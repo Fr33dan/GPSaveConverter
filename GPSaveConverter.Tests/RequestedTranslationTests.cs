@@ -56,6 +56,7 @@ namespace GPSaveConverter.Tests
         [InlineData("RogueTrader")]
         [InlineData("FinalFantasyResonanceDemo")]
         [InlineData("Cyberpunk2077")]
+        [InlineData("WellDweller")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2155,6 +2156,50 @@ namespace GPSaveConverter.Tests
         public void Cyberpunk2077_OtherSteamFiles_AreLeftAlone(string path)
         {
             Assert.Equal(Outcome.NoTranslation, Cyberpunk2077().ToXbox(path).Outcome);
+        }
+
+        #endregion
+
+        #region Well Dweller (#287)
+
+        private static readonly XboxFile WellDwellerXboxSave = new XboxFile("root/WELLDWELLER", "root/WELLDWELLER", "blob.sav");
+
+        private static TranslationSimulator WellDweller(params string[] extraSteamFiles)
+        {
+            // The tables posted in #287. The Game Pass save is one container, root/WELLDWELLER twice,
+            // holding one blob, blob.sav. The Steam version keeps WellDweller1.sav and Settings.sav.
+            // The one blob is paired with the save file, and the settings are left out.
+            var xboxFiles = new[] { WellDwellerXboxSave };
+            var nonXboxFiles = new[] { "Settings.sav", "WellDweller1.sav" }.Concat(extraSteamFiles).ToArray();
+
+            return new TranslationSimulator(Profile("WellDweller"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void WellDweller_Save_MapsBothWays()
+        {
+            TranslationSimulator game = WellDweller();
+
+            var toNonXbox = game.ToNonXbox(WellDwellerXboxSave);
+            var toXbox = game.ToXbox("WellDweller1.sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("WellDweller1.sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("root/WELLDWELLER | root/WELLDWELLER | blob.sav", toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void WellDweller_Settings_AreLeftAlone()
+        {
+            Assert.Equal(Outcome.NoTranslation, WellDweller().ToXbox("Settings.sav").Outcome);
+        }
+
+        [Fact]
+        public void WellDweller_ASecondSteamSave_IsLeftAlone()
+        {
+            // The Xbox save holds one blob, so only the one Steam save the tables show is paired with it.
+            Assert.Equal(Outcome.NoTranslation, WellDweller("WellDweller2.sav").ToXbox("WellDweller2.sav").Outcome);
         }
 
         #endregion

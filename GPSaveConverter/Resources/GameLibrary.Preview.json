@@ -417,6 +417,21 @@
           "NamedRegexGroups": [ "(?<Slot>GameSaveData[0-9]+)" ]
         }
       ]
+    },
+    {
+      "Name": "Well Dweller",
+      "PackageName": "TopHatStudiosInc.WellDweller_93vj94f8vfryy",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\WellDweller\\",
+      "Issues": [ 287 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "WellDweller1\\.sav",
+          "XboxFileID": "blob\\.sav",
+          "ContainerName1": "root/WELLDWELLER",
+          "ContainerName2": "root/WELLDWELLER",
+          "NamedRegexGroups": []
+        }
+      ]
     }
   ]
 }
