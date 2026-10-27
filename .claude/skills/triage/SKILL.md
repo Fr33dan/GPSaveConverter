@@ -32,6 +32,8 @@ gh api 'repos/Fr33dan/GPSaveConverter/issues?state=open&per_page=100' --paginate
 gh api 'repos/Fr33dan/GPSaveConverter/issues?state=open&labels=needs-info&sort=updated&direction=desc&per_page=100' --jq '.[] | "\(.number)\t\(.updated_at)\t\(.title)"'
 # Of the 30 issues updated last, those whose last comment is not ours.
 for n in $(gh api 'repos/Fr33dan/GPSaveConverter/issues?state=open&sort=updated&direction=desc&per_page=30' --jq '.[] | select(.pull_request | not) | select(.comments > 0) | .number'); do gh api "repos/Fr33dan/GPSaveConverter/issues/$n/comments?per_page=100" --jq "last | select(.user.login != \"Fr33dan\") | \"$n\t\(.created_at)\t\(.user.login)\""; done
+# The same for the 20 closed issues updated last. A reporter can post a result and close the issue at once (#282).
+for n in $(gh api 'repos/Fr33dan/GPSaveConverter/issues?state=closed&sort=updated&direction=desc&per_page=20' --jq '.[] | select(.pull_request | not) | select(.comments > 0) | .number'); do gh api "repos/Fr33dan/GPSaveConverter/issues/$n/comments?per_page=100" --jq "last | select(.user.login != \"Fr33dan\") | \"$n\t\(.created_at)\t\(.user.login)\""; done
 # One issue, whole: its text, then every comment.
 gh api repos/Fr33dan/GPSaveConverter/issues/N --jq '.title, .body'
 gh api 'repos/Fr33dan/GPSaveConverter/issues/N/comments?per_page=100' --paginate --jq '.[] | "--- \(.user.login) \(.created_at)\n\(.body)"'
@@ -71,6 +73,14 @@ gh issue list --state open --search "sort:updated-desc" --limit 30 --json number
 ```
 
 On #183 the reporter answered our question on an issue labelled `incompatible-save`. A check of the two waiting labels did not show it, and it sat until the next day.
+
+A reporter can also post a result and close the issue in one step. On #282 the reporter said the game called the copied saves corrupted, and closed the issue in the same moment. The runs that followed looked only at open issues, and nobody answered for a day and a half. So check the closed issues updated lately as well:
+
+```
+gh issue list --state closed --search "sort:updated-desc" --limit 20 --json number,title,updatedAt,comments --jq '.[] | select(.comments | length > 0) | select(.comments[-1].author.login != "Fr33dan") | "\(.number)\t\(.updatedAt)\t\(.comments[-1].author.login)\t\(.title)"'
+```
+
+Treat a comment found there as you would one on an open issue. A test result goes through the same steps, such as taking a translation the game refused out of the preview file. Leave the issue closed. A thank-you on an issue that is settled needs no answer.
 
 ## Labels
 
