@@ -1,0 +1,29 @@
+{
+  "Name": "Palworld",
+  "PackageName": "PocketpairInc.Palworld_ad4psfrxyesvt",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\Pal\\Saved\\SaveGames\\<user-id>\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${World}\\\\Level\\.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${World}-Level-01",
+      "ContainerName2": "${World}-Level-01",
+      "NamedRegexGroups": [ "(?<World>[0-9A-F]{32})" ]
+    },
+    {
+      "NonXboxFilename": "${World}\\\\${File}\\.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${World}-${File}",
+      "ContainerName2": "${World}-${File}",
+      "NamedRegexGroups": [ "(?<World>[0-9A-F]{32})", "(?<File>LevelMeta|LocalData|WorldOption)" ]
+    },
+    {
+      "NonXboxFilename": "${World}\\\\Players\\\\${Player}\\.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${World}-Players-${Player}",
+      "ContainerName2": "${World}-Players-${Player}",
+      "NamedRegexGroups": [ "(?<World>[0-9A-F]{32})", "(?<Player>[0-9A-F]{32})" ]
+    }
+  ]
+}
