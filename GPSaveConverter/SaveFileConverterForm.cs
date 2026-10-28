@@ -1557,50 +1557,36 @@ namespace GPSaveConverter
         /// </summary>
         private string saveFileTables()
         {
-            StringBuilder sb = new StringBuilder();
+            List<TranslationRequest.TableRow> xboxRows = this.xboxFilesTable.DataSource == null
+                ? null
+                : ((IEnumerable<Xbox.XboxFileInfo>)this.xboxFilesTable.DataSource)
+                    .Select(f => new TranslationRequest.TableRow(fileSize(Xbox.XboxFileInfo.FileSystem, f.getFilePath()), f.ContainerName1, f.ContainerName2, f.FileID))
+                    .ToList();
+            List<TranslationRequest.TableRow> nonXboxRows = this.nonXboxFilesTable.DataSource == null
+                ? null
+                : ((IEnumerable<NonXboxFileInfo>)this.nonXboxFilesTable.DataSource)
+                    .Select(f => new TranslationRequest.TableRow(fileSize(Library.GameInfo.FileSystem, f.FilePath), f.RelativePath))
+                    .ToList();
 
-            sb.Append("Game Name:");
-            sb.AppendLine(ActiveGame.Name);
+            string tables = TranslationRequest.SaveFileTables(ActiveGame.Name, ActiveGame.PackageName, xboxRows, ActiveGame.BaseNonXboxSaveLocation, nonXboxRows);
+            return TranslationRequest.HideUserFolders(tables, TranslationRequest.UserFolders());
+        }
 
-            sb.Append("Game Package ID:");
-            sb.AppendLine(this.ActiveGame.PackageName);
-            sb.AppendLine();
-
-            if (this.xboxFilesTable.DataSource != null)
+        /// <summary>A file's size in bytes, or null if it cannot be read, as when it was deleted after it was listed.</summary>
+        private static long? fileSize(IFileSystem fileSystem, string path)
+        {
+            try
             {
-                sb.AppendLine("## Xbox Files:");
-                sb.AppendLine("| Container Name 1 | Container Name 2 | Blob ID |");
-                sb.AppendLine("| ---------------- | ---------------- | ------- |");
-                IEnumerable<Xbox.XboxFileInfo> xboxFileList = (IEnumerable<Xbox.XboxFileInfo>)this.xboxFilesTable.DataSource;
-                foreach(Xbox.XboxFileInfo xboxFileInfo in xboxFileList)
-                {
-                    sb.Append("| ");
-                    sb.Append(xboxFileInfo.ContainerName1);
-                    sb.Append(" | ");
-                    sb.Append(xboxFileInfo.ContainerName2);
-                    sb.Append(" | ");
-                    sb.Append(xboxFileInfo.FileID);
-                    sb.AppendLine(" |");
-                }
+                return fileSystem.GetFileLength(path);
             }
-
-            if(this.nonXboxFilesTable.DataSource != null)
+            catch (IOException)
             {
-                sb.AppendLine("## Non-Xbox Files:");
-                sb.Append("Non-Xbox save location: ");
-                sb.AppendLine(ActiveGame.BaseNonXboxSaveLocation);
-                sb.AppendLine("| File Path |");
-                sb.AppendLine("| --------  |");
-                IEnumerable<NonXboxFileInfo> nonXboxFileList = (IEnumerable<NonXboxFileInfo>)this.nonXboxFilesTable.DataSource;
-                foreach (NonXboxFileInfo xboxFileInfo in nonXboxFileList)
-                {
-                    sb.Append("| ");
-                    sb.Append(xboxFileInfo.RelativePath);
-                    sb.AppendLine(" |");
-                }
+                return null;
             }
-
-            return TranslationRequest.HideUserFolders(sb.ToString(), TranslationRequest.UserFolders());
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
         }
 
         private void filterText_TextChanged(object sender, EventArgs e)
