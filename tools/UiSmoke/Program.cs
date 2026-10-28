@@ -1051,6 +1051,10 @@ namespace GPSaveConverter.UiSmoke
 
             copyTablesMenu.PerformClick();
             Check(copied.Count == 1 && copied[0].Contains("| saveFile0.sav |") && copied[0].Contains(hiddenLocation), "File > Copy Save File Table(s) copies the same tables, folders hidden");
+            long blobSize = new FileInfo(xboxFiles.Rows.Cast<DataGridViewRow>().Select(r => (XboxFileInfo)r.DataBoundItem).First(f => f.FileID == "SaveSlot0").getFilePath()).Length;
+            long fileSize = new FileInfo(nonXboxFiles.Rows.Cast<DataGridViewRow>().Select(r => (NonXboxFileInfo)r.DataBoundItem).First(f => f.RelativePath == "saveFile0.sav").FilePath).Length;
+            Check(copied.Count == 1 && copied[0].Contains("| SaveGame |  | SaveSlot0 | " + blobSize + " |") && copied[0].Contains("| saveFile0.sav | " + fileSize + " |"),
+                "each file is listed with its size in bytes, the blob's " + blobSize + " and saveFile0.sav's " + fileSize);
 
             Say("== File > Suggest a Translation: nothing when no names agree, and one that pairs the files when they do");
             ToolStripMenuItem suggestMenu = Field<ToolStripMenuItem>(form, "suggestTranslationToolStripMenuItem");

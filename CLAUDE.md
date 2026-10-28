@@ -33,7 +33,7 @@ A real transfer cannot be tried by hand without a Game Pass save. After changing
 | `GPSaveConverter/Library/TranslationSuggester.cs` | Works out a translation from the names of a game's files on both sides |
 | `GPSaveConverter/Library/PlainTranslation.cs` | A translation in plain words, with placeholders such as `{number}`, and the pairs it makes, for the translation editor |
 | `GPSaveConverter/TranslationEditorForm.cs` | The translation editor, opened with **Edit...** in the translations panel |
-| `GPSaveConverter/TranslationRequest.cs` | Builds the GitHub address for **File ▸ Request a Translation** |
+| `GPSaveConverter/TranslationRequest.cs` | Builds the save file tables, and the GitHub address for **File ▸ Request a Translation** |
 | `GPSaveConverter/Xbox/` | Reads and writes the `wgs` container format (`containers.index`, `container.N`) |
 | `GPSaveConverter/Xbox/PickedXboxSave.cs` | Finds the Xbox save in a folder picked with **File ▸ Open Xbox Save Folder** |
 | `GPSaveConverter/SaveBackups/` | Backs up save files before a transfer and restores them |

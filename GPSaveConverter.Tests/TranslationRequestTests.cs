@@ -39,6 +39,57 @@ namespace GPSaveConverter.Tests
             Assert.Contains("&game=Test%20Game", address);
         }
 
+        [Fact]
+        public void SaveFileTables_ListsEachFileWithItsSizeInBytes()
+        {
+            var xboxFiles = new[]
+            {
+                new TranslationRequest.TableRow(1048576, "SaveGame", "", "SaveSlot0"),
+                new TranslationRequest.TableRow(312, "SaveGame", "", "SaveSlot1")
+            };
+            var nonXboxFiles = new[] { new TranslationRequest.TableRow(1048888, @"slot0\saveFile.sav") };
+
+            string tables = TranslationRequest.SaveFileTables("Test Game", "Studio.TestGame_abc123", xboxFiles, @"%APPDATA%\Studio\Test Game\", nonXboxFiles);
+
+            Assert.Equal(
+                "Game Name:Test Game\r\n" +
+                "Game Package ID:Studio.TestGame_abc123\r\n" +
+                "\r\n" +
+                "## Xbox Files:\r\n" +
+                "| Container Name 1 | Container Name 2 | Blob ID | Size (bytes) |\r\n" +
+                "| ---------------- | ---------------- | ------- | ------------ |\r\n" +
+                "| SaveGame |  | SaveSlot0 | 1048576 |\r\n" +
+                "| SaveGame |  | SaveSlot1 | 312 |\r\n" +
+                "## Non-Xbox Files:\r\n" +
+                "Non-Xbox save location: %APPDATA%\\Studio\\Test Game\\\r\n" +
+                "| File Path | Size (bytes) |\r\n" +
+                "| --------- | ------------ |\r\n" +
+                "| slot0\\saveFile.sav | 1048888 |\r\n",
+                tables);
+        }
+
+        [Fact]
+        public void SaveFileTables_AFileThatCouldNotBeRead_HasNoSize()
+        {
+            var nonXboxFiles = new[] { new TranslationRequest.TableRow(null, "saveFile0.sav") };
+
+            string tables = TranslationRequest.SaveFileTables("Test Game", "Studio.TestGame_abc123", null, @"C:\Saves\", nonXboxFiles);
+
+            Assert.Contains("| saveFile0.sav |  |\r\n", tables);
+        }
+
+        [Fact]
+        public void SaveFileTables_ASideThatIsNotListed_HasNoTable()
+        {
+            var xboxFiles = new[] { new TranslationRequest.TableRow(12, "SaveGame", "", "SaveSlot0") };
+
+            string tables = TranslationRequest.SaveFileTables("Test Game", "Studio.TestGame_abc123", xboxFiles, null, null);
+
+            Assert.Contains("## Xbox Files:", tables);
+            Assert.DoesNotContain("## Non-Xbox Files:", tables);
+            Assert.DoesNotContain("Non-Xbox save location", tables);
+        }
+
         private static readonly KeyValuePair<string, string>[] Folders =
         {
             new KeyValuePair<string, string>("%LOCALAPPDATA%", @"C:\Users\Jo\AppData\Local"),

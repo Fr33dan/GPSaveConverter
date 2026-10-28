@@ -138,6 +138,12 @@ With the data in hand:
    - **One file in parts.** Blobs named as pieces of one thing, such as `ChunkData0`, `ChunkData1` and a `toc`, are one save in parts (Fallout 4, #260; Starfield, #64). No translation can join them, so that alone makes the game incompatible.
    - **Separate files.** Blobs with names of their own may be separate files: the save, and things kept beside it such as a header or a picture. The names can even be numbers that recur in every container, such as `1230789541` (Resident Evil, #262, #263).
 
+   From v.0.4.18 the tables give each file's size in bytes. Read the sizes within one side:
+   - Parts of one size with a shorter last one look like one file cut into plain pieces.
+   - In a container of separate files, the largest blob is usually the save, and a small one beside it a header or a picture.
+
+   Across the two sides, sizes that differ prove nothing. A save that has been played on is often far larger than one made only so that the files exist to list. Sizes that agree are worth telling the maintainer about, such as a Steam file as large as one Xbox container's parts together. That points to a plain split, which `CLAUDE.md` puts in scope for the tool to join one day. Tables from v.0.4.17 or earlier have no sizes.
+
    When the containers of the second kind pair up with the other side's files by name, stage a translation that takes one blob from each container, the likeliest first, and name the others as candidates. Calling such a game incompatible needs a report that a copied save was refused. The maintainer corrected this on 2026-10-19, after both Resident Evil requests were first answered as incompatible.
 
    Check first whether the reporter needs one at all. The **+** button in **View ▸ Show File Translations** adds a translation that gives the Xbox container, its second name and the blob the file's own name. When the Xbox table names everything like the file, as Gunfire Reborn does (#68), that works as it is. When only the containers are named differently, changing **Container Name 1** or **2** in it is enough (#41, #54). A few steps in a reply are quicker for the reporter than a staged entry. Its pattern takes almost any name, so tell them to select only the save files when they transfer.

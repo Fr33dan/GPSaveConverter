@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace GPSaveConverter
@@ -34,6 +36,78 @@ namespace GPSaveConverter
 
             tablesIncluded = withTables.Length <= LongestAddress;
             return tablesIncluded ? withTables : start;
+        }
+
+        /// <summary>A row of a file table: the file's names, then its size.</summary>
+        internal sealed class TableRow
+        {
+            /// <param name="size">The size in bytes, or null if the file could not be read.</param>
+            internal TableRow(long? size, params string[] names)
+            {
+                this.Size = size;
+                this.Names = names;
+            }
+
+            internal long? Size { get; }
+            internal string[] Names { get; }
+        }
+
+        /// <summary>
+        /// A game's save files on both sides, as tables for a GitHub issue, each file with its size
+        /// in bytes.
+        /// </summary>
+        /// <remarks>
+        /// Sizes say most within one side: a file kept in parts on one store shows as parts of one
+        /// size and a shorter last one. Across the two sides they say less, as a save that has been
+        /// played on is often larger than one made only so that files exist to list.
+        /// </remarks>
+        /// <param name="xboxFiles">Container Name 1, Container Name 2 and Blob ID of each file, or null for no Xbox table.</param>
+        /// <param name="nonXboxFiles">Each file's path within the save folder, or null for no non-Xbox table.</param>
+        internal static string SaveFileTables(string gameName, string packageName, IEnumerable<TableRow> xboxFiles, string nonXboxLocation, IEnumerable<TableRow> nonXboxFiles)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Game Name:");
+            sb.AppendLine(gameName);
+
+            sb.Append("Game Package ID:");
+            sb.AppendLine(packageName);
+            sb.AppendLine();
+
+            if (xboxFiles != null)
+            {
+                sb.AppendLine("## Xbox Files:");
+                sb.AppendLine("| Container Name 1 | Container Name 2 | Blob ID | Size (bytes) |");
+                sb.AppendLine("| ---------------- | ---------------- | ------- | ------------ |");
+                appendRows(sb, xboxFiles);
+            }
+
+            if (nonXboxFiles != null)
+            {
+                sb.AppendLine("## Non-Xbox Files:");
+                sb.Append("Non-Xbox save location: ");
+                sb.AppendLine(nonXboxLocation);
+                sb.AppendLine("| File Path | Size (bytes) |");
+                sb.AppendLine("| --------- | ------------ |");
+                appendRows(sb, nonXboxFiles);
+            }
+
+            return sb.ToString();
+        }
+
+        private static void appendRows(StringBuilder sb, IEnumerable<TableRow> rows)
+        {
+            foreach (TableRow row in rows)
+            {
+                sb.Append("| ");
+                foreach (string name in row.Names)
+                {
+                    sb.Append(name);
+                    sb.Append(" | ");
+                }
+                sb.Append(row.Size.HasValue ? row.Size.Value.ToString(CultureInfo.InvariantCulture) : String.Empty);
+                sb.AppendLine(" |");
+            }
         }
 
         /// <summary>

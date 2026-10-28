@@ -17,6 +17,7 @@ namespace GPSaveConverter.Interfaces
         FileStream OpenWrite(string path);
         void CopyFile(string sourceFileName, string destFileName, bool overwrite = false);
         DateTime GetFileLastWriteTime(string path);
+        long GetFileLength(string path);
         void SetFileLastWriteTime(string path, DateTime lastWriteTime);
 
         // Directory operations

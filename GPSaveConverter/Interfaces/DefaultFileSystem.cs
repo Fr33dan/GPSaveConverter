@@ -25,6 +25,8 @@ namespace GPSaveConverter.Interfaces
 
         public DateTime GetFileLastWriteTime(string path) => File.GetLastWriteTime(path);
 
+        public long GetFileLength(string path) => new FileInfo(path).Length;
+
         public void SetFileLastWriteTime(string path, DateTime lastWriteTime) =>
             File.SetLastWriteTime(path, lastWriteTime);
 
