@@ -485,6 +485,10 @@ namespace GPSaveConverter.Tests
 
         #region Final Fantasy VII Remake Intergrade (#180)
 
+        // Taken out of testing after #298. The game called a save copied this way corrupted, and with
+        // ff7remakecommon.sav copied too it did not reach its main menu. The tests stay as the record
+        // of what was checked.
+
         private static TranslationSimulator FinalFantasyVIIRemake()
         {
             // The Xbox table as pasted in the issue: a container for each of fourteen slots, and one more.

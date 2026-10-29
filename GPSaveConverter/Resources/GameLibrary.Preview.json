@@ -109,20 +109,6 @@
       ]
     },
     {
-      "Name": "FINAL FANTASY VII REMAKE INTERGRADE",
-      "PackageName": "39EA002F.EXED1_n746a19ndrrjg",
-      "Issues": [ 180 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "ff7remake${Slot}.sav",
-          "XboxFileID": "Data",
-          "ContainerName1": "ff7remake${Slot}",
-          "ContainerName2": "ff7remake${Slot}",
-          "NamedRegexGroups": [ "(?<Slot>[0-9]{3}|common)" ]
-        }
-      ]
-    },
-    {
       "Name": "Generation Zero",
       "PackageName": "AvalancheStudios.GenerationZero_m0byj0nmrybdr",
       "Issues": [ 144 ],
