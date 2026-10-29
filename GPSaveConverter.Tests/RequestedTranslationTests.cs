@@ -2159,6 +2159,57 @@ namespace GPSaveConverter.Tests
             Assert.Equal(Outcome.NoTranslation, Cyberpunk2077().ToXbox(path).Outcome);
         }
 
+        // #299 copies the other way, into the Game Pass version.
+
+        private static TranslationSimulator Cyberpunk2077ToGamePass()
+        {
+            // The tables posted in #299. The Game Pass save has two slots, AutoSave-0 and ManualSave-0.
+            // The other store's folder holds 25 saves, each a folder with the same three files.
+            var xboxFiles = new[]
+            {
+                new XboxFile("Save-AutoSave-0", "AutoSave-0:2f4e2b25559ec851b2194d96c7b8abe7", "AutoSave-0"),
+                new XboxFile("Save-AutoSave-0", "AutoSave-0:2f4e2b25559ec851b2194d96c7b8abe7", "metadata.9.json"),
+                new XboxFile("Save-AutoSave-0", "AutoSave-0:2f4e2b25559ec851b2194d96c7b8abe7", "reserved"),
+                new XboxFile("Save-AutoSave-0", "AutoSave-0:2f4e2b25559ec851b2194d96c7b8abe7", "screenshot.png"),
+                new XboxFile("Save-ManualSave-0", "ManualSave-0:77c0dda04cfdfdf18fa82761535a3b82", "ManualSave-0"),
+                new XboxFile("Save-ManualSave-0", "ManualSave-0:77c0dda04cfdfdf18fa82761535a3b82", "metadata.9.json"),
+                new XboxFile("Save-ManualSave-0", "ManualSave-0:77c0dda04cfdfdf18fa82761535a3b82", "screenshot.png"),
+                new XboxFile("Save-QuickSave-Reserved", "QuickSave-:f1305d5afd73b0ea29b8eefa1952c376", "reserved"),
+                new XboxFile("SettingsWinGDK", "SettingsWinGDK", "reserved"),
+                new XboxFile("SettingsWinGDK", "SettingsWinGDK", "settings.json"),
+                new XboxFile("UserFile", "UserFile", "reserved"),
+                new XboxFile("UserFile", "UserFile", "user.gls")
+            };
+            var slots = Enumerable.Range(0, 20).Select(n => "AutoSave-" + n)
+                                  .Concat(new[] { "EndGameSave-0", "ManualSave-1", "PointOfNoReturnSave-0", "PointOfNoReturnSave-1", "PointOfNoReturnSave-2" });
+            var nonXboxFiles = slots.SelectMany(slot => new[] { "metadata.9.json", "sav.dat", "screenshot.png" }.Select(file => slot + "\\" + file))
+                                    .ToArray();
+
+            return new TranslationSimulator(Profile("Cyberpunk2077"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("sav.dat", "AutoSave-0")]
+        [InlineData("metadata.9.json", "metadata.9.json")]
+        [InlineData("screenshot.png", "screenshot.png")]
+        public void Cyberpunk2077_ToGamePass_SlotOnBothSides_GoesIntoItsContainer(string file, string blob)
+        {
+            var toXbox = Cyberpunk2077ToGamePass().ToXbox("AutoSave-0\\" + file);
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("Save-AutoSave-0 | AutoSave-0:2f4e2b25559ec851b2194d96c7b8abe7 | " + blob, toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("ManualSave-1\\sav.dat")]
+        [InlineData("AutoSave-1\\sav.dat")]
+        [InlineData("PointOfNoReturnSave-2\\metadata.9.json")]
+        public void Cyberpunk2077_ToGamePass_SlotOnlyOnPC_HasNoContainerToGoInto(string path)
+        {
+            // ManualSave-1 is not ManualSave-0, and AutoSave-1 is not AutoSave-0.
+            Assert.Equal(Outcome.NoContainer, Cyberpunk2077ToGamePass().ToXbox(path).Outcome);
+        }
+
         #endregion
 
         #region Well Dweller (#287)
