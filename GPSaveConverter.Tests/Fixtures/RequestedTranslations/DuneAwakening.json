@@ -1,0 +1,61 @@
+{
+  "Name": "Dune: Awakening",
+  "PackageName": "FuncomOsloAS.ProjectSeabass_pkaskhy6cdq4g",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\DuneSandbox\\Saved\\Cloud\\PlayerClientStorage\\FLS_retail\\<user-id>\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${FileName}",
+      "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+      "ContainerName1": "userdatastorage",
+      "ContainerName2": "",
+      "NamedRegexGroups": [
+        "(?<FileName>[\\w\\-. ]+)"
+      ]
+    },
+    {
+      "NonXboxFilename": "ClientPersistence\\\\${FileName}",
+      "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+      "ContainerName1": "userdatastorage/ClientPersistence",
+      "ContainerName2": "",
+      "NamedRegexGroups": [
+        "(?<FileName>[\\w\\-. ]+)"
+      ]
+    },
+    {
+      "NonXboxFilename": "autosave\\\\${FileName}",
+      "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+      "ContainerName1": "userdatastorage/autosave",
+      "ContainerName2": "",
+      "NamedRegexGroups": [
+        "(?<FileName>[\\w\\-. ]+)"
+      ]
+    },
+    {
+      "NonXboxFilename": "SOLO\\\\${FileName}",
+      "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+      "ContainerName1": "userdatastorage/SOLO",
+      "ContainerName2": "",
+      "NamedRegexGroups": [
+        "(?<FileName>[\\w\\-. ]+)"
+      ]
+    },
+    {
+      "NonXboxFilename": "SOLO\\\\ClientPersistence\\\\${FileName}",
+      "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+      "ContainerName1": "userdatastorage/SOLO/ClientPersistence",
+      "ContainerName2": "",
+      "NamedRegexGroups": [
+        "(?<FileName>[\\w\\-. ]+)"
+      ]
+    },
+    {
+      "NonXboxFilename": "SOLO\\\\FogOfWar\\\\${FileName}",
+      "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+      "ContainerName1": "userdatastorage/SOLO/FogOfWar",
+      "ContainerName2": "",
+      "NamedRegexGroups": [
+        "(?<FileName>[\\w\\-. ]+)"
+      ]
+    }
+  ]
+}

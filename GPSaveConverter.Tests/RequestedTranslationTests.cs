@@ -58,6 +58,7 @@ namespace GPSaveConverter.Tests
         [InlineData("Cyberpunk2077")]
         [InlineData("WellDweller")]
         [InlineData("PalworldEveryWorld")]
+        [InlineData("DuneAwakening")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
