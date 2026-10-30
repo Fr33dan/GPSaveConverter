@@ -58,6 +58,7 @@ namespace GPSaveConverter.Tests
         [InlineData("Cyberpunk2077")]
         [InlineData("WellDweller")]
         [InlineData("PalworldEveryWorld")]
+        [InlineData("Witcher3")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2346,6 +2347,83 @@ namespace GPSaveConverter.Tests
         public void PalworldEveryWorld_SteamBackupsAndCloudFile_AreLeftAlone(string steamPath)
         {
             Assert.Equal(Outcome.NoTranslation, PalworldEveryWorld().ToXbox(steamPath).Outcome);
+        }
+
+        #endregion
+
+        #region The Witcher 3: Wild Hunt – Game of the Year Edition (#305)
+
+        private static TranslationSimulator Witcher3()
+        {
+            // Part of the tables posted in #305. Each Game Pass save is a container named after it, with
+            // the first number of the name as its second name, holding the blobs con, meta, sav and scr.
+            // The other store keeps each save as a .sav file with a .png beside it. No save has the same
+            // name on both sides, so a save copied to Game Pass needs a container of its own.
+            string[] containers =
+            {
+                "AutoSave_53db9_7ea49c00_5e8c9b7", "CheckPoint_55607_7ea4d400_521cee6",
+                "ManualSave_55607_7ea4f400_36208f7", "ManualSave_55607_7ea4f400_3624441"
+            };
+            var xboxFiles = containers
+                .SelectMany(c => new[] { "con", "meta", "sav", "scr" }.Select(blob => new XboxFile(c, c.Split('_')[1], blob)))
+                .Concat(new[] { new XboxFile("input", "input", "str"), new XboxFile("settings", "settings", "str") })
+                .ToArray();
+            var nonXboxFiles = new[]
+            {
+                "ManualSave_100056_7e104000_3c6a2f4.png", "ManualSave_100056_7e104000_3c6a2f4.sav",
+                "ManualSave_55607_7e103c00_5c805de.png", "ManualSave_55607_7e103c00_5c805de.sav",
+                "ManualSave_fff7b_7e103c00_599d695.png", "ManualSave_fff7b_7e103c00_599d695.sav",
+                "ready for kovir.png", "ready for kovir.sav"
+            };
+            return new TranslationSimulator(Profile("Witcher3"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("ManualSave_100056_7e104000_3c6a2f4", "100056")]
+        [InlineData("ManualSave_55607_7e103c00_5c805de", "55607")]
+        [InlineData("ManualSave_fff7b_7e103c00_599d695", "fff7b")]
+        public void Witcher3_PCSave_GoesIntoANewContainerNamedAfterIt(string save, string id)
+        {
+            // ManualSave_55607_... on PC is not the Game Pass save ManualSave_55607_7ea4f400_..., though
+            // both start with 55607.
+            Assert.Equal(Outcome.NoContainer, Witcher3().ToXbox(save + ".sav").Outcome);
+
+            string problem;
+            string[] names = Profile("Witcher3").First().NewContainerNames(save + ".sav", TranslationSimulator.XboxProfileID, out problem);
+            Assert.True(names != null, problem);
+            Assert.Equal(new[] { save, id }, names);
+        }
+
+        [Theory]
+        [InlineData("AutoSave_53db9_7ea49c00_5e8c9b7", "53db9")]
+        [InlineData("CheckPoint_55607_7ea4d400_521cee6", "55607")]
+        [InlineData("ManualSave_55607_7ea4f400_36208f7", "55607")]
+        public void Witcher3_GamePassSave_BecomesASavFileOfTheSameName(string container, string id)
+        {
+            var toNonXbox = Witcher3().ToNonXbox(new XboxFile(container, id, "sav"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(container + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("ManualSave_55607_7ea4f400_36208f7", "55607", "con")]
+        [InlineData("ManualSave_55607_7ea4f400_36208f7", "55607", "meta")]
+        [InlineData("ManualSave_55607_7ea4f400_36208f7", "55607", "scr")]
+        [InlineData("input", "input", "str")]
+        [InlineData("settings", "settings", "str")]
+        public void Witcher3_OtherXboxFiles_AreLeftAlone(string container1, string container2, string blob)
+        {
+            Assert.Equal(Outcome.NoTranslation, Witcher3().ToNonXbox(new XboxFile(container1, container2, blob)).Outcome);
+        }
+
+        [Theory]
+        [InlineData("ManualSave_55607_7e103c00_5c805de.png")]
+        [InlineData("ready for kovir.sav")]
+        [InlineData("ready for kovir.png")]
+        public void Witcher3_PicturesAndNamedSaves_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, Witcher3().ToXbox(path).Outcome);
         }
 
         #endregion
