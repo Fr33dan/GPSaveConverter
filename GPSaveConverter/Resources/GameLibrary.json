@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-29",
+  "Version": "2026-10-30",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -552,6 +552,56 @@
           "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
         }
       ]
+    },
+    {
+      "Name": "Dune: Awakening",
+      "PackageName": "FuncomOsloAS.ProjectSeabass_pkaskhy6cdq4g",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\DuneSandbox\\Saved\\Cloud\\PlayerClientStorage\\FLS_retail\\<user-id>\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${FileName}",
+          "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+          "ContainerName1": "userdatastorage",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. ]+)" ]
+        },
+        {
+          "NonXboxFilename": "ClientPersistence\\\\${FileName}",
+          "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+          "ContainerName1": "userdatastorage/ClientPersistence",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. ]+)" ]
+        },
+        {
+          "NonXboxFilename": "autosave\\\\${FileName}",
+          "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+          "ContainerName1": "userdatastorage/autosave",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. ]+)" ]
+        },
+        {
+          "NonXboxFilename": "SOLO\\\\${FileName}",
+          "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+          "ContainerName1": "userdatastorage/SOLO",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. ]+)" ]
+        },
+        {
+          "NonXboxFilename": "SOLO\\\\ClientPersistence\\\\${FileName}",
+          "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+          "ContainerName1": "userdatastorage/SOLO/ClientPersistence",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. ]+)" ]
+        },
+        {
+          "NonXboxFilename": "SOLO\\\\FogOfWar\\\\${FileName}",
+          "XboxFileID": "(?<FileName>[\\w\\-. ]+)",
+          "ContainerName1": "userdatastorage/SOLO/FogOfWar",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<FileName>[\\w\\-. ]+)" ]
+        }
+      ]
     }
   ],
   "Warnings": [
@@ -562,6 +612,7 @@
     { "Name": "Day of the Tentacle Remastered", "PackageName": "Microsoft.DayoftheTentacleRemastered_8wekyb3d8bbwe", "Direction": "ToXbox", "Text": "The Xbox version lists a copied Steam save, and loading it closes the game (#11)." },
     { "Name": "DOOM Eternal", "PackageName": "BethesdaSoftworks.DOOMEternal-PC_3275kfvn8vcwc", "Direction": "FromXbox", "Text": "The Steam version finds the profile and save slot copied from Game Pass, and calls both corrupt (#120)." },
     { "Name": "Dragon Ball Xenoverse 2", "PackageName": "NAMCOBANDAIGamesInc.DBXV2BaseGame_gdy2aq6ez762w", "Text": "The game calls a copied save corrupt, whichever way it was copied (#155)." },
+    { "Name": "Dune: Awakening", "PackageName": "FuncomOsloAS.ProjectSeabass_pkaskhy6cdq4g", "Direction": "FromXbox", "Text": "The copy is complete but the character only appears after the game's own account row is rewritten: game.db keys the character to a row in its accounts table (user, funcom_id, platform_id, platform_name), so a save copied from Game Pass comes up as a new level 0 character until those four values are changed to the Steam account. The world itself is intact. #303 describes how." },
     { "Name": "Eiyuden Chronicle: Hundred Heroes", "PackageName": "505GAMESS.P.A.EiyudenChronicleHundredHeroes_tefn33qh9azfc", "Text": "The two versions write the save differently. The game called a copied save corrupt and deleted it (#93)." },
     { "Name": "Fallout 4", "PackageName": "BethesdaSoftworks.Fallout4-CoreGame_3275kfvn8vcwc", "Text": "The Game Pass version keeps each save in several parts and the Steam version in one file, so a copied save does not work (#260)." },
     { "Name": "FINAL FANTASY VII REMAKE INTERGRADE", "PackageName": "39EA002F.EXED1_n746a19ndrrjg", "Direction": "ToXbox", "Text": "The Game Pass version calls a save copied from Steam corrupted. With ff7remakecommon.sav copied too, the game does not reach its main menu (#298)." },
