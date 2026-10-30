@@ -1,0 +1,14 @@
+{
+  "Name": "The Witcher 3: Wild Hunt – Game of the Year Edition",
+  "PackageName": "CDPROJEKTSA.Witcher3GOTY_0xkrdv0gjmk28",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\The Witcher 3\\gamesaves\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Kind}_${Id}_${Stamp}\\.sav",
+      "XboxFileID": "sav",
+      "ContainerName1": "${Kind}_${Id}_${Stamp}",
+      "ContainerName2": "${Id}",
+      "NamedRegexGroups": [ "(?<Kind>[A-Za-z]+)", "(?<Id>[0-9a-f]+)", "(?<Stamp>[0-9a-f]+_[0-9a-f]+)" ]
+    }
+  ]
+}
