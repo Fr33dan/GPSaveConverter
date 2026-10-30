@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-29",
+  "Version": "2026-10-30",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -569,6 +569,7 @@
     { "Name": "Halo Infinite", "PackageName": "Microsoft.254428597CFE2_8wekyb3d8bbwe", "Direction": "FromXbox", "Text": "The Steam version loads a save copied from Game Pass only after the first 272 bytes of one of its own saves are added to it with a hex editor. #76 describes how." },
     { "Name": "Kunitsu-Gami: Path of the Goddess", "PackageName": "F024294D.Kunitsu-Gami_8fty0by30jkny", "Direction": "FromXbox", "Text": "The Steam version reports \"Failed to load system saved data\" for a save copied from Game Pass (#156)." },
     { "Name": "Monster Hunter Rise", "PackageName": "F024294D.50755C2F12831_8fty0by30jkny", "Text": "The game hangs on loading a copied save, or calls it corrupt (#34)." },
+    { "Name": "Palworld", "PackageName": "PocketpairInc.Palworld_ad4psfrxyesvt", "Direction": "FromXbox", "Text": "The Steam version finds worlds copied from Game Pass in its own world folder, and calls them corrupted (#286)." },
     { "Name": "Persona 3 Reload", "PackageName": "SEGAofAmericaInc.L0cb6b3aea_s751p9cej88mt", "Direction": "ToXbox", "Text": "Steam saves copied to Game Pass show up as empty slots (#165)." },
     { "Name": "Resonance: A Plague Tale Legacy", "PackageName": "FocusHomeInteractiveSA.APlagueTaleFelons_4hny5m903y3g0", "Direction": "ToXbox", "Text": "The Xbox version discards a copied Steam save and starts a new one (#182)." },
     { "Name": "Starfield", "PackageName": "BethesdaSoftworks.ProjectGold_3275kfvn8vcwc", "Text": "The Game Pass version keeps each save in many parts and the Steam version in one file, so a copied save does not work (#64)." },
