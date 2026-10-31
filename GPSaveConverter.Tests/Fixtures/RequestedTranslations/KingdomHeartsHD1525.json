@@ -1,0 +1,15 @@
+{
+  "Name": "KINGDOM HEARTS -HD 1.5+2.5 ReMIX-",
+  "PackageName": "39EA002F.KH1.52.5_n746a19ndrrjg",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\KINGDOM HEARTS HD 1.5+2.5 ReMIX\\Steam\\<user-id_SteamID64>\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "KHFM_WW\\.png",
+      "XboxFileID": "KH1SaveData/SAVE0\\.DAT",
+      "ContainerName1": "KH1SaveData/SAVE0\\.DAT",
+      "ContainerName2": "KH1SaveData/SAVE0\\.DAT",
+      "NamedRegexGroups": []
+    }
+  ]
+}
