@@ -2431,6 +2431,10 @@ namespace GPSaveConverter.Tests
 
         #region KINGDOM HEARTS -HD 1.5+2.5 ReMIX- (#308)
 
+        // Taken out of testing after #308. The reporter copied KHFM_WW.png into the Game Pass
+        // version, and the save was missing in the game. The tests stay as the record of what was
+        // checked.
+
         private static readonly XboxFile KingdomHeartsKH1Save = new XboxFile("KH1SaveData/SAVE0.DAT", "KH1SaveData/SAVE0.DAT", "KH1SaveData/SAVE0.DAT");
 
         private static TranslationSimulator KingdomHeartsHD1525()
