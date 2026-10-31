@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-10-30",
+  "Version": "2026-10-31",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -567,6 +567,7 @@
     { "Name": "FINAL FANTASY VII REMAKE INTERGRADE", "PackageName": "39EA002F.EXED1_n746a19ndrrjg", "Direction": "ToXbox", "Text": "The Game Pass version calls a save copied from Steam corrupted. With ff7remakecommon.sav copied too, the game does not reach its main menu (#298)." },
     { "Name": "Forza Horizon 4", "PackageName": "Microsoft.SunriseBaseGame_8wekyb3d8bbwe", "Text": "The game rejects a copied save (#146)." },
     { "Name": "Halo Infinite", "PackageName": "Microsoft.254428597CFE2_8wekyb3d8bbwe", "Direction": "FromXbox", "Text": "The Steam version loads a save copied from Game Pass only after the first 272 bytes of one of its own saves are added to it with a hex editor. #76 describes how." },
+    { "Name": "KINGDOM HEARTS -HD 1.5+2.5 ReMIX-", "PackageName": "39EA002F.KH1.52.5_n746a19ndrrjg", "Direction": "ToXbox", "Text": "A Kingdom Hearts Final Mix save copied from Steam was missing in the Game Pass version (#308)." },
     { "Name": "Kunitsu-Gami: Path of the Goddess", "PackageName": "F024294D.Kunitsu-Gami_8fty0by30jkny", "Direction": "FromXbox", "Text": "The Steam version reports \"Failed to load system saved data\" for a save copied from Game Pass (#156)." },
     { "Name": "Monster Hunter Rise", "PackageName": "F024294D.50755C2F12831_8fty0by30jkny", "Text": "The game hangs on loading a copied save, or calls it corrupt (#34)." },
     { "Name": "Palworld", "PackageName": "PocketpairInc.Palworld_ad4psfrxyesvt", "Direction": "FromXbox", "Text": "The Steam version finds worlds copied from Game Pass in its own world folder, and calls them corrupted (#286)." },
