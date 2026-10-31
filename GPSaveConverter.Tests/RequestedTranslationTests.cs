@@ -59,6 +59,7 @@ namespace GPSaveConverter.Tests
         [InlineData("WellDweller")]
         [InlineData("PalworldEveryWorld")]
         [InlineData("Witcher3")]
+        [InlineData("KingdomHeartsHD1525")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2424,6 +2425,66 @@ namespace GPSaveConverter.Tests
         public void Witcher3_PicturesAndNamedSaves_AreLeftAlone(string path)
         {
             Assert.Equal(Outcome.NoTranslation, Witcher3().ToXbox(path).Outcome);
+        }
+
+        #endregion
+
+        #region KINGDOM HEARTS -HD 1.5+2.5 ReMIX- (#308)
+
+        private static readonly XboxFile KingdomHeartsKH1Save = new XboxFile("KH1SaveData/SAVE0.DAT", "KH1SaveData/SAVE0.DAT", "KH1SaveData/SAVE0.DAT");
+
+        private static TranslationSimulator KingdomHeartsHD1525()
+        {
+            // The tables posted in #308. On Game Pass each game of the collection keeps a container
+            // named <game>SaveData/SAVE0.DAT, with the same name three times. The Steam version keeps
+            // a .png per game: KHFM_WW.png for Kingdom Hearts Final Mix, which is KH1. Only KH1 has a
+            // save on both sides, so only it is paired.
+            var xboxFiles = new[]
+            {
+                KingdomHeartsKH1Save,
+                new XboxFile("KH1SaveData/TitleLaunchHistory.DAT", "KH1SaveData/TitleLaunchHistory.DAT", "KH1SaveData/TitleLaunchHistory.DAT"),
+                new XboxFile("MareSaveData/SAVE0.DAT", "MareSaveData/SAVE0.DAT", "MareSaveData/SAVE0.DAT"),
+                new XboxFile("MareSaveData/TitleLaunchHistory.DAT", "MareSaveData/TitleLaunchHistory.DAT", "MareSaveData/TitleLaunchHistory.DAT"),
+                new XboxFile("config1525.dat", "config1525.dat", "config1525.dat")
+            };
+            var nonXboxFiles = new[] { "config1525.dat", "KH1.5+2.5_system_WW.png", "KHFM_WW.png", "KHIIFM_WW.png", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("KingdomHeartsHD1525"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void KingdomHeartsHD1525_KH1Save_MapsBothWays()
+        {
+            TranslationSimulator game = KingdomHeartsHD1525();
+
+            var toXbox = game.ToXbox("KHFM_WW.png");
+            var toNonXbox = game.ToNonXbox(KingdomHeartsKH1Save);
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(KingdomHeartsKH1Save.ToString(), toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("KHFM_WW.png", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("KHIIFM_WW.png")]
+        [InlineData("KH1.5+2.5_system_WW.png")]
+        [InlineData("config1525.dat")]
+        [InlineData("steam_autocloud.vdf")]
+        public void KingdomHeartsHD1525_OtherSteamFiles_AreLeftAlone(string path)
+        {
+            // KH2's save has no container on Game Pass yet, and the system file and settings have no
+            // counterpart there that the posted names show.
+            Assert.Equal(Outcome.NoTranslation, KingdomHeartsHD1525().ToXbox(path).Outcome);
+        }
+
+        [Theory]
+        [InlineData("KH1SaveData/TitleLaunchHistory.DAT")]
+        [InlineData("MareSaveData/SAVE0.DAT")]
+        [InlineData("config1525.dat")]
+        public void KingdomHeartsHD1525_OtherXboxFiles_AreLeftAlone(string name)
+        {
+            Assert.Equal(Outcome.NoTranslation, KingdomHeartsHD1525().ToNonXbox(new XboxFile(name, name, name)).Outcome);
         }
 
         #endregion
