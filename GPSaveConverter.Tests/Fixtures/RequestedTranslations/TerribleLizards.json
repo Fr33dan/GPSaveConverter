@@ -1,0 +1,14 @@
+{
+  "Name": "Terrible Lizards",
+  "PackageName": "DigitalPajamas.TerribleLizards_q2ff5vnm5q6e4",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\terrible_lizards\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "Saved\\\\SaveGames\\\\save${Slot}\\.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "save${Slot}",
+      "ContainerName2": "save${Slot}",
+      "NamedRegexGroups": [ "(?<Slot>[0-9]+)" ]
+    }
+  ]
+}

@@ -440,6 +440,21 @@
           "NamedRegexGroups": [ "(?<Kind>[A-Za-z]+)", "(?<Id>[0-9a-f]+)", "(?<Stamp>[0-9a-f]+_[0-9a-f]+)" ]
         }
       ]
+    },
+    {
+      "Name": "Terrible Lizards",
+      "PackageName": "DigitalPajamas.TerribleLizards_q2ff5vnm5q6e4",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\terrible_lizards\\",
+      "Issues": [ 315 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "Saved\\\\SaveGames\\\\save${Slot}\\.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "save${Slot}",
+          "ContainerName2": "save${Slot}",
+          "NamedRegexGroups": [ "(?<Slot>[0-9]+)" ]
+        }
+      ]
     }
   ]
 }
