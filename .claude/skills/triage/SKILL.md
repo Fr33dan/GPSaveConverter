@@ -34,6 +34,8 @@ gh api 'repos/Fr33dan/GPSaveConverter/issues?state=open&labels=needs-info&sort=u
 for n in $(gh api 'repos/Fr33dan/GPSaveConverter/issues?state=open&sort=updated&direction=desc&per_page=30' --jq '.[] | select(.pull_request | not) | select(.comments > 0) | .number'); do gh api "repos/Fr33dan/GPSaveConverter/issues/$n/comments?per_page=100" --jq "last | select(.user.login != \"Fr33dan\") | \"$n\t\(.created_at)\t\(.user.login)\""; done
 # The same for the 20 closed issues updated last. A reporter can post a result and close the issue at once (#282).
 for n in $(gh api 'repos/Fr33dan/GPSaveConverter/issues?state=closed&sort=updated&direction=desc&per_page=20' --jq '.[] | select(.pull_request | not) | select(.comments > 0) | .number'); do gh api "repos/Fr33dan/GPSaveConverter/issues/$n/comments?per_page=100" --jq "last | select(.user.login != \"Fr33dan\") | \"$n\t\(.created_at)\t\(.user.login)\""; done
+# Issues closed in the last three days with no label and no comment: closed before anyone answered (#309).
+gh api 'repos/Fr33dan/GPSaveConverter/issues?state=closed&sort=updated&direction=desc&per_page=30' --jq '.[] | select(.pull_request | not) | select(.comments == 0) | select(.labels | length == 0) | select((.closed_at | fromdateiso8601) > (now - 3*86400)) | "\(.number)\t\(.closed_at)\t\(.user.login)\t\(.title)"'
 # One issue, whole: its text, then every comment.
 gh api repos/Fr33dan/GPSaveConverter/issues/N --jq '.title, .body'
 gh api 'repos/Fr33dan/GPSaveConverter/issues/N/comments?per_page=100' --paginate --jq '.[] | "--- \(.user.login) \(.created_at)\n\(.body)"'
@@ -81,6 +83,19 @@ gh issue list --state closed --search "sort:updated-desc" --limit 20 --json numb
 ```
 
 Treat a comment found there as you would one on an open issue. A test result goes through the same steps, such as taking a translation the game refused out of the preview file. Leave the issue closed. A thank-you on an issue that is settled needs no answer.
+
+An issue can also be closed before anyone answers it. On #309 the reporter opened a translation request and closed it a minute later, with no comment and no label. The check above only looks at issues that have comments, so neither run that day saw it. List those as well:
+
+```
+gh api 'repos/Fr33dan/GPSaveConverter/issues?state=closed&sort=updated&direction=desc&per_page=30' --jq '.[] | select(.pull_request | not) | select(.comments == 0) | select(.labels | length == 0) | select((.closed_at | fromdateiso8601) > (now - 3*86400)) | "\(.number)\t\(.closed_at)\t\(.user.login)\t\(.title)"'
+```
+
+Read each one. Leave it closed, and post one short comment.
+
+- For a translation request, ask whether the game loaded the save, and which translation they used. The reporter may have found one in the tool, and their answer can put the game in the library.
+- For anything else, answer it, or ask what is still wrong.
+
+Once that comment is posted, the issue drops out of this list, and the check above catches the reporter's answer.
 
 ## Labels
 
