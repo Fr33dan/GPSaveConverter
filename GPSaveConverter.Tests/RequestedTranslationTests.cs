@@ -60,6 +60,7 @@ namespace GPSaveConverter.Tests
         [InlineData("PalworldEveryWorld")]
         [InlineData("Witcher3")]
         [InlineData("KingdomHeartsHD1525")]
+        [InlineData("TerribleLizards")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2489,6 +2490,68 @@ namespace GPSaveConverter.Tests
         public void KingdomHeartsHD1525_OtherXboxFiles_AreLeftAlone(string name)
         {
             Assert.Equal(Outcome.NoTranslation, KingdomHeartsHD1525().ToNonXbox(new XboxFile(name, name, name)).Outcome);
+        }
+
+        #endregion
+
+        #region Terrible Lizards (#315)
+
+        private static readonly XboxFile TerribleLizardsSave1 = new XboxFile("save1", "save1", "Data");
+
+        private static TranslationSimulator TerribleLizards()
+        {
+            // The tables posted in #315. The Game Pass save is a container named save1, twice, holding
+            // one blob, Data. The Steam version keeps Saved\SaveGames\save1.sav, beside settings, crash
+            // reporter files and a shader cache, which are left out.
+            var xboxFiles = new[] { TerribleLizardsSave1 };
+            var nonXboxFiles = new[]
+            {
+                "Saved\\terrible_lizards_PCD3D_SM6.upipelinecache",
+                "Saved\\Config\\CrashReportClient\\UECC-Windows-005130004897060F6902FEBF0F04A895\\CrashReportClient.ini",
+                "Saved\\Config\\CrashReportClient\\UECC-WinGDK-C1C8B83542FA42FEE1F546995B4F2907\\CrashReportClient.ini",
+                "Saved\\Config\\Windows\\GameUserSettings.ini",
+                "Saved\\Config\\WinGDK\\GameUserSettings.ini",
+                "Saved\\SaveGames\\save1.sav"
+            };
+
+            return new TranslationSimulator(Profile("TerribleLizards"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void TerribleLizards_Save1_MapsBothWays()
+        {
+            TranslationSimulator game = TerribleLizards();
+
+            var toXbox = game.ToXbox("Saved\\SaveGames\\save1.sav");
+            var toNonXbox = game.ToNonXbox(TerribleLizardsSave1);
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(TerribleLizardsSave1.ToString(), toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("Saved\\SaveGames\\save1.sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void TerribleLizards_SteamOnlySlot_CanHaveAContainerMade()
+        {
+            // No such slot was posted. It checks that the container names spell out one name.
+            Assert.Equal(Outcome.NoContainer, TerribleLizards().ToXbox("Saved\\SaveGames\\save2.sav").Outcome);
+
+            string problem;
+            string[] names = Profile("TerribleLizards").Single().NewContainerNames("Saved\\SaveGames\\save2.sav", TranslationSimulator.XboxProfileID, out problem);
+            Assert.True(names != null, problem);
+            Assert.Equal(new[] { "save2", "save2" }, names);
+        }
+
+        [Theory]
+        [InlineData("Saved\\terrible_lizards_PCD3D_SM6.upipelinecache")]
+        [InlineData("Saved\\Config\\CrashReportClient\\UECC-Windows-005130004897060F6902FEBF0F04A895\\CrashReportClient.ini")]
+        [InlineData("Saved\\Config\\Windows\\GameUserSettings.ini")]
+        [InlineData("Saved\\Config\\WinGDK\\GameUserSettings.ini")]
+        [InlineData("save1.sav")]
+        public void TerribleLizards_OtherSteamFiles_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, TerribleLizards().ToXbox(path).Outcome);
         }
 
         #endregion
