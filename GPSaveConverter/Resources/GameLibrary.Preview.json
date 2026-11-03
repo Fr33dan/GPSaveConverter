@@ -109,6 +109,21 @@
       ]
     },
     {
+      "Name": "Escape the Backrooms",
+      "PackageName": "SecretMode.EscapetheBackrooms_w0mtarpevwbkm",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\EscapeTheBackrooms\\Saved\\SaveGames\\",
+      "Issues": [ 318 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Save}\\.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${Save}",
+          "ContainerName2": "${Save}",
+          "NamedRegexGroups": [ "(?<Save>MAINSAVE|MULTIPLAYER_[A-Za-z0-9_]+)" ]
+        }
+      ]
+    },
+    {
       "Name": "Generation Zero",
       "PackageName": "AvalancheStudios.GenerationZero_m0byj0nmrybdr",
       "Issues": [ 144 ],

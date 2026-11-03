@@ -1,0 +1,14 @@
+{
+  "Name": "Escape the Backrooms",
+  "PackageName": "SecretMode.EscapetheBackrooms_w0mtarpevwbkm",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\EscapeTheBackrooms\\Saved\\SaveGames\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Save}\\.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${Save}",
+      "ContainerName2": "${Save}",
+      "NamedRegexGroups": [ "(?<Save>MAINSAVE|MULTIPLAYER_[A-Za-z0-9_]+)" ]
+    }
+  ]
+}
