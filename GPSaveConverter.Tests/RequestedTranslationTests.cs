@@ -61,6 +61,7 @@ namespace GPSaveConverter.Tests
         [InlineData("Witcher3")]
         [InlineData("KingdomHeartsHD1525")]
         [InlineData("TerribleLizards")]
+        [InlineData("EscapeTheBackrooms")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2552,6 +2553,82 @@ namespace GPSaveConverter.Tests
         public void TerribleLizards_OtherSteamFiles_AreLeftAlone(string path)
         {
             Assert.Equal(Outcome.NoTranslation, TerribleLizards().ToXbox(path).Outcome);
+        }
+
+        #endregion
+
+        #region Escape the Backrooms (#318)
+
+        private static XboxFile EscapeTheBackroomsContainer(string name)
+        {
+            return new XboxFile(name, name, "Data");
+        }
+
+        private static TranslationSimulator EscapeTheBackrooms()
+        {
+            // The second set of tables posted in #318, from the Steam save folder. Each Game Pass file is a
+            // container named after it, twice, holding one blob, Data. The Steam version keeps <name>.sav.
+            // Only the saves are paired: MAINSAVE and the MULTIPLAYER_ runs, not the settings or the list
+            // of blocked players.
+            var xboxFiles = new[] { "BlockedPlayers", "CostumeSettings", "GameSettings_SaveSlot", "MAINSAVE", "MULTIPLAYER_GENSAVE1_Normal", "MULTIPLAYER_Solo_Easy" }
+                .Select(EscapeTheBackroomsContainer).ToArray();
+            var nonXboxFiles = new[] { "BlockedPlayers.sav", "GameSettings_SaveSlot.sav", "MAINSAVE.sav", "MULTIPLAYER_GENSAVE0_Normal.sav", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("EscapeTheBackrooms"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void EscapeTheBackrooms_MainSave_MapsBothWays()
+        {
+            TranslationSimulator game = EscapeTheBackrooms();
+
+            var toNonXbox = game.ToNonXbox(EscapeTheBackroomsContainer("MAINSAVE"));
+            var toXbox = game.ToXbox("MAINSAVE.sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("MAINSAVE.sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(EscapeTheBackroomsContainer("MAINSAVE").ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("MULTIPLAYER_GENSAVE1_Normal")]
+        [InlineData("MULTIPLAYER_Solo_Easy")]
+        public void EscapeTheBackrooms_GamePassOnlySave_BecomesASavFileOfTheSameName(string name)
+        {
+            var toNonXbox = EscapeTheBackrooms().ToNonXbox(EscapeTheBackroomsContainer(name));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(name + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void EscapeTheBackrooms_SteamOnlySave_GetsAContainerOfItsName()
+        {
+            Assert.Equal(Outcome.NoContainer, EscapeTheBackrooms().ToXbox("MULTIPLAYER_GENSAVE0_Normal.sav").Outcome);
+
+            string problem;
+            string[] names = Profile("EscapeTheBackrooms").Single().NewContainerNames("MULTIPLAYER_GENSAVE0_Normal.sav", TranslationSimulator.XboxProfileID, out problem);
+            Assert.True(names != null, problem);
+            Assert.Equal(new[] { "MULTIPLAYER_GENSAVE0_Normal", "MULTIPLAYER_GENSAVE0_Normal" }, names);
+        }
+
+        [Theory]
+        [InlineData("BlockedPlayers")]
+        [InlineData("CostumeSettings")]
+        [InlineData("GameSettings_SaveSlot")]
+        public void EscapeTheBackrooms_SettingsOnGamePass_AreLeftAlone(string name)
+        {
+            Assert.Equal(Outcome.NoTranslation, EscapeTheBackrooms().ToNonXbox(EscapeTheBackroomsContainer(name)).Outcome);
+        }
+
+        [Theory]
+        [InlineData("BlockedPlayers.sav")]
+        [InlineData("GameSettings_SaveSlot.sav")]
+        [InlineData("steam_autocloud.vdf")]
+        public void EscapeTheBackrooms_SettingsOnSteam_AreLeftAlone(string path)
+        {
+            Assert.Equal(Outcome.NoTranslation, EscapeTheBackrooms().ToXbox(path).Outcome);
         }
 
         #endregion
