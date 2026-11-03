@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-11-01",
+  "Version": "2026-11-02",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -550,6 +550,20 @@
           "ContainerName1": "MainSave",
           "ContainerName2": "MainSave",
           "NamedRegexGroups": [ "(?<SlotNumber>\\d+)", "(?<FileName>.*)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Terrible Lizards",
+      "PackageName": "DigitalPajamas.TerribleLizards_q2ff5vnm5q6e4",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\terrible_lizards\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "Saved\\\\SaveGames\\\\save${Slot}\\.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "save${Slot}",
+          "ContainerName2": "save${Slot}",
+          "NamedRegexGroups": [ "(?<Slot>[0-9]+)" ]
         }
       ]
     }
