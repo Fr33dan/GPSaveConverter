@@ -1,0 +1,29 @@
+{
+  "Name": "Like a Dragon: Pirate Yakuza in Hawaii",
+  "PackageName": "SEGAofAmericaInc.s1b05f489rw_s751p9cej88mt",
+  "BaseNonXboxSaveLocation": "%APPDATA%\\Sega\\LikeADragonPirates\\Steam\\<user-id>\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Slot}\\\\data.sav",
+      "XboxFileID": "data",
+      "ContainerName1": "save/${Slot}/data.sav",
+      "ContainerName2": ".*",
+      "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "${Slot}\\\\${Slot}_icon0.dds",
+      "XboxFileID": "icon",
+      "ContainerName1": "save/${Slot}/data.sav",
+      "ContainerName2": ".*",
+      "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
+    },
+    {
+      "NonXboxFilename": "system\\\\data.sys",
+      "XboxFileID": "data",
+      "ContainerName1": "save/system/data.sys",
+      "ContainerName2": "displayName",
+      "NamedRegexGroups": []
+    }
+  ]
+}
