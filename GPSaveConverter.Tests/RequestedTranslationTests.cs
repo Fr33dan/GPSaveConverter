@@ -62,6 +62,7 @@ namespace GPSaveConverter.Tests
         [InlineData("KingdomHeartsHD1525")]
         [InlineData("TerribleLizards")]
         [InlineData("EscapeTheBackrooms")]
+        [InlineData("LikeADragonPirateYakuza")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2629,6 +2630,81 @@ namespace GPSaveConverter.Tests
         public void EscapeTheBackrooms_SettingsOnSteam_AreLeftAlone(string path)
         {
             Assert.Equal(Outcome.NoTranslation, EscapeTheBackrooms().ToXbox(path).Outcome);
+        }
+
+        #endregion
+
+        #region Like a Dragon: Pirate Yakuza in Hawaii (#326)
+
+        // The same studio's scheme as Infinite Wealth (#145): a container per slot holding a data and an icon blob.
+        private const string PirateYakuzaSave001 = "5803050378bf0100402690014300ee05ac020000";
+        private const string PirateYakuzaSave002 = "5803050355d10100ffe104068600260687020000";
+
+        private static TranslationSimulator PirateYakuza()
+        {
+            // Container Name 2 is a long value that differs for every save.
+            var slots = new Dictionary<string, string>
+            {
+                { "save001", PirateYakuzaSave001 },
+                { "save002", PirateYakuzaSave002 },
+                { "save031", "5803050361d80100ffe104068600260687020000" },
+                { "save032", "58030503f5dd01001882ba068600330687020000" },
+                { "save033", "5803050332cb0100402690018600330687020000" }
+            };
+            var xboxFiles = slots.SelectMany(s => new[] { new XboxFile("save/" + s.Key + "/data.sav", s.Value, "data"), new XboxFile("save/" + s.Key + "/data.sav", s.Value, "icon") })
+                                 .Concat(new[] { new XboxFile("save/system/data.sys", "displayName", "data") })
+                                 .ToArray();
+            var nonXboxFiles = new[]
+            {
+                "steam_autocloud.vdf", "save001\\data.sav", "save001\\save001_icon0.dds", "save031\\data.sav", "save031\\save031_icon0.dds",
+                "save032\\data.sav", "save032\\save032_icon0.dds", "system\\data.sys"
+            };
+            return new TranslationSimulator(Profile("LikeADragonPirateYakuza"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("save/save001/data.sav", PirateYakuzaSave001, "data", "save001\\data.sav")]
+        [InlineData("save/save001/data.sav", PirateYakuzaSave001, "icon", "save001\\save001_icon0.dds")]
+        [InlineData("save/save031/data.sav", "5803050361d80100ffe104068600260687020000", "data", "save031\\data.sav")]
+        [InlineData("save/save032/data.sav", "58030503f5dd01001882ba068600330687020000", "icon", "save032\\save032_icon0.dds")]
+        [InlineData("save/system/data.sys", "displayName", "data", "system\\data.sys")]
+        public void PirateYakuza_FileOnBothSides_MapsBothWays(string container1, string container2, string fileID, string steamPath)
+        {
+            TranslationSimulator game = PirateYakuza();
+
+            var toNonXbox = game.ToNonXbox(new XboxFile(container1, container2, fileID));
+            var toXbox = game.ToXbox(steamPath);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(steamPath, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container1, toXbox.XboxFile.ContainerName1);
+            Assert.Equal(container2, toXbox.XboxFile.ContainerName2);
+            Assert.Equal(fileID, toXbox.XboxFile.FileID);
+        }
+
+        [Theory]
+        [InlineData("data", "save002\\data.sav")]
+        [InlineData("icon", "save002\\save002_icon0.dds")]
+        public void PirateYakuza_XboxOnlySlot_IsCreatedInItsOwnFolder(string fileID, string expectedPath)
+        {
+            var result = PirateYakuza().ToNonXbox(new XboxFile("save/save002/data.sav", PirateYakuzaSave002, fileID));
+
+            Assert.Equal(Outcome.NewFile, result.Outcome);
+            Assert.Equal(expectedPath, result.PathOnDisk);
+        }
+
+        [Fact]
+        public void PirateYakuza_SteamCloudFile_IsNotCovered()
+        {
+            Assert.Equal(Outcome.NoTranslation, PirateYakuza().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        [Fact]
+        public void PirateYakuza_SlotWithNoXboxContainer_CannotBeCopiedToXbox()
+        {
+            // Not in the posted tables: a slot saved only on Steam.
+            Assert.Equal(Outcome.NoContainer, PirateYakuza().ToXbox("save050\\data.sav").Outcome);
         }
 
         #endregion
