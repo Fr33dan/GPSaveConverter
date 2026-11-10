@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-11-07",
+  "Version": "2026-11-09",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -591,6 +591,7 @@
     { "Name": "Supermarket Simulator", "PackageName": "18814NAISU.SupermarketSimulator_79azw0v9jg4wg", "Direction": "FromXbox", "Text": "The Game Pass version writes the save in a different format from the Steam version, which starts a new game in place of a copied save. One player moved a save by converting it by hand; #284 describes how." },
     { "Name": "Teenage Mutant Ninja Turtles: Shredder's Revenge", "PackageName": "DotEmu.TeenageMutantNinjaTurtlesShreddersRevenge_map6zyh9ym1xy", "Direction": "FromXbox", "Text": "The Steam version does not load a save copied from Game Pass, and starts a new game (#183)." },
     { "Name": "The Outer Worlds: Spacer's Choice Edition", "PackageName": "PrivateDivision.64850D0BF098F_hv3d7yfbgr2rp", "Text": "The Microsoft Store version keeps its save in a different file from the Steam and Epic versions, so a copied save does not work (#154)." },
+    { "Name": "Total Chaos", "PackageName": "Atari.TotalChaos_xka83p2csqhz2", "Direction": "FromXbox", "Text": "The Game Pass version keeps only a PlayerPrefs file, with no save files to copy. Copied in place of a Steam save, it did not show up in the Steam version (#329)." },
     { "Name": "Tunic", "PackageName": "Finji.TUNIC_tys0ffscxatjj", "Text": "The Game Pass version keeps every save slot in one file and the Steam version keeps one file per slot, so a copied save does not work (#6)." },
     { "Name": "Well Dweller", "PackageName": "TopHatStudiosInc.WellDweller_93vj94f8vfryy", "Direction": "FromXbox", "Text": "A Game Pass save copied to the Steam version crashes the game at its menu. One player got it to load by decoding the file first, a step this tool does not do. #287 describes how." },
     { "Name": "Wo Long: Fallen Dynasty", "PackageName": "946B6A6E.WoLongFallenDynasty_dkffhzhmh6pmy", "Text": "The game calls a copied save corrupt until the start of the file is patched with a hex editor. #45 describes how." }
