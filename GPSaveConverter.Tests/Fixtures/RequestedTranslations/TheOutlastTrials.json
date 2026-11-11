@@ -1,0 +1,14 @@
+{
+  "Name": "The Outlast Trials",
+  "PackageName": "12495RedBarrels-Montreal.TheOutlastTrials_hvfjwf428ytt4",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\OPP\\Saved\\SaveGames\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Name}-[0-9]+\\.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "${Name}-${XboxProfileID_Int}",
+      "ContainerName2": "${Name}-${XboxProfileID_Int}",
+      "NamedRegexGroups": [ "(?<Name>Preferences|Profile)" ]
+    }
+  ]
+}
