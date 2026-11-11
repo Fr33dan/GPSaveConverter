@@ -1,0 +1,15 @@
+{
+  "Name": "Battletoads",
+  "PackageName": "Microsoft.Frogspawn_8wekyb3d8bbwe",
+  "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1244950\\remote\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "bkp\\\\GameSave",
+      "XboxFileID": "GameSave",
+      "ContainerName1": "SeasonOne",
+      "ContainerName2": "SeasonOne",
+      "NamedRegexGroups": []
+    }
+  ]
+}

@@ -485,6 +485,37 @@
           "NamedRegexGroups": []
         }
       ]
+    },
+    {
+      "Name": "The Outlast Trials",
+      "PackageName": "12495RedBarrels-Montreal.TheOutlastTrials_hvfjwf428ytt4",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\OPP\\Saved\\SaveGames\\",
+      "Issues": [ 333 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Name}-[0-9]+\\.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "${Name}-${XboxProfileID_Int}",
+          "ContainerName2": "${Name}-${XboxProfileID_Int}",
+          "NamedRegexGroups": [ "(?<Name>Preferences|Profile)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Battletoads",
+      "PackageName": "Microsoft.Frogspawn_8wekyb3d8bbwe",
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1244950\\remote\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "Issues": [ 334 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "bkp\\\\GameSave",
+          "XboxFileID": "GameSave",
+          "ContainerName1": "SeasonOne",
+          "ContainerName2": "SeasonOne",
+          "NamedRegexGroups": []
+        }
+      ]
     }
   ]
 }

@@ -63,6 +63,8 @@ namespace GPSaveConverter.Tests
         [InlineData("TerribleLizards")]
         [InlineData("EscapeTheBackrooms")]
         [InlineData("LikeADragonPirateYakuza")]
+        [InlineData("TheOutlastTrials")]
+        [InlineData("Battletoads")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2705,6 +2707,98 @@ namespace GPSaveConverter.Tests
         {
             // Not in the posted tables: a slot saved only on Steam.
             Assert.Equal(Outcome.NoContainer, PirateYakuza().ToXbox("save050\\data.sav").Outcome);
+        }
+
+        #endregion
+
+        #region The Outlast Trials (#333)
+
+        // TranslationSimulator.XboxProfileID, 0009000000000001, as a decimal number.
+        private const string OutlastTrialsXboxID = "2533274790395905";
+
+        private static XboxFile OutlastTrialsContainer(string name)
+        {
+            return new XboxFile(name + "-" + OutlastTrialsXboxID, name + "-" + OutlastTrialsXboxID, "Data");
+        }
+
+        private static TranslationSimulator OutlastTrials()
+        {
+            // The tables posted in #333, with the reporter's Xbox ID in the container names replaced by the
+            // simulator's. Game Pass keeps a container <name>-<Xbox ID as a decimal number>, twice, holding one
+            // blob, Data. Steam keeps <name>-<SteamID64>.sav, beside steam_autocloud.vdf.
+            var xboxFiles = new[] { OutlastTrialsContainer("Preferences"), OutlastTrialsContainer("Profile") };
+            var nonXboxFiles = new[] { "Preferences-76561198043514738.sav", "Profile-76561198043514738.sav", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("TheOutlastTrials"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("Preferences")]
+        [InlineData("Profile")]
+        public void OutlastTrials_FileOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = OutlastTrials();
+
+            var toXbox = game.ToXbox(name + "-76561198043514738.sav");
+            var toNonXbox = game.ToNonXbox(OutlastTrialsContainer(name));
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(OutlastTrialsContainer(name).ToString(), toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(name + "-76561198043514738.sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void OutlastTrials_AnotherSteamAccount_GoesToTheSameContainers()
+        {
+            // The Steam ID in the file name is not carried over, so any account's files go to this Xbox profile.
+            var toXbox = OutlastTrials().ToXbox("Profile-76561198000000001.sav");
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(OutlastTrialsContainer("Profile").ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void OutlastTrials_SteamCloudFile_IsNotCovered()
+        {
+            Assert.Equal(Outcome.NoTranslation, OutlastTrials().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region Battletoads (#334)
+
+        private static readonly XboxFile BattletoadsSave = new XboxFile("SeasonOne", "SeasonOne", "GameSave");
+
+        private static TranslationSimulator Battletoads()
+        {
+            // The tables posted in #334. Game Pass keeps one container, SeasonOne, twice, holding one blob,
+            // GameSave. The Steam folder held only bkp\GameSave. A GameSave beside the bkp folder is the
+            // other candidate, named in the reply.
+            var xboxFiles = new[] { BattletoadsSave };
+            var nonXboxFiles = new[] { "bkp\\GameSave" };
+
+            return new TranslationSimulator(Profile("Battletoads"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void Battletoads_Save_MapsBothWays()
+        {
+            TranslationSimulator game = Battletoads();
+
+            var toNonXbox = game.ToNonXbox(BattletoadsSave);
+            var toXbox = game.ToXbox("bkp\\GameSave");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("bkp\\GameSave", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(BattletoadsSave.ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void Battletoads_GameSaveOutsideTheBackupFolder_IsNotCovered()
+        {
+            Assert.Equal(Outcome.NoTranslation, Battletoads().ToXbox("GameSave").Outcome);
         }
 
         #endregion
