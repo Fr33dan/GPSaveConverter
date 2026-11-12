@@ -2713,6 +2713,10 @@ namespace GPSaveConverter.Tests
 
         #region The Outlast Trials (#333)
 
+        // Taken out of testing after #333. The reporter copied both files from Steam into the Game Pass
+        // version with the game and the Xbox app closed, and the game used neither. The tests stay as the
+        // record of what was checked.
+
         // TranslationSimulator.XboxProfileID, 0009000000000001, as a decimal number.
         private const string OutlastTrialsXboxID = "2533274790395905";
 
