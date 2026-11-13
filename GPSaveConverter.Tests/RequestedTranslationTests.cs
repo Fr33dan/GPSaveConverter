@@ -67,6 +67,7 @@ namespace GPSaveConverter.Tests
         [InlineData("Battletoads")]
         [InlineData("StateOfDecay2")]
         [InlineData("PowerWashSimulator2")]
+        [InlineData("StarWarsBattlefront")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2911,6 +2912,65 @@ namespace GPSaveConverter.Tests
             Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("0T1removalvan", "0T1removalvan", "Timelapse.sav.0")).Outcome);
             Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("Preferences", "Preferences", "FuturPlayerPrefs.0")).Outcome);
             Assert.Equal(Outcome.NoTranslation, game.ToXbox("0j1removalvan\\washmaps.sav").Outcome);
+        }
+
+        #endregion
+
+        #region Star Wars Battlefront (#344)
+
+        private static readonly XboxFile[] StarWarsBattlefrontXboxFiles =
+        {
+            new XboxFile("U4c410011", "Title Metadata", "SaveImage.xbx00"),
+            new XboxFile("U4c410011", "Title Metadata", "TitleImage.xbx00"),
+            new XboxFile("U4c410011", "Title Metadata", "TitleMeta.xbx00"),
+            new XboxFile("U4c410011/1EB0B3B35174", "Profile: TTMSSS", "SaveMeta.xbx00"),
+            new XboxFile("U4c410011/1EB0B3B35174", "Profile: TTMSSS", "profiles.dat00")
+        };
+
+        private static TranslationSimulator StarWarsBattlefront()
+        {
+            // The tables posted in #344. The Xbox 360 backward compatibility package keeps a container
+            // U4c410011, Title Metadata, and one per saved game, U4c410011/1EB0B3B35174 with the save's
+            // name as its second name. The reporter's folder holds the same files under the same names,
+            // with each container a folder and its "/" written as "_".
+            var nonXboxFiles = new[]
+            {
+                "U4c410011\\SaveImage.xbx00",
+                "U4c410011\\TitleImage.xbx00",
+                "U4c410011\\TitleMeta.xbx00",
+                "U4c410011_1EB0B3B35174\\profiles.dat00",
+                "U4c410011_1EB0B3B35174\\SaveMeta.xbx00"
+            };
+
+            return new TranslationSimulator(Profile("StarWarsBattlefront"), StarWarsBattlefrontXboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData(0, "U4c410011\\SaveImage.xbx00")]
+        [InlineData(1, "U4c410011\\TitleImage.xbx00")]
+        [InlineData(2, "U4c410011\\TitleMeta.xbx00")]
+        [InlineData(3, "U4c410011_1EB0B3B35174\\SaveMeta.xbx00")]
+        [InlineData(4, "U4c410011_1EB0B3B35174\\profiles.dat00")]
+        public void StarWarsBattlefront_EveryFile_MapsBothWays(int xboxFile, string relativePath)
+        {
+            TranslationSimulator game = StarWarsBattlefront();
+            XboxFile blob = StarWarsBattlefrontXboxFiles[xboxFile];
+
+            var toNonXbox = game.ToNonXbox(blob);
+            var toXbox = game.ToXbox(relativePath);
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(relativePath, toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(blob.ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void StarWarsBattlefront_SavedGameTheXboxSaveLacks_HasNoContainer()
+        {
+            // The second name of a saved game's container is the save's own name, which the folder does not
+            // give, so the translation finds that container but cannot make one.
+            Assert.Equal(Outcome.NoContainer, StarWarsBattlefront().ToXbox("U4c410011_2AB0B3B35175\\SaveMeta.xbx00").Outcome);
         }
 
         #endregion

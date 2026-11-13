@@ -1,0 +1,20 @@
+{
+  "Name": "Star Wars Battlefront",
+  "PackageName": "Xbox360BackwardCompatibil.274616A2FE62_ksqcvrsvwz2jp",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "U4c410011\\\\${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "U4c410011",
+      "ContainerName2": "Title Metadata",
+      "NamedRegexGroups": [ "(?<File>[^\\\\/]+)" ]
+    },
+    {
+      "NonXboxFilename": "U4c410011_${SaveFolder}\\\\${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "U4c410011/${SaveFolder}",
+      "ContainerName2": ".+",
+      "NamedRegexGroups": [ "(?<SaveFolder>[0-9A-Fa-f]+)", "(?<File>[^\\\\/]+)" ]
+    }
+  ]
+}
