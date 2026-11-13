@@ -1,0 +1,15 @@
+{
+  "Name": "State of Decay 2",
+  "PackageName": "Microsoft.Dayton_8wekyb3d8bbwe",
+  "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\StateOfDecay2\\Saved\\Steam\\<user-id_SteamID64>\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "[0-9]+\\\\Release\\\\v2\\\\${FileName}\\.sav",
+      "XboxFileID": "Release/v2/${FileName}",
+      "ContainerName1": "UE4DefaultSaveGameContainer",
+      "ContainerName2": "StateOfDecay2",
+      "NamedRegexGroups": [ "(?<FileName>SaveGame_[A-Za-z0-9]+_[0-9]+|SaveUser)" ]
+    }
+  ]
+}

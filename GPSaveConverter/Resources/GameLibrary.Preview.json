@@ -501,6 +501,37 @@
           "NamedRegexGroups": []
         }
       ]
+    },
+    {
+      "Name": "State of Decay 2",
+      "PackageName": "Microsoft.Dayton_8wekyb3d8bbwe",
+      "BaseNonXboxSaveLocation": "%LOCALAPPDATA%\\StateOfDecay2\\Saved\\Steam\\<user-id_SteamID64>\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "Issues": [ 339 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "[0-9]+\\\\Release\\\\v2\\\\${FileName}\\.sav",
+          "XboxFileID": "Release/v2/${FileName}",
+          "ContainerName1": "UE4DefaultSaveGameContainer",
+          "ContainerName2": "StateOfDecay2",
+          "NamedRegexGroups": [ "(?<FileName>SaveGame_[A-Za-z0-9]+_[0-9]+|SaveUser)" ]
+        }
+      ]
+    },
+    {
+      "Name": "PowerWash Simulator 2",
+      "PackageName": "FuturLabLtd.PowerWashSimulator2_2xkwfxww5pj0p",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\FuturLab\\PowerWash Simulator 2\\PC_Steam\\SaveData\\",
+      "Issues": [ 341 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${UserId}\\\\player\\.sav",
+          "XboxFileID": "Player\\.sav\\.${UserId}",
+          "ContainerName1": "${UserId}",
+          "ContainerName2": "${UserId}",
+          "NamedRegexGroups": [ "(?<UserId>[0-9]+)" ]
+        }
+      ]
     }
   ]
 }

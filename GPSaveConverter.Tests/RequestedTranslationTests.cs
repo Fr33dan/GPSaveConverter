@@ -65,6 +65,8 @@ namespace GPSaveConverter.Tests
         [InlineData("LikeADragonPirateYakuza")]
         [InlineData("TheOutlastTrials")]
         [InlineData("Battletoads")]
+        [InlineData("StateOfDecay2")]
+        [InlineData("PowerWashSimulator2")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2803,6 +2805,112 @@ namespace GPSaveConverter.Tests
         public void Battletoads_GameSaveOutsideTheBackupFolder_IsNotCovered()
         {
             Assert.Equal(Outcome.NoTranslation, Battletoads().ToXbox("GameSave").Outcome);
+        }
+
+        #endregion
+
+        #region State of Decay 2 (#339)
+
+        private static XboxFile StateOfDecay2Blob(string name)
+        {
+            return new XboxFile("UE4DefaultSaveGameContainer", "StateOfDecay2", "Release/v2/" + name);
+        }
+
+        private static TranslationSimulator StateOfDecay2()
+        {
+            // The tables posted in #339, with paths relative to the Steam profile's folder,
+            // %LOCALAPPDATA%\StateOfDecay2\Saved\Steam\<SteamID64>\. Game Pass keeps one container,
+            // UE4DefaultSaveGameContainer and StateOfDecay2, holding Release/v2/SaveGame_Vanilla_0 and
+            // Release/v2/SaveUser. Steam keeps the same names with .sav, one folder further down, in a folder
+            // named with a number, 2535452887542598 in the paste.
+            var xboxFiles = new[] { StateOfDecay2Blob("SaveGame_Vanilla_0"), StateOfDecay2Blob("SaveUser") };
+            var nonXboxFiles = new[]
+            {
+                "steam_autocloud.vdf",
+                "2535452887542598\\Release\\v2\\SaveGame_Vanilla_0.sav",
+                "2535452887542598\\Release\\v2\\SaveUser.sav"
+            };
+
+            return new TranslationSimulator(Profile("StateOfDecay2"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("SaveGame_Vanilla_0")]
+        [InlineData("SaveUser")]
+        public void StateOfDecay2_FileOnBothSides_MapsBothWays(string name)
+        {
+            TranslationSimulator game = StateOfDecay2();
+
+            var toXbox = game.ToXbox("2535452887542598\\Release\\v2\\" + name + ".sav");
+            var toNonXbox = game.ToNonXbox(StateOfDecay2Blob(name));
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(StateOfDecay2Blob(name).ToString(), toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("2535452887542598\\Release\\v2\\" + name + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void StateOfDecay2_AnotherSlot_GoesIntoTheSameContainer()
+        {
+            var toXbox = StateOfDecay2().ToXbox("2535452887542598\\Release\\v2\\SaveGame_Vanilla_1.sav");
+
+            Assert.Equal(Outcome.NewFile, toXbox.Outcome);
+            Assert.Equal("Release/v2/SaveGame_Vanilla_1", toXbox.NewFileID);
+        }
+
+        [Fact]
+        public void StateOfDecay2_SteamCloudFile_IsNotCovered()
+        {
+            Assert.Equal(Outcome.NoTranslation, StateOfDecay2().ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region PowerWash Simulator 2 (#341)
+
+        private static readonly XboxFile PowerWashSimulator2Player = new XboxFile("0", "0", "Player.sav.0");
+
+        private static TranslationSimulator PowerWashSimulator2()
+        {
+            // The tables posted in #341. Game Pass keeps a container 0, twice, holding Player.sav.0, a container
+            // per job such as 0T1removalvan holding Timelapse.sav.0, and Preferences holding FuturPlayerPrefs.0.
+            // Steam keeps 0\player.sav, 0j1removalvan\timelapse.sav and washmaps.sav, and
+            // preferences\futurplayerprefs. Only the player file is covered: the job folders are named
+            // differently on the two sides (0T1 and 0j1), and the preferences are settings.
+            var xboxFiles = new[]
+            {
+                PowerWashSimulator2Player,
+                new XboxFile("0T1removalvan", "0T1removalvan", "Timelapse.sav.0"),
+                new XboxFile("Preferences", "Preferences", "FuturPlayerPrefs.0")
+            };
+            var nonXboxFiles = new[] { "0\\player.sav", "0j1removalvan\\timelapse.sav", "0j1removalvan\\washmaps.sav", "preferences\\futurplayerprefs" };
+
+            return new TranslationSimulator(Profile("PowerWashSimulator2"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void PowerWashSimulator2_Player_MapsBothWays()
+        {
+            TranslationSimulator game = PowerWashSimulator2();
+
+            var toNonXbox = game.ToNonXbox(PowerWashSimulator2Player);
+            var toXbox = game.ToXbox("0\\player.sav");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("0\\player.sav", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(PowerWashSimulator2Player.ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void PowerWashSimulator2_TimelapseAndPreferences_AreNotCovered()
+        {
+            TranslationSimulator game = PowerWashSimulator2();
+
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("0T1removalvan", "0T1removalvan", "Timelapse.sav.0")).Outcome);
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("Preferences", "Preferences", "FuturPlayerPrefs.0")).Outcome);
+            Assert.Equal(Outcome.NoTranslation, game.ToXbox("0j1removalvan\\washmaps.sav").Outcome);
         }
 
         #endregion

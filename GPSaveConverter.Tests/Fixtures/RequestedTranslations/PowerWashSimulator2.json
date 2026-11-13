@@ -1,0 +1,14 @@
+{
+  "Name": "PowerWash Simulator 2",
+  "PackageName": "FuturLabLtd.PowerWashSimulator2_2xkwfxww5pj0p",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\FuturLab\\PowerWash Simulator 2\\PC_Steam\\SaveData\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${UserId}\\\\player\\.sav",
+      "XboxFileID": "Player\\.sav\\.${UserId}",
+      "ContainerName1": "${UserId}",
+      "ContainerName2": "${UserId}",
+      "NamedRegexGroups": [ "(?<UserId>[0-9]+)" ]
+    }
+  ]
+}
