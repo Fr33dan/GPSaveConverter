@@ -405,13 +405,31 @@ namespace GPSaveConverter.Library
                 if (createOrUpdate)
                 {
                     logger.Info("Extracting Xbox save file: {0} -> {1}", file.FileID, returnVal.FilePath);
+                    string sourcePath = file.getFilePath();
+                    byte[] converted = null;
+                    if (string.Equals(PackageName, PirateWarriors4Save.PackageName, StringComparison.OrdinalIgnoreCase)
+                        && file.FileID == "WholeData")
+                    {
+                        converted = PirateWarriors4Save.FromXbox(file.ContainerName1, file.ContainerName2, FileSystem.ReadAllBytes(sourcePath));
+                    }
                     if (backup != null)
                     {
                         // Before the folder is made, so the backup can tell that it was not there.
                         backup.Preserve(returnVal.FilePath);
                     }
                     FileSystem.CreateDirectory(Path.GetDirectoryName(returnVal.FilePath));
-                    FileSystem.CopyFile(file.getFilePath(), returnVal.FilePath, true);
+                    if (converted == null)
+                    {
+                        FileSystem.CopyFile(sourcePath, returnVal.FilePath, true);
+                    }
+                    else
+                    {
+                        using (var stream = FileSystem.OpenWrite(returnVal.FilePath))
+                        {
+                            stream.Write(converted, 0, converted.Length);
+                            stream.SetLength(converted.Length);
+                        }
+                    }
                     returnVal.Timestamp = FileSystem.GetFileLastWriteTime(returnVal.FilePath);
                 }
             } else if (createOrUpdate)
@@ -486,6 +504,11 @@ namespace GPSaveConverter.Library
             Xbox.XboxFileInfo matchedFile = null;
             if (t != null)
             {
+                if (createOrUpdate && string.Equals(PackageName, PirateWarriors4Save.PackageName, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("Pirate Warriors 4 save conversion only supports copying from Windows Store to Steam.");
+                }
+
                 List<Xbox.XboxFileContainer> containers = t.FindContainers(index.Children, c => c.ContainerID[0], c => c.ContainerID[1], file.RelativePath, index.XboxProfileID);
 
                 if (containers.Count > 1)
