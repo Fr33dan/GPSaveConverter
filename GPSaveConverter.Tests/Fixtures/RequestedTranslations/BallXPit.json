@@ -1,0 +1,14 @@
+{
+  "Name": "Ball X Pit",
+  "PackageName": "DevolverDigital.BallxPit_6kzv4j18v0c96",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\Kenny Sun\\BALL x PIT\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "meta1\\.yankai",
+      "XboxFileID": "Save_Data",
+      "ContainerName1": "Balls_Saves",
+      "ContainerName2": "Balls_Saves",
+      "NamedRegexGroups": []
+    }
+  ]
+}

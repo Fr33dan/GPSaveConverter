@@ -68,6 +68,7 @@ namespace GPSaveConverter.Tests
         [InlineData("StateOfDecay2")]
         [InlineData("PowerWashSimulator2")]
         [InlineData("StarWarsBattlefront")]
+        [InlineData("BallXPit")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -2641,6 +2642,10 @@ namespace GPSaveConverter.Tests
 
         #region Like a Dragon: Pirate Yakuza in Hawaii (#326)
 
+        // Taken out of testing after #326. The reporter copied the saves from Game Pass to Steam with this
+        // translation, and the Steam version loaded none of them; an earlier copy of their own gave a black
+        // screen. The tests stay as the record of what was checked.
+
         // The same studio's scheme as Infinite Wealth (#145): a container per slot holding a data and an icon blob.
         private const string PirateYakuzaSave001 = "5803050378bf0100402690014300ee05ac020000";
         private const string PirateYakuzaSave002 = "5803050355d10100ffe104068600260687020000";
@@ -2971,6 +2976,55 @@ namespace GPSaveConverter.Tests
             // The second name of a saved game's container is the save's own name, which the folder does not
             // give, so the translation finds that container but cannot make one.
             Assert.Equal(Outcome.NoContainer, StarWarsBattlefront().ToXbox("U4c410011_2AB0B3B35175\\SaveMeta.xbx00").Outcome);
+        }
+
+        #endregion
+
+        #region Ball X Pit (#347)
+
+        private static readonly XboxFile BallXPitSave = new XboxFile("Balls_Saves", "Balls_Saves", "Save_Data");
+
+        private static TranslationSimulator BallXPit()
+        {
+            // The tables posted in #347, from v.0.4.17, so with no sizes. Game Pass keeps one container,
+            // Balls_Saves, twice, holding one blob, Save_Data. The Steam folder holds meta1.yankai and its
+            // backup, saveslotinfo.balls, two logs and Steam's own file. meta1.yankai is staged as the save;
+            // saveslotinfo.balls is the other candidate, named in the reply.
+            var xboxFiles = new[] { BallXPitSave };
+            var nonXboxFiles = new[] { "meta1.yankai", "meta1_backup.yankai", "Player-prev.log", "Player.log", "saveslotinfo.balls", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("BallXPit"), xboxFiles, nonXboxFiles);
+        }
+
+        [Fact]
+        public void BallXPit_Save_MapsBothWays()
+        {
+            TranslationSimulator game = BallXPit();
+
+            var toNonXbox = game.ToNonXbox(BallXPitSave);
+            var toXbox = game.ToXbox("meta1.yankai");
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("meta1.yankai", toNonXbox.RelativePath);
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(BallXPitSave.ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("meta1_backup.yankai")]
+        [InlineData("Player-prev.log")]
+        [InlineData("Player.log")]
+        [InlineData("saveslotinfo.balls")]
+        [InlineData("steam_autocloud.vdf")]
+        public void BallXPit_OtherSteamFiles_AreNotCovered(string relativePath)
+        {
+            Assert.Equal(Outcome.NoTranslation, BallXPit().ToXbox(relativePath).Outcome);
+        }
+
+        [Fact]
+        public void BallXPit_DotInTheName_IsNotAnyCharacter()
+        {
+            Assert.Equal(Outcome.NoTranslation, BallXPit().ToXbox("meta1xyankai").Outcome);
         }
 
         #endregion

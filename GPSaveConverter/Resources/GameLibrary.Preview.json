@@ -457,36 +457,6 @@
       ]
     },
     {
-      "Name": "Like a Dragon: Pirate Yakuza in Hawaii",
-      "PackageName": "SEGAofAmericaInc.s1b05f489rw_s751p9cej88mt",
-      "BaseNonXboxSaveLocation": "%APPDATA%\\Sega\\LikeADragonPirates\\Steam\\<user-id>\\",
-      "TargetProfileTypes": [ "Steam" ],
-      "Issues": [ 326 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "${Slot}\\\\data.sav",
-          "XboxFileID": "data",
-          "ContainerName1": "save/${Slot}/data.sav",
-          "ContainerName2": ".*",
-          "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
-        },
-        {
-          "NonXboxFilename": "${Slot}\\\\${Slot}_icon0.dds",
-          "XboxFileID": "icon",
-          "ContainerName1": "save/${Slot}/data.sav",
-          "ContainerName2": ".*",
-          "NamedRegexGroups": [ "(?<Slot>save[0-9]+)" ]
-        },
-        {
-          "NonXboxFilename": "system\\\\data.sys",
-          "XboxFileID": "data",
-          "ContainerName1": "save/system/data.sys",
-          "ContainerName2": "displayName",
-          "NamedRegexGroups": []
-        }
-      ]
-    },
-    {
       "Name": "Battletoads",
       "PackageName": "Microsoft.Frogspawn_8wekyb3d8bbwe",
       "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\1244950\\remote\\",
@@ -551,6 +521,21 @@
           "ContainerName1": "U4c410011/${SaveFolder}",
           "ContainerName2": ".+",
           "NamedRegexGroups": [ "(?<SaveFolder>[0-9A-Fa-f]+)", "(?<File>[^\\\\/]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Ball X Pit",
+      "PackageName": "DevolverDigital.BallxPit_6kzv4j18v0c96",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\Kenny Sun\\BALL x PIT\\",
+      "Issues": [ 347 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "meta1\\.yankai",
+          "XboxFileID": "Save_Data",
+          "ContainerName1": "Balls_Saves",
+          "ContainerName2": "Balls_Saves",
+          "NamedRegexGroups": []
         }
       ]
     }
