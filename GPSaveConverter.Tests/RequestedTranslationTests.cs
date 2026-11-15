@@ -1858,7 +1858,7 @@ namespace GPSaveConverter.Tests
 
         #endregion
 
-        #region PlateUp! (#277)
+        #region PlateUp! (#277, #351)
 
         private static readonly string[] PlateUpXboxBlobs =
         {
@@ -1929,6 +1929,55 @@ namespace GPSaveConverter.Tests
         public void PlateUp_LogsAndSteamFiles_AreLeftAlone(string path)
         {
             Assert.Equal(Outcome.NoTranslation, PlateUp().ToXbox(path).Outcome);
+        }
+
+        private static TranslationSimulator PlateUpSecondReport()
+        {
+            // The tables posted in #351, copying from Game Pass to Steam. Besides what #277 showed, the
+            // Xbox container holds saves under Full\3 and Full\4, a Preferences folder, the old single-file
+            // SaveBlob (#81) and fsim_status.txt. The Steam folder has no Full or Preferences folder.
+            string[] blobs =
+            {
+                "Full\\1\\1722643027.plateupsave", "Full\\1\\1722643044.plateupsave", "Full\\3\\1710018085.plateupsave", "Full\\3\\1710018330.plateupsave",
+                "Full\\4\\1710092329.plateupsave", "Full\\4\\1710092499.plateupsave", "Preferences\\1767922721.plateupsave", "Preferences\\1767922722.plateupsave",
+                "Profile\\1722398043.plateupsave", "Profile\\1722398045.plateupsave", "Profile\\1767922695.plateupsave", "Profile\\1767922696.plateupsave",
+                "Progress\\1734493596.plateupsave", "Progress\\1734493845.plateupsave", "Progress\\1767922708.plateupsave", "Progress\\1794722092.plateupsave",
+                "Progress\\1794722309.plateupsave", "SaveBlob", "fsim_status.txt"
+            };
+            var xboxFiles = blobs.Select(blob => new XboxFile("SaveContainer", "Game Save", blob)).ToArray();
+            var nonXboxFiles = new[]
+            {
+                "Player-prev.log", "Player.log", "steam_autocloud.vdf", "Profile\\1767836625.plateupsave",
+                "Profile\\1767836629.plateupsave", "Profile\\1767836633.plateupsave", "Profile\\1767836638.plateupsave", "Profile\\1767836640.plateupsave",
+                "Progress\\1767836359.plateupsave", "Progress\\1767836448.plateupsave", "Progress\\1767836700.plateupsave", "Progress\\1767838852.plateupsave",
+                "Progress\\1767925196.plateupsave"
+            };
+
+            return new TranslationSimulator(Profile("PlateUp"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("Full\\3\\1710018330.plateupsave")]
+        [InlineData("Full\\4\\1710092499.plateupsave")]
+        [InlineData("Profile\\1767922696.plateupsave")]
+        [InlineData("Progress\\1794722309.plateupsave")]
+        public void PlateUp_SecondReport_XboxFile_GoesToTheSamePathOnSteam(string blob)
+        {
+            var toNonXbox = PlateUpSecondReport().ToNonXbox(new XboxFile("SaveContainer", "Game Save", blob));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(blob, toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("Preferences\\1767922721.plateupsave")]
+        [InlineData("SaveBlob")]
+        [InlineData("fsim_status.txt")]
+        public void PlateUp_SecondReport_PreferencesAndOldBlob_AreNotCovered(string blob)
+        {
+            var toNonXbox = PlateUpSecondReport().ToNonXbox(new XboxFile("SaveContainer", "Game Save", blob));
+
+            Assert.Equal(Outcome.NoTranslation, toNonXbox.Outcome);
         }
 
         #endregion
