@@ -4,7 +4,7 @@
   "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\Kenny Sun\\BALL x PIT\\",
   "FileTranslations": [
     {
-      "NonXboxFilename": "meta1\\.yankai",
+      "NonXboxFilename": "saveslotinfo\\.balls",
       "XboxFileID": "Save_Data",
       "ContainerName1": "Balls_Saves",
       "ContainerName2": "Balls_Saves",

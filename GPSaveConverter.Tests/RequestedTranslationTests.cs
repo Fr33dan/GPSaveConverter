@@ -494,11 +494,13 @@ namespace GPSaveConverter.Tests
 
         #endregion
 
-        #region Final Fantasy VII Remake Intergrade (#180)
+        #region Final Fantasy VII Remake Intergrade (#180, #354)
 
-        // Taken out of testing after #298. The game called a save copied this way corrupted, and with
-        // ff7remakecommon.sav copied too it did not reach its main menu. The tests stay as the record
-        // of what was checked.
+        // Taken out of testing after #298. The Game Pass version called a save copied from Steam
+        // corrupted, and with ff7remakecommon.sav copied too it did not reach its main menu. A warning
+        // covers that direction. Staged again for #354, which copies the other way, from Game Pass to
+        // Steam, which nobody has tried. The save folder now names the Steam account's folder, so the
+        // tool lists it as a profile and the paths start at the save files.
 
         private static TranslationSimulator FinalFantasyVIIRemake()
         {
@@ -540,6 +542,53 @@ namespace GPSaveConverter.Tests
 
             Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
             Assert.Equal("ff7remake" + slot + ".sav", toNonXbox.RelativePath);
+        }
+
+        private static TranslationSimulator FinalFantasyVIIRemakeFromGamePass()
+        {
+            // The tables posted in #354, from v.0.4.17, with the Steam account's folder taken off the
+            // front of each path: the save location now ends in that folder. The Steam version has not
+            // saved in a slot yet, only its common and device files.
+            var xboxFiles = new[] { "ff7remake000", "ff7remake001", "ff7remake002", "ff7remakecommon" }
+                                      .Select(container => new XboxFile(container, container, "Data")).ToArray();
+            var nonXboxFiles = new[] { "ff7remakecommon.sav", "ff7remakedevice.sav", "steam_autocloud.vdf" };
+
+            return new TranslationSimulator(Profile("FinalFantasyVIIRemakeIntergrade"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("000")]
+        [InlineData("001")]
+        [InlineData("002")]
+        public void FinalFantasyVIIRemake_FromGamePass_SlotBecomesANewSteamFile(string slot)
+        {
+            var toNonXbox = FinalFantasyVIIRemakeFromGamePass().ToNonXbox(new XboxFile("ff7remake" + slot, "ff7remake" + slot, "Data"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("ff7remake" + slot + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void FinalFantasyVIIRemake_FromGamePass_CommonReplacesTheSteamOne()
+        {
+            var toNonXbox = FinalFantasyVIIRemakeFromGamePass().ToNonXbox(new XboxFile("ff7remakecommon", "ff7remakecommon", "Data"));
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("ff7remakecommon.sav", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("ff7remakedevice.sav")]
+        [InlineData("steam_autocloud.vdf")]
+        public void FinalFantasyVIIRemake_FromGamePass_OtherSteamFilesAreNotCovered(string file)
+        {
+            Assert.Equal(Outcome.NoTranslation, FinalFantasyVIIRemakeFromGamePass().ToXbox(file).Outcome);
+        }
+
+        [Fact]
+        public void FinalFantasyVIIRemake_DotInTheName_IsNotAnyCharacter()
+        {
+            Assert.Equal(Outcome.NoTranslation, FinalFantasyVIIRemakeFromGamePass().ToXbox("ff7remakecommonxsav").Outcome);
         }
 
         [Theory]
@@ -3029,7 +3078,7 @@ namespace GPSaveConverter.Tests
 
         #endregion
 
-        #region Ball X Pit (#347)
+        #region Ball X Pit (#347, #352)
 
         private static readonly XboxFile BallXPitSave = new XboxFile("Balls_Saves", "Balls_Saves", "Save_Data");
 
@@ -3037,8 +3086,10 @@ namespace GPSaveConverter.Tests
         {
             // The tables posted in #347, from v.0.4.17, so with no sizes. Game Pass keeps one container,
             // Balls_Saves, twice, holding one blob, Save_Data. The Steam folder holds meta1.yankai and its
-            // backup, saveslotinfo.balls, two logs and Steam's own file. meta1.yankai is staged as the save;
-            // saveslotinfo.balls is the other candidate, named in the reply.
+            // backup, saveslotinfo.balls, two logs and Steam's own file. #352 posted the same tables.
+            // meta1.yankai was staged first. Copied into Save_Data on #352, the Game Pass version offered
+            // only a new game, so the translation moved to saveslotinfo.balls, the other candidate named
+            // in both replies.
             var xboxFiles = new[] { BallXPitSave };
             var nonXboxFiles = new[] { "meta1.yankai", "meta1_backup.yankai", "Player-prev.log", "Player.log", "saveslotinfo.balls", "steam_autocloud.vdf" };
 
@@ -3051,19 +3102,19 @@ namespace GPSaveConverter.Tests
             TranslationSimulator game = BallXPit();
 
             var toNonXbox = game.ToNonXbox(BallXPitSave);
-            var toXbox = game.ToXbox("meta1.yankai");
+            var toXbox = game.ToXbox("saveslotinfo.balls");
 
             Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
-            Assert.Equal("meta1.yankai", toNonXbox.RelativePath);
+            Assert.Equal("saveslotinfo.balls", toNonXbox.RelativePath);
             Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
             Assert.Equal(BallXPitSave.ToString(), toXbox.XboxFile.ToString());
         }
 
         [Theory]
+        [InlineData("meta1.yankai")]
         [InlineData("meta1_backup.yankai")]
         [InlineData("Player-prev.log")]
         [InlineData("Player.log")]
-        [InlineData("saveslotinfo.balls")]
         [InlineData("steam_autocloud.vdf")]
         public void BallXPit_OtherSteamFiles_AreNotCovered(string relativePath)
         {
@@ -3073,7 +3124,7 @@ namespace GPSaveConverter.Tests
         [Fact]
         public void BallXPit_DotInTheName_IsNotAnyCharacter()
         {
-            Assert.Equal(Outcome.NoTranslation, BallXPit().ToXbox("meta1xyankai").Outcome);
+            Assert.Equal(Outcome.NoTranslation, BallXPit().ToXbox("saveslotinfoxballs").Outcome);
         }
 
         #endregion
