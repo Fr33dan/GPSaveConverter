@@ -1,4 +1,4 @@
-{
+﻿{
   "Version": "2026-10-15",
   "GameInfo": [
     {
@@ -528,14 +528,30 @@
       "Name": "Ball X Pit",
       "PackageName": "DevolverDigital.BallxPit_6kzv4j18v0c96",
       "BaseNonXboxSaveLocation": "%USERPROFILE%\\AppData\\LocalLow\\Kenny Sun\\BALL x PIT\\",
-      "Issues": [ 347 ],
+      "Issues": [ 347, 352 ],
       "FileTranslations": [
         {
-          "NonXboxFilename": "meta1\\.yankai",
+          "NonXboxFilename": "saveslotinfo\\.balls",
           "XboxFileID": "Save_Data",
           "ContainerName1": "Balls_Saves",
           "ContainerName2": "Balls_Saves",
           "NamedRegexGroups": []
+        }
+      ]
+    },
+    {
+      "Name": "FINAL FANTASY VII REMAKE INTERGRADE",
+      "PackageName": "39EA002F.EXED1_n746a19ndrrjg",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\FINAL FANTASY VII REMAKE\\Steam\\<user-id_SteamID64>\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "Issues": [ 354 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "ff7remake${Slot}\\.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "ff7remake${Slot}",
+          "ContainerName2": "ff7remake${Slot}",
+          "NamedRegexGroups": [ "(?<Slot>[0-9]{3}|common)" ]
         }
       ]
     }
