@@ -1,0 +1,13 @@
+{
+  "Name": "Banishers: Ghosts of New Eden",
+  "PackageName": "FocusHomeInteractiveSA.NewWorldBanishers_4hny5m903y3g0",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "BNS${SaveId}\\.sav",
+      "XboxFileID": "Data",
+      "ContainerName1": "BNS${SaveId}",
+      "ContainerName2": "BNS${SaveId}",
+      "NamedRegexGroups": [ "(?<SaveId>[0-9]+)" ]
+    }
+  ]
+}
