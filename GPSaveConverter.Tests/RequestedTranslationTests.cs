@@ -69,6 +69,7 @@ namespace GPSaveConverter.Tests
         [InlineData("PowerWashSimulator2")]
         [InlineData("StarWarsBattlefront")]
         [InlineData("BallXPit")]
+        [InlineData("Banishers")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -3125,6 +3126,64 @@ namespace GPSaveConverter.Tests
         public void BallXPit_DotInTheName_IsNotAnyCharacter()
         {
             Assert.Equal(Outcome.NoTranslation, BallXPit().ToXbox("saveslotinfoxballs").Outcome);
+        }
+
+        #endregion
+        #region Banishers: Ghosts of New Eden (#359)
+
+        private static TranslationSimulator Banishers()
+        {
+            // The tables posted in #359, from v.0.4.17, so with no sizes. Game Pass keeps a container per
+            // save, named BNS and a number, twice, holding one blob, Data, and two settings containers.
+            // The Steam folder holds two saves named the same way with .sav after the number. The numbers
+            // differ between the two sides: each save is named after when it was made.
+            var xboxFiles = new[]
+            {
+                "BNS1794964737202618011857", "BNS1794964905202618012145", "BNS1794965039202618012359", "BNS1794966410202618014650",
+                "BNS1794967180202618015940", "BNS1794967184202618015944", "BNS1794967185202618015945", "BNS1794967799202618020959",
+                "MachineSettingsDesktop", "UserSettingsDesktop"
+            }.Select(container => new XboxFile(container, container, "Data")).ToArray();
+            var nonXboxFiles = new[] { "BNS1761508231202526195031.sav", "BNS1761508241202526195041.sav" };
+
+            return new TranslationSimulator(Profile("Banishers"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("BNS1761508231202526195031")]
+        [InlineData("BNS1761508241202526195041")]
+        public void Banishers_SteamSave_GetsANewContainerOfItsName(string save)
+        {
+            Assert.Equal(Outcome.NoContainer, Banishers().ToXbox(save + ".sav").Outcome);
+
+            string problem;
+            string[] names = Profile("Banishers").Single().NewContainerNames(save + ".sav", TranslationSimulator.XboxProfileID, out problem);
+            Assert.True(names != null, problem);
+            Assert.Equal(new[] { save, save }, names);
+        }
+
+        [Theory]
+        [InlineData("BNS1794964737202618011857")]
+        [InlineData("BNS1794967799202618020959")]
+        public void Banishers_XboxSave_BecomesASteamFileOfItsName(string save)
+        {
+            var toNonXbox = Banishers().ToNonXbox(new XboxFile(save, save, "Data"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(save + ".sav", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("MachineSettingsDesktop")]
+        [InlineData("UserSettingsDesktop")]
+        public void Banishers_Settings_AreNotCovered(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, Banishers().ToNonXbox(new XboxFile(container, container, "Data")).Outcome);
+        }
+
+        [Fact]
+        public void Banishers_DotInTheName_IsNotAnyCharacter()
+        {
+            Assert.Equal(Outcome.NoTranslation, Banishers().ToXbox("BNS1761508231202526195031xsav").Outcome);
         }
 
         #endregion
