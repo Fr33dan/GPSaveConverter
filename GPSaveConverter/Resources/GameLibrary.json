@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-11-17",
+  "Version": "2026-11-18",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -564,6 +564,19 @@
           "ContainerName1": "save${Slot}",
           "ContainerName2": "save${Slot}",
           "NamedRegexGroups": [ "(?<Slot>[0-9]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Banishers: Ghosts of New Eden",
+      "PackageName": "FocusHomeInteractiveSA.NewWorldBanishers_4hny5m903y3g0",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "BNS${SaveId}\\.sav",
+          "XboxFileID": "Data",
+          "ContainerName1": "BNS${SaveId}",
+          "ContainerName2": "BNS${SaveId}",
+          "NamedRegexGroups": [ "(?<SaveId>[0-9]+)" ]
         }
       ]
     }
