@@ -70,6 +70,7 @@ namespace GPSaveConverter.Tests
         [InlineData("StarWarsBattlefront")]
         [InlineData("BallXPit")]
         [InlineData("Banishers")]
+        [InlineData("KnightsOfTheOldRepublic")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -3184,6 +3185,140 @@ namespace GPSaveConverter.Tests
         public void Banishers_DotInTheName_IsNotAnyCharacter()
         {
             Assert.Equal(Outcome.NoTranslation, Banishers().ToXbox("BNS1761508231202526195031xsav").Outcome);
+        }
+
+        #endregion
+
+        #region STAR WARS - Knights of the Old Republic (#363)
+
+        private static readonly string[] KnightsOfTheOldRepublicSlots =
+        {
+            "2A3645F3D757|Game 13 - 0h 1m|13", "2BC6F6C88D20|Game 4 - 10h 8m|4", "2D7903A23802|Game 2 - 8h 50m|2",
+            "2DB003AB5A45|Game 3 - 9h 16m|3", "CA74A90E36B5|Game 12 - 21h 17m|12", "CBD46484291C|Game 10 - 17h 53m|10",
+            "CC4986C4291C|Game 11 - 19h 10m|11", "F701AF31170F|Game 5 - 11h 31m|5", "F73FD17A170F|Game 6 - 12h 37m|6",
+            "F76D262A24A8|Game 1 - 23h 56m|1", "F77BF3BB170F|Game 7 - 13h 15m|7", "F7BD15F9170F|Game 8 - 14h 40m|8",
+            "F834383C170F|Game 9 - 16h 20m|9"
+        };
+
+        private static readonly string[] KnightsOfTheOldRepublicSlotFiles =
+        {
+            "GLOBALVARS.res", "PARTYTABLE.res", "SAVEGAME.sav", "SAVE_DATA.sig", "SAVE_HEADER.sig", "SAVE_HEADERVAR.sig",
+            "SAVE_INFO.sig", "SAVE_PARTY.sig", "SAVE_VARS.sig", "Screen.sig", "Screen.tga", "savenfo.res"
+        };
+
+        private static XboxFile KnightsOfTheOldRepublicBlob(int slot, string file)
+        {
+            string[] container = KnightsOfTheOldRepublicSlots.Select(s => s.Split('|')).Single(s => s[2] == slot.ToString());
+            return new XboxFile("U4c410003/" + container[0], container[1], slot.ToString("000000") + " - Slot" + slot + "/" + file + "00");
+        }
+
+        private static TranslationSimulator KnightsOfTheOldRepublic()
+        {
+            // The tables posted in #363, from v.0.4.17, so with no sizes. The Game Pass version is the console
+            // game under backward compatibility. Each save is a container named U4c410003/ and an ID, with a
+            // second name such as "Game 1 - 23h 56m", holding the save's files in a folder such as
+            // "000001 - Slot1/" with 00 after each name, .sig files beside them, and SaveImage.XBX00 and
+            // SaveMeta.xbx00. GOG keeps a folder per save, "000001 - AUTOSAVE" and "000002 - Game1": the number
+            // in front is one more than on Xbox, so the saves pair by the number after Game and Slot.
+            var xboxFiles = new List<XboxFile>
+            {
+                new XboxFile("T4c410003/opt.res", "Title Metadata", "data00"),
+                new XboxFile("T4c410003/opt.sig", "Title Metadata", "data00"),
+                new XboxFile("U4c410003", "Title Metadata", "SaveImage.xbx00"),
+                new XboxFile("U4c410003", "Title Metadata", "TitleImage.xbx00"),
+                new XboxFile("U4c410003", "Title Metadata", "TitleMeta.xbx00")
+            };
+            foreach (string autosaveFile in new[] { "PLAYER_INFO.sig", "REBOOT.sav", "REBOOT_DATA.sig", "REBOOT_HEADER.sig", "REBOOT_HEADERVAR.sig", "SAVEGAME.sav", "SAVE_DATA.sig", "SAVE_HEADER.sig", "SAVE_HEADERVAR.sig", "SAVE_INFO.sig", "pifo.ifo", "savenfo.res" })
+            {
+                xboxFiles.Add(new XboxFile("U4c410003/8DD53EC93D8B", "Auto Save", "000000 - AUTOSAVE/" + autosaveFile + "00"));
+            }
+            foreach (string[] slot in KnightsOfTheOldRepublicSlots.Select(s => s.Split('|')))
+            {
+                int number = int.Parse(slot[2]);
+                xboxFiles.AddRange(KnightsOfTheOldRepublicSlotFiles.Select(f => KnightsOfTheOldRepublicBlob(number, f)));
+                xboxFiles.Add(new XboxFile("U4c410003/" + slot[0], slot[1], "SaveImage.XBX00"));
+                xboxFiles.Add(new XboxFile("U4c410003/" + slot[0], slot[1], "SaveMeta.xbx00"));
+            }
+            var nonXboxFiles = new[]
+            {
+                "000001 - AUTOSAVE\\GLOBALVARS.res", "000001 - AUTOSAVE\\PARTYTABLE.res", "000001 - AUTOSAVE\\pifo.ifo",
+                "000001 - AUTOSAVE\\SAVEGAME.sav", "000001 - AUTOSAVE\\savenfo.res",
+                "000002 - Game1\\GLOBALVARS.res", "000002 - Game1\\PARTYTABLE.res", "000002 - Game1\\SAVEGAME.sav",
+                "000002 - Game1\\savenfo.res", "000002 - Game1\\Screen.tga"
+            };
+
+            return new TranslationSimulator(Profile("KnightsOfTheOldRepublic"), xboxFiles.ToArray(), nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("GLOBALVARS.res")]
+        [InlineData("PARTYTABLE.res")]
+        [InlineData("SAVEGAME.sav")]
+        [InlineData("savenfo.res")]
+        [InlineData("Screen.tga")]
+        public void KnightsOfTheOldRepublic_GogGame1_ReplacesXboxGame1(string file)
+        {
+            var toXbox = KnightsOfTheOldRepublic().ToXbox("000002 - Game1\\" + file);
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(KnightsOfTheOldRepublicBlob(1, file).ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Theory]
+        [InlineData("GLOBALVARS.res")]
+        [InlineData("SAVEGAME.sav")]
+        [InlineData("Screen.tga")]
+        public void KnightsOfTheOldRepublic_XboxGame1_ReplacesGogGame1(string file)
+        {
+            var toNonXbox = KnightsOfTheOldRepublic().ToNonXbox(KnightsOfTheOldRepublicBlob(1, file));
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("000002 - Game1\\" + file, toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData(9)]
+        [InlineData(10)]
+        [InlineData(13)]
+        public void KnightsOfTheOldRepublic_GogFolderRenamed_ReplacesThatXboxSlot(int slot)
+        {
+            // A GOG save copied to a folder named for another slot, such as "000014 - Game13", goes to that slot.
+            var toXbox = KnightsOfTheOldRepublic().ToXbox((slot + 1).ToString("000000") + " - Game" + slot + "\\SAVEGAME.sav");
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(KnightsOfTheOldRepublicBlob(slot, "SAVEGAME.sav").ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void KnightsOfTheOldRepublic_Game1_DoesNotMatchGame10To13()
+        {
+            var toXbox = KnightsOfTheOldRepublic().ToXbox("000002 - Game1\\SAVEGAME.sav");
+
+            Assert.Equal(KnightsOfTheOldRepublicBlob(1, "SAVEGAME.sav").ToString(), toXbox.XboxFile.ToString());
+            Assert.Equal(Outcome.ExistingFile, KnightsOfTheOldRepublic().ToXbox("000011 - Game10\\SAVEGAME.sav").Outcome);
+        }
+
+        [Theory]
+        [InlineData("SAVE_DATA.sig")]
+        [InlineData("Screen.sig")]
+        public void KnightsOfTheOldRepublic_XboxSignatures_AreNotCovered(string file)
+        {
+            Assert.Equal(Outcome.NoTranslation, KnightsOfTheOldRepublic().ToNonXbox(KnightsOfTheOldRepublicBlob(1, file)).Outcome);
+        }
+
+        [Fact]
+        public void KnightsOfTheOldRepublic_SaveImageAndMeta_AreNotCovered()
+        {
+            Assert.Equal(Outcome.NoTranslation, KnightsOfTheOldRepublic().ToNonXbox(new XboxFile("U4c410003/F76D262A24A8", "Game 1 - 23h 56m", "SaveMeta.xbx00")).Outcome);
+        }
+
+        [Theory]
+        [InlineData("000001 - AUTOSAVE\\SAVEGAME.sav")]
+        [InlineData("000001 - AUTOSAVE\\pifo.ifo")]
+        public void KnightsOfTheOldRepublic_Autosave_IsNotCovered(string path)
+        {
+            // The two autosaves hold different files (Xbox has REBOOT.sav and no GLOBALVARS.res), so it is left out.
+            Assert.Equal(Outcome.NoTranslation, KnightsOfTheOldRepublic().ToXbox(path).Outcome);
         }
 
         #endregion
