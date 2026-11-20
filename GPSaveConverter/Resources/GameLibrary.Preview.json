@@ -568,6 +568,27 @@
           "NamedRegexGroups": [ "(?<SaveId>[0-9]+)" ]
         }
       ]
+    },
+    {
+      "Name": "STAR WARS™ - Knights of the Old Republic™",
+      "PackageName": "Xbox360BackwardCompatibil.PrimaryStarWarsKotOR4C41_ksqcvrsvwz2jp",
+      "Issues": [ 363 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "[0-9]{6} - Game${Slot}\\\\${File}",
+          "XboxFileID": "00000${Slot} - Slot${Slot}/${File}00",
+          "ContainerName1": "U4c410003/[0-9A-F]+",
+          "ContainerName2": "Game ${Slot} - .*",
+          "NamedRegexGroups": [ "(?<Slot>[1-9])", "(?<File>GLOBALVARS\\.res|PARTYTABLE\\.res|SAVEGAME\\.sav|savenfo\\.res|Screen\\.tga)" ]
+        },
+        {
+          "NonXboxFilename": "[0-9]{6} - Game${Slot}\\\\${File}",
+          "XboxFileID": "0000${Slot} - Slot${Slot}/${File}00",
+          "ContainerName1": "U4c410003/[0-9A-F]+",
+          "ContainerName2": "Game ${Slot} - .*",
+          "NamedRegexGroups": [ "(?<Slot>[1-9][0-9])", "(?<File>GLOBALVARS\\.res|PARTYTABLE\\.res|SAVEGAME\\.sav|savenfo\\.res|Screen\\.tga)" ]
+        }
+      ]
     }
   ]
 }
