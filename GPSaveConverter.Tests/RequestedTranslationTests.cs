@@ -3191,6 +3191,11 @@ namespace GPSaveConverter.Tests
 
         #region STAR WARS - Knights of the Old Republic (#363)
 
+        // Taken out of testing after #363. The reporter copied a GOG save into an Xbox slot, the files
+        // highlighted and copied as the tests below expect, and the game called the slot damaged. Each Xbox
+        // slot also holds .sig files that the GOG save has no counterpart for. The tests stay as the record
+        // of what was checked.
+
         private static readonly string[] KnightsOfTheOldRepublicSlots =
         {
             "2A3645F3D757|Game 13 - 0h 1m|13", "2BC6F6C88D20|Game 4 - 10h 8m|4", "2D7903A23802|Game 2 - 8h 50m|2",
