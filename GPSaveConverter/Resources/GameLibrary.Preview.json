@@ -556,21 +556,6 @@
       ]
     },
     {
-      "Name": "Kingdom Come: Deliverance II",
-      "PackageName": "DeepSilver.77536C3FE941_hmv7qcest37me",
-      "BaseNonXboxSaveLocation": "%USERPROFILE%\\Saved Games\\kingdomcome2\\saves\\",
-      "Issues": [ 280, 366 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "${Playline}\\\\${Save}",
-          "XboxFileID": "${Save}",
-          "ContainerName1": "saves/${Playline}",
-          "ContainerName2": "",
-          "NamedRegexGroups": [ "(?<Playline>playline[0-9]+)", "(?<Save>(?:autosave|save|permanent)[0-9]+\\.whs|exit\\.whs)" ]
-        }
-      ]
-    },
-    {
       "Name": "Totally Reliable Delivery Service",
       "PackageName": "tinyBuildGames.TotallyReliableDeliveryService_3sz1pp2ynv2xe",
       "Issues": [ 370 ],
