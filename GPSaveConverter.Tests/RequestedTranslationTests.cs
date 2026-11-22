@@ -71,6 +71,8 @@ namespace GPSaveConverter.Tests
         [InlineData("BallXPit")]
         [InlineData("Banishers")]
         [InlineData("KnightsOfTheOldRepublic")]
+        [InlineData("KingdomComeDeliveranceII")]
+        [InlineData("TotallyReliableDeliveryService")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -3324,6 +3326,149 @@ namespace GPSaveConverter.Tests
         {
             // The two autosaves hold different files (Xbox has REBOOT.sav and no GLOBALVARS.res), so it is left out.
             Assert.Equal(Outcome.NoTranslation, KnightsOfTheOldRepublic().ToXbox(path).Outcome);
+        }
+
+        #endregion
+
+        #region Kingdom Come: Deliverance II (#280, #366)
+
+        private static XboxFile KingdomComeBlob(string file)
+        {
+            return new XboxFile("saves/playline0", "", file);
+        }
+
+        private static TranslationSimulator KingdomComeDeliveranceII()
+        {
+            var xboxFiles = new[] { "autosave385.whs", "autosave386.whs", "autosave388.whs", "exit.whs", "permanent338.whs", "permanent346.whs", "permanent371.whs", "save378.whs", "save379.whs", "save387.whs" }
+                .Select(KingdomComeBlob)
+                .Concat(new[]
+                {
+                    new XboxFile("Profiles", "", "settings.xml"),
+                    new XboxFile("Profiles/DestinedLemur0", "", "profile.xml")
+                })
+                .ToArray();
+            var nonXboxFiles = new[] { "steam_autocloud.vdf", "playline0\\autosave003.whs", "playline0\\exit.whs", "playline0\\permanent001.whs", "playline0\\permanent002.whs" };
+            return new TranslationSimulator(Profile("KingdomComeDeliveranceII"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("autosave385.whs")]
+        [InlineData("permanent371.whs")]
+        [InlineData("save387.whs")]
+        public void KingdomCome_XboxSave_GoesToSteamPlayline(string file)
+        {
+            var toNonXbox = KingdomComeDeliveranceII().ToNonXbox(KingdomComeBlob(file));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("playline0\\" + file, toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void KingdomCome_XboxExit_ReplacesSteamExit()
+        {
+            var toNonXbox = KingdomComeDeliveranceII().ToNonXbox(KingdomComeBlob("exit.whs"));
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("playline0\\exit.whs", toNonXbox.RelativePath);
+        }
+
+        [Theory]
+        [InlineData("autosave003.whs")]
+        [InlineData("permanent001.whs")]
+        public void KingdomCome_SteamSave_GoesToXboxPlayline(string file)
+        {
+            var toXbox = KingdomComeDeliveranceII().ToXbox("playline0\\" + file);
+
+            Assert.Equal(Outcome.NewFile, toXbox.Outcome);
+            Assert.Equal("saves/playline0", toXbox.XboxFile.ContainerName1);
+            Assert.Equal("", toXbox.XboxFile.ContainerName2);
+            Assert.Equal(file, toXbox.NewFileID);
+        }
+
+        [Fact]
+        public void KingdomCome_SteamExit_ReplacesXboxExit()
+        {
+            var toXbox = KingdomComeDeliveranceII().ToXbox("playline0\\exit.whs");
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(KingdomComeBlob("exit.whs").ToString(), toXbox.XboxFile.ToString());
+        }
+
+        [Fact]
+        public void KingdomCome_ProfilesAndSteamCloud_AreNotCovered()
+        {
+            TranslationSimulator game = KingdomComeDeliveranceII();
+
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("Profiles", "", "settings.xml")).Outcome);
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("Profiles/DestinedLemur0", "", "profile.xml")).Outcome);
+            Assert.Equal(Outcome.NoTranslation, game.ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region Totally Reliable Delivery Service (#370)
+
+        // The profile folder whose decimal form, 2533274922204428, starts the posted Xbox blob names.
+        private const string DeliveryServiceProfile = "0009000007DB3D0C";
+
+        private static TranslationSimulator TotallyReliableDeliveryService()
+        {
+            var xboxFiles = new[]
+            {
+                new XboxFile("Saves", "Saves", "2533274922204428prefs.trd"),
+                new XboxFile("Saves", "Saves", "2533274922204428progress.trd"),
+                new XboxFile("TotallyReliableDeliveryService", "TotallyReliableDeliveryService", "saveGame")
+            };
+            // Posted from the folder above the save folder, so every path started with
+            // "Totally Reliable Delivery Service\". Here they are relative to that inner folder,
+            // the one the reporter is told to pick, which also holds Unity's folder as a Unity
+            // game's save folder does.
+            var nonXboxFiles = new[]
+            {
+                "150902304432410300.png", "bpl.ist", "outfits0.dad", "progress.dad",
+                "Unity\\9cd2f0b6-3d2a-4aac-8ee5-74a47e39e254\\Analytics\\config",
+                "Unity\\9cd2f0b6-3d2a-4aac-8ee5-74a47e39e254\\Analytics\\values",
+                "Unity\\local.2524f3b5886a93b45a1829e290f066d6\\Analytics\\config"
+            };
+            return new TranslationSimulator(Profile("TotallyReliableDeliveryService"), xboxFiles, nonXboxFiles, DeliveryServiceProfile);
+        }
+
+        [Fact]
+        public void TotallyReliableDeliveryService_Progress_MapsBothWays()
+        {
+            TranslationSimulator game = TotallyReliableDeliveryService();
+
+            var toXbox = game.ToXbox("progress.dad");
+            var toNonXbox = game.ToNonXbox(new XboxFile("Saves", "Saves", "2533274922204428progress.trd"));
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal("2533274922204428progress.trd", toXbox.XboxFile.FileID);
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal("progress.dad", toNonXbox.RelativePath);
+        }
+
+        [Fact]
+        public void TotallyReliableDeliveryService_AnotherProfilesProgress_IsNotCovered()
+        {
+            Assert.Equal(Outcome.NoTranslation, TotallyReliableDeliveryService().ToNonXbox(new XboxFile("Saves", "Saves", "2533274922204429progress.trd")).Outcome);
+        }
+
+        [Theory]
+        [InlineData("outfits0.dad")]
+        [InlineData("bpl.ist")]
+        [InlineData("150902304432410300.png")]
+        [InlineData("Unity\\local.2524f3b5886a93b45a1829e290f066d6\\Analytics\\config")]
+        public void TotallyReliableDeliveryService_OtherSteamFiles_AreNotSentToXbox(string file)
+        {
+            Assert.Equal(Outcome.NoTranslation, TotallyReliableDeliveryService().ToXbox(file).Outcome);
+        }
+
+        [Theory]
+        [InlineData("Saves", "2533274922204428prefs.trd")]
+        [InlineData("TotallyReliableDeliveryService", "saveGame")]
+        public void TotallyReliableDeliveryService_OtherXboxFiles_AreNotCovered(string container, string blob)
+        {
+            Assert.Equal(Outcome.NoTranslation, TotallyReliableDeliveryService().ToNonXbox(new XboxFile(container, container, blob)).Outcome);
         }
 
         #endregion

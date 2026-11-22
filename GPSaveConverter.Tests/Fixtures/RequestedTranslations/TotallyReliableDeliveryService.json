@@ -1,0 +1,13 @@
+{
+  "Name": "Totally Reliable Delivery Service",
+  "PackageName": "tinyBuildGames.TotallyReliableDeliveryService_3sz1pp2ynv2xe",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "progress\\.dad",
+      "XboxFileID": "${XboxProfileID_Int}progress\\.trd",
+      "ContainerName1": "Saves",
+      "ContainerName2": "Saves",
+      "NamedRegexGroups": []
+    }
+  ]
+}
