@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-11-21",
+  "Version": "2026-11-22A",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -577,6 +577,20 @@
           "ContainerName1": "BNS${SaveId}",
           "ContainerName2": "BNS${SaveId}",
           "NamedRegexGroups": [ "(?<SaveId>[0-9]+)" ]
+        }
+      ]
+    },
+    {
+      "Name": "Kingdom Come: Deliverance II",
+      "PackageName": "DeepSilver.77536C3FE941_hmv7qcest37me",
+      "BaseNonXboxSaveLocation": "%USERPROFILE%\\Saved Games\\kingdomcome2\\saves\\",
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Playline}\\\\${Save}",
+          "XboxFileID": "${Save}",
+          "ContainerName1": "saves/${Playline}",
+          "ContainerName2": "",
+          "NamedRegexGroups": [ "(?<Playline>playline[0-9]+)", "(?<Save>(?:autosave|save|permanent)[0-9]+\\.whs|exit\\.whs)" ]
         }
       ]
     }
