@@ -3373,17 +3373,25 @@ namespace GPSaveConverter.Tests
         }
 
         [Theory]
-        [InlineData("autosave003.whs", Outcome.NewFile)]
-        [InlineData("permanent001.whs", Outcome.NewFile)]
-        [InlineData("exit.whs", Outcome.ExistingFile)]
-        public void KingdomCome_SteamSave_GoesToXboxPlayline(string file, Outcome outcome)
+        [InlineData("autosave003.whs")]
+        [InlineData("permanent001.whs")]
+        public void KingdomCome_SteamSave_GoesToXboxPlayline(string file)
         {
             var toXbox = KingdomComeDeliveranceII().ToXbox("playline0\\" + file);
 
-            Assert.Equal(outcome, toXbox.Outcome);
+            Assert.Equal(Outcome.NewFile, toXbox.Outcome);
             Assert.Equal("saves/playline0", toXbox.XboxFile.ContainerName1);
             Assert.Equal("", toXbox.XboxFile.ContainerName2);
-            Assert.Equal(file, outcome == Outcome.NewFile ? toXbox.NewFileID : toXbox.XboxFile.FileID);
+            Assert.Equal(file, toXbox.NewFileID);
+        }
+
+        [Fact]
+        public void KingdomCome_SteamExit_ReplacesXboxExit()
+        {
+            var toXbox = KingdomComeDeliveranceII().ToXbox("playline0\\exit.whs");
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(KingdomComeBlob("exit.whs").ToString(), toXbox.XboxFile.ToString());
         }
 
         [Fact]
