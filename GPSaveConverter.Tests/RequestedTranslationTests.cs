@@ -3408,6 +3408,10 @@ namespace GPSaveConverter.Tests
 
         #region Totally Reliable Delivery Service (#370)
 
+        // Taken out of testing after #370. The reporter copied progress.dad from Steam to the Xbox blob these
+        // tests expect, and the Game Pass version reset their progress in place of loading it. The tests stay
+        // as the record of what was checked.
+
         // The profile folder whose decimal form, 2533274922204428, starts the posted Xbox blob names.
         private const string DeliveryServiceProfile = "0009000007DB3D0C";
 
