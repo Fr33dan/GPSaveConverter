@@ -1,5 +1,5 @@
 ﻿{
-  "Version": "2026-11-22A",
+  "Version": "2026-11-23",
   "GameInfo": [
     {
       "PackageName": "7904SEGAEuropeLtd.TwoPointHospital-GamePass_zs7esxpzd8d5c",
@@ -623,6 +623,7 @@
     { "Name": "The Outer Worlds: Spacer's Choice Edition", "PackageName": "PrivateDivision.64850D0BF098F_hv3d7yfbgr2rp", "Text": "The Microsoft Store version keeps its save in a different file from the Steam and Epic versions, so a copied save does not work (#154)." },
     { "Name": "The Outlast Trials", "PackageName": "12495RedBarrels-Montreal.TheOutlastTrials_hvfjwf428ytt4", "Direction": "ToXbox", "Text": "Steam saves copied into the Game Pass version were not used by the game, which may keep its progress online (#333)." },
     { "Name": "Total Chaos", "PackageName": "Atari.TotalChaos_xka83p2csqhz2", "Direction": "FromXbox", "Text": "The Game Pass version keeps only a PlayerPrefs file, with no save files to copy. Copied in place of a Steam save, it did not show up in the Steam version (#329)." },
+    { "Name": "Totally Reliable Delivery Service", "PackageName": "tinyBuildGames.TotallyReliableDeliveryService_3sz1pp2ynv2xe", "Direction": "ToXbox", "Text": "The Game Pass version did not load a progress file copied from Steam, and reset the player's progress. The two versions name the file differently, .dad on Steam and .trd on Game Pass (#370)." },
     { "Name": "Tunic", "PackageName": "Finji.TUNIC_tys0ffscxatjj", "Text": "The Game Pass version keeps every save slot in one file and the Steam version keeps one file per slot, so a copied save does not work (#6)." },
     { "Name": "Well Dweller", "PackageName": "TopHatStudiosInc.WellDweller_93vj94f8vfryy", "Direction": "FromXbox", "Text": "A Game Pass save copied to the Steam version crashes the game at its menu. One player got it to load by decoding the file first, a step this tool does not do. #287 describes how." },
     { "Name": "Wo Long: Fallen Dynasty", "PackageName": "946B6A6E.WoLongFallenDynasty_dkffhzhmh6pmy", "Text": "The game calls a copied save corrupt until the start of the file is patched with a hex editor. #45 describes how." }
