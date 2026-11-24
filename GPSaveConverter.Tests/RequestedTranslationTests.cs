@@ -73,6 +73,7 @@ namespace GPSaveConverter.Tests
         [InlineData("KnightsOfTheOldRepublic")]
         [InlineData("KingdomComeDeliveranceII")]
         [InlineData("TotallyReliableDeliveryService")]
+        [InlineData("TheOuterWorlds2")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -3473,6 +3474,135 @@ namespace GPSaveConverter.Tests
         public void TotallyReliableDeliveryService_OtherXboxFiles_AreNotCovered(string container, string blob)
         {
             Assert.Equal(Outcome.NoTranslation, TotallyReliableDeliveryService().ToNonXbox(new XboxFile(container, container, blob)).Outcome);
+        }
+
+        #endregion
+
+        #region The Outer Worlds 2 (#377)
+
+        // Each Game Pass save is a container named by the save's ID, with "TOW Save Game" as its second
+        // name, holding Metadata.dat, SaveGameScreenshot.png and SavedState.dat. Steam keeps a folder of
+        // the same name holding Metadata.dat, SaveGameScreenshot.png and SaveGame.dat. Every container
+        // posted has a folder of its name on Steam, though most of those folders hold only the picture.
+        private static readonly string[] OuterWorlds2Containers =
+        {
+            "035FEE2D4670F883BFA9AC8B02C0336C", "0414D05C499686BBEC2A1A90D82019E6", "0CA536C94CE9A283F53439A8FA03C451",
+            "0E4107814561334592832EB8B5D462C4", "1265B1A64ADCAF6D65F40B98FF845617", "132EEA384EAF01C6DE4FF39E34B0ADA4",
+            "1424E2CC49249F106F06DF81D3CF4D59", "16A5DF4C4F5AFA58AF64DFBCCEC921EC", "1FDB7A2941B58C3493CD1D9D0EDACA4D",
+            "2919C186450CDD1DD6912C9327BD6DD2", "2BE3702F47D44B9216AA33ADCF908761", "37A80510436D9854157C62A8AC437997",
+            "38A5321B442619EFE8B8CFAAEA633DDF", "3EE1A9594800BFE7D8C9758767A88433", "40231FB64BBC5E7887F81E94A550C071",
+            "416FDDC54FF86DF96D8D97AD50BB2167", "424255DD403E4D83196B079561A69204", "48FB9C644667D9AB8BC1C7B75A0B882E",
+            "4EF7BC6F478869FCF497F99C89D5140F", "537A7B4143D74E595BFE6E94A18C5FAA", "54C886F94A4131E69FB3639B0566633C",
+            "581258B54C68D3A205F51CBC34DCD09F", "5CBC91C54847F2742D57CDAC5EDB762B", "66EF0F4C4E1C0748CB6101B49011194C",
+            "6B414DDB48C33214E2066795983D1A2E", "6BCA25874C9335B6CF4B8EA0E0249FEA", "746D374C475D1E156E4B8FA1CBB11874",
+            "77A77C67438D1FA8D7475FB2167A4183", "7A6B0C6C491137E238B929AC74964894", "810E1B834082B1179DF885800027C001",
+            "83A850694C0309E05AE8879248A3E2F8", "86A1F5B64BD69C8593B0A5B6798F2B74", "86AD184E4B0EE2763997C59A18935447",
+            "8B06B2D14701BCE5AF69B69CD1F85849", "930320484DE31853A653A9BC965B188E", "973843ED4A0AE947FAC18B83302B0721",
+            "9F8AC795499BB3E65A3E6EA06F403EAE", "A7576F9C436E47528BF955B954C1EC70", "Autosave00",
+            "Autosave01", "Autosave02", "B3825E374FD4A626B02F23A6046D8903",
+            "B6B94899427E1A8A60C673A553ACD471", "C119A863456E9F29BAA769A0ED2B698F", "C1F69A534974E3979324D1B745252646",
+            "C300C08244FF9B1DDBA93E9B4D0DA2A5", "C398C64B4CD9A2E4B09DB682E7C44F09", "C7165789498FDFB06EAD62BDBA356A3B",
+            "CC32E9F84009917AD03B6FB5884C7F49", "D54792EC4F7608D6DC45FF9C0E5DF371", "D77EC53A4682BEBDC0D20093DAEDD2B1",
+            "D8272F204DB639585172B98114CCF7BA", "F07B843840ED4C6FFB2D14A627A57204", "F69A3BB746ECF12497985A91F99F4155",
+            "F996EFB045F5A87AD895F68B7205E453", "FA3B25664FD6BD11A8D3549C43745DE7"
+        };
+
+        private static TranslationSimulator OuterWorlds2()
+        {
+            var xboxFiles = OuterWorlds2Containers
+                .SelectMany(save => new[] { "Metadata.dat", "SaveGameScreenshot.png", "SavedState.dat" }.Select(blob => new XboxFile(save, "TOW Save Game", blob)))
+                .Concat(new[] { new XboxFile("UserContainer", "User Settings Data", "UserSettings_WinGDK.dat") })
+                .ToArray();
+            var nonXboxFiles = new[]
+            {
+                "steam_autocloud.vdf", "035FEE2D4670F883BFA9AC8B02C0336C\\SaveGameScreenshot.png",
+                "0414D05C499686BBEC2A1A90D82019E6\\SaveGameScreenshot.png", "0CA536C94CE9A283F53439A8FA03C451\\SaveGameScreenshot.png",
+                "0E4107814561334592832EB8B5D462C4\\SaveGameScreenshot.png", "1265B1A64ADCAF6D65F40B98FF845617\\SaveGameScreenshot.png",
+                "132EEA384EAF01C6DE4FF39E34B0ADA4\\SaveGameScreenshot.png", "1424E2CC49249F106F06DF81D3CF4D59\\SaveGameScreenshot.png",
+                "16A5DF4C4F5AFA58AF64DFBCCEC921EC\\SaveGameScreenshot.png", "1FDB7A2941B58C3493CD1D9D0EDACA4D\\SaveGameScreenshot.png",
+                "2919C186450CDD1DD6912C9327BD6DD2\\SaveGameScreenshot.png", "2BE3702F47D44B9216AA33ADCF908761\\SaveGameScreenshot.png",
+                "37A80510436D9854157C62A8AC437997\\SaveGameScreenshot.png", "38A5321B442619EFE8B8CFAAEA633DDF\\SaveGameScreenshot.png",
+                "3EE1A9594800BFE7D8C9758767A88433\\SaveGameScreenshot.png", "40231FB64BBC5E7887F81E94A550C071\\SaveGameScreenshot.png",
+                "416FDDC54FF86DF96D8D97AD50BB2167\\SaveGameScreenshot.png", "424255DD403E4D83196B079561A69204\\SaveGameScreenshot.png",
+                "48FB9C644667D9AB8BC1C7B75A0B882E\\SaveGameScreenshot.png", "4EF7BC6F478869FCF497F99C89D5140F\\SaveGameScreenshot.png",
+                "537A7B4143D74E595BFE6E94A18C5FAA\\SaveGameScreenshot.png", "54C886F94A4131E69FB3639B0566633C\\SaveGameScreenshot.png",
+                "581258B54C68D3A205F51CBC34DCD09F\\SaveGameScreenshot.png", "5CBC91C54847F2742D57CDAC5EDB762B\\SaveGameScreenshot.png",
+                "66EF0F4C4E1C0748CB6101B49011194C\\SaveGameScreenshot.png", "6B414DDB48C33214E2066795983D1A2E\\SaveGameScreenshot.png",
+                "6BCA25874C9335B6CF4B8EA0E0249FEA\\SaveGameScreenshot.png", "746D374C475D1E156E4B8FA1CBB11874\\SaveGameScreenshot.png",
+                "77A77C67438D1FA8D7475FB2167A4183\\SaveGameScreenshot.png", "7A6B0C6C491137E238B929AC74964894\\SaveGameScreenshot.png",
+                "810E1B834082B1179DF885800027C001\\SaveGameScreenshot.png", "83A850694C0309E05AE8879248A3E2F8\\SaveGameScreenshot.png",
+                "86A1F5B64BD69C8593B0A5B6798F2B74\\SaveGameScreenshot.png", "86AD184E4B0EE2763997C59A18935447\\SaveGameScreenshot.png",
+                "8B06B2D14701BCE5AF69B69CD1F85849\\SaveGameScreenshot.png", "930320484DE31853A653A9BC965B188E\\SaveGameScreenshot.png",
+                "973843ED4A0AE947FAC18B83302B0721\\SaveGameScreenshot.png", "9F8AC795499BB3E65A3E6EA06F403EAE\\SaveGameScreenshot.png",
+                "A7576F9C436E47528BF955B954C1EC70\\SaveGameScreenshot.png", "Autosave00\\Metadata.dat",
+                "Autosave00\\SaveGame.dat", "Autosave00\\SaveGameScreenshot.png",
+                "Autosave01\\SaveGameScreenshot.png", "Autosave02\\SaveGameScreenshot.png",
+                "B3825E374FD4A626B02F23A6046D8903\\SaveGameScreenshot.png", "B6B94899427E1A8A60C673A553ACD471\\SaveGameScreenshot.png",
+                "C119A863456E9F29BAA769A0ED2B698F\\SaveGameScreenshot.png", "C1F69A534974E3979324D1B745252646\\SaveGameScreenshot.png",
+                "C300C08244FF9B1DDBA93E9B4D0DA2A5\\SaveGameScreenshot.png", "C398C64B4CD9A2E4B09DB682E7C44F09\\SaveGameScreenshot.png",
+                "C62E9ED848880DF9F740AF8B962AE428\\Metadata.dat", "C62E9ED848880DF9F740AF8B962AE428\\SaveGame.dat",
+                "C62E9ED848880DF9F740AF8B962AE428\\SaveGameScreenshot.png", "C7165789498FDFB06EAD62BDBA356A3B\\SaveGameScreenshot.png",
+                "CC32E9F84009917AD03B6FB5884C7F49\\SaveGameScreenshot.png", "D54792EC4F7608D6DC45FF9C0E5DF371\\SaveGameScreenshot.png",
+                "D77EC53A4682BEBDC0D20093DAEDD2B1\\SaveGameScreenshot.png", "D8272F204DB639585172B98114CCF7BA\\SaveGameScreenshot.png",
+                "F07B843840ED4C6FFB2D14A627A57204\\SaveGameScreenshot.png", "F69A3BB746ECF12497985A91F99F4155\\SaveGameScreenshot.png",
+                "F996EFB045F5A87AD895F68B7205E453\\SaveGameScreenshot.png", "FA3B25664FD6BD11A8D3549C43745DE7\\SaveGameScreenshot.png"
+            };
+            return new TranslationSimulator(Profile("TheOuterWorlds2"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("Autosave00", "SavedState.dat", "Autosave00\\SaveGame.dat")]
+        [InlineData("Autosave00", "Metadata.dat", "Autosave00\\Metadata.dat")]
+        [InlineData("Autosave00", "SaveGameScreenshot.png", "Autosave00\\SaveGameScreenshot.png")]
+        [InlineData("035FEE2D4670F883BFA9AC8B02C0336C", "SaveGameScreenshot.png", "035FEE2D4670F883BFA9AC8B02C0336C\\SaveGameScreenshot.png")]
+        public void OuterWorlds2_XboxSave_ReplacesSteamFileOfItsName(string container, string blob, string path)
+        {
+            var toNonXbox = OuterWorlds2().ToNonXbox(new XboxFile(container, "TOW Save Game", blob));
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.PathOnDisk);
+        }
+
+        [Theory]
+        [InlineData("Autosave01", "SavedState.dat", "Autosave01\\SaveGame.dat")]
+        [InlineData("035FEE2D4670F883BFA9AC8B02C0336C", "SavedState.dat", "035FEE2D4670F883BFA9AC8B02C0336C\\SaveGame.dat")]
+        [InlineData("035FEE2D4670F883BFA9AC8B02C0336C", "Metadata.dat", "035FEE2D4670F883BFA9AC8B02C0336C\\Metadata.dat")]
+        public void OuterWorlds2_XboxSave_GoesToSteamFolderOfItsName(string container, string blob, string path)
+        {
+            var toNonXbox = OuterWorlds2().ToNonXbox(new XboxFile(container, "TOW Save Game", blob));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.PathOnDisk);
+        }
+
+        [Theory]
+        [InlineData("Autosave00\\SaveGame.dat", "SavedState.dat")]
+        [InlineData("Autosave00\\Metadata.dat", "Metadata.dat")]
+        [InlineData("Autosave00\\SaveGameScreenshot.png", "SaveGameScreenshot.png")]
+        [InlineData("FA3B25664FD6BD11A8D3549C43745DE7\\SaveGameScreenshot.png", "SaveGameScreenshot.png")]
+        public void OuterWorlds2_SteamSave_ReplacesXboxBlob(string path, string blob)
+        {
+            var toXbox = OuterWorlds2().ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(path.Substring(0, path.IndexOf('\\')), toXbox.XboxFile.ContainerName1);
+            Assert.Equal("TOW Save Game", toXbox.XboxFile.ContainerName2);
+            Assert.Equal(blob, toXbox.XboxFile.FileID);
+        }
+
+        [Fact]
+        public void OuterWorlds2_SteamOnlySave_HasNoXboxContainerYet()
+        {
+            Assert.Equal(Outcome.NoContainer, OuterWorlds2().ToXbox("C62E9ED848880DF9F740AF8B962AE428\\SaveGame.dat").Outcome);
+        }
+
+        [Fact]
+        public void OuterWorlds2_SettingsAndSteamCloud_AreNotCovered()
+        {
+            TranslationSimulator game = OuterWorlds2();
+
+            Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("UserContainer", "User Settings Data", "UserSettings_WinGDK.dat")).Outcome);
+            Assert.Equal(Outcome.NoTranslation, game.ToXbox("steam_autocloud.vdf").Outcome);
         }
 
         #endregion

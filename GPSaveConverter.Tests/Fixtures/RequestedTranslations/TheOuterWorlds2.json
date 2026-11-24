@@ -1,0 +1,21 @@
+{
+  "Name": "The Outer Worlds 2",
+  "PackageName": "Microsoft.OE-Arkansas_8wekyb3d8bbwe",
+  "BaseNonXboxSaveLocation": "%USERPROFILE%\\Saved Games\\TheOuterWorlds2\\",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Save}\\\\SaveGame\\.dat",
+      "XboxFileID": "SavedState\\.dat",
+      "ContainerName1": "${Save}",
+      "ContainerName2": "TOW Save Game",
+      "NamedRegexGroups": [ "(?<Save>[0-9A-Za-z]+)" ]
+    },
+    {
+      "NonXboxFilename": "${Save}\\\\${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "${Save}",
+      "ContainerName2": "TOW Save Game",
+      "NamedRegexGroups": [ "(?<Save>[0-9A-Za-z]+)", "(?<File>Metadata\\.dat|SaveGameScreenshot\\.png)" ]
+    }
+  ]
+}
