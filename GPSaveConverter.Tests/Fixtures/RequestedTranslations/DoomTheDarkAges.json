@@ -1,0 +1,15 @@
+{
+  "Name": "DOOM: The Dark Ages",
+  "PackageName": "BethesdaSoftworks.ProjectTitan_3275kfvn8vcwc",
+  "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\3017860\\remote\\",
+  "TargetProfileTypes": [ "Steam" ],
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "${Folder}\\\\${File}",
+      "XboxFileID": "${File}",
+      "ContainerName1": "${Folder}",
+      "ContainerName2": "${Folder}",
+      "NamedRegexGroups": [ "(?<Folder>GAME-[A-Z0-9]+|PROFILE)", "(?<File>game\\.details|game\\.details-BACKUP|game_duration\\.dat|game_duration\\.dat-BACKUP|profile\\.bin)" ]
+    }
+  ]
+}

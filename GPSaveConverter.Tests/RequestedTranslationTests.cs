@@ -74,6 +74,7 @@ namespace GPSaveConverter.Tests
         [InlineData("KingdomComeDeliveranceII")]
         [InlineData("TotallyReliableDeliveryService")]
         [InlineData("TheOuterWorlds2")]
+        [InlineData("DoomTheDarkAges")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -506,6 +507,10 @@ namespace GPSaveConverter.Tests
         // covers that direction. Staged again for #354, which copies the other way, from Game Pass to
         // Steam, which nobody has tried. The save folder now names the Steam account's folder, so the
         // tool lists it as a profile and the paths start at the save files.
+        //
+        // Taken out of testing again after #354. A user copied from Game Pass to Steam with it, and the
+        // Steam version showed the copied saves with nonsense in them and would not load them. The tests
+        // stay as the record of what was checked.
 
         private static TranslationSimulator FinalFantasyVIIRemake()
         {
@@ -3603,6 +3608,87 @@ namespace GPSaveConverter.Tests
 
             Assert.Equal(Outcome.NoTranslation, game.ToNonXbox(new XboxFile("UserContainer", "User Settings Data", "UserSettings_WinGDK.dat")).Outcome);
             Assert.Equal(Outcome.NoTranslation, game.ToXbox("steam_autocloud.vdf").Outcome);
+        }
+
+        #endregion
+
+        #region DOOM: The Dark Ages (#379)
+
+        // Each Game Pass save is a container whose two names are the name of a folder in the Steam save
+        // folder, holding a blob for each file in that folder. The Game Pass version also keeps a
+        // .checksum blob beside game_duration.dat and its backup, which the Steam folder has no file for,
+        // so those are left out.
+        private static TranslationSimulator DoomTheDarkAges()
+        {
+            // The tables as posted in #379, from v.0.4.17.
+            var xboxFiles = new[]
+            {
+                new XboxFile("GAME-AUTOSAVE1", "GAME-AUTOSAVE1", "game.details"),
+                new XboxFile("GAME-AUTOSAVE1", "GAME-AUTOSAVE1", "game.details-BACKUP"),
+                new XboxFile("GAME-AUTOSAVE1", "GAME-AUTOSAVE1", "game_duration.dat"),
+                new XboxFile("GAME-AUTOSAVE1", "GAME-AUTOSAVE1", "game_duration.dat-BACKUP"),
+                new XboxFile("GAME-AUTOSAVE1", "GAME-AUTOSAVE1", "game_duration.dat-BACKUP.checksum"),
+                new XboxFile("GAME-AUTOSAVE1", "GAME-AUTOSAVE1", "game_duration.dat.checksum"),
+                new XboxFile("PROFILE", "PROFILE", "profile.bin")
+            };
+            var nonXboxFiles = new[]
+            {
+                "GAME-AUTOSAVE1\\game.details", "GAME-AUTOSAVE1\\game.details-BACKUP", "GAME-AUTOSAVE1\\game_duration.dat",
+                "GAME-AUTOSAVE1\\game_duration.dat-BACKUP", "PROFILE\\profile.bin"
+            };
+            return new TranslationSimulator(Profile("DoomTheDarkAges"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("GAME-AUTOSAVE1", "game.details", "GAME-AUTOSAVE1\\game.details")]
+        [InlineData("GAME-AUTOSAVE1", "game.details-BACKUP", "GAME-AUTOSAVE1\\game.details-BACKUP")]
+        [InlineData("GAME-AUTOSAVE1", "game_duration.dat", "GAME-AUTOSAVE1\\game_duration.dat")]
+        [InlineData("GAME-AUTOSAVE1", "game_duration.dat-BACKUP", "GAME-AUTOSAVE1\\game_duration.dat-BACKUP")]
+        [InlineData("PROFILE", "profile.bin", "PROFILE\\profile.bin")]
+        public void DoomTheDarkAges_XboxFile_ReplacesSteamFileOfItsName(string container, string blob, string path)
+        {
+            var toNonXbox = DoomTheDarkAges().ToNonXbox(new XboxFile(container, container, blob));
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.PathOnDisk);
+        }
+
+        [Theory]
+        [InlineData("GAME-AUTOSAVE1\\game.details", "GAME-AUTOSAVE1", "game.details")]
+        [InlineData("GAME-AUTOSAVE1\\game_duration.dat", "GAME-AUTOSAVE1", "game_duration.dat")]
+        [InlineData("GAME-AUTOSAVE1\\game_duration.dat-BACKUP", "GAME-AUTOSAVE1", "game_duration.dat-BACKUP")]
+        [InlineData("PROFILE\\profile.bin", "PROFILE", "profile.bin")]
+        public void DoomTheDarkAges_SteamFile_ReplacesXboxBlob(string path, string container, string blob)
+        {
+            var toXbox = DoomTheDarkAges().ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container, toXbox.XboxFile.ContainerName1);
+            Assert.Equal(container, toXbox.XboxFile.ContainerName2);
+            Assert.Equal(blob, toXbox.XboxFile.FileID);
+        }
+
+        [Theory]
+        [InlineData("game_duration.dat.checksum")]
+        [InlineData("game_duration.dat-BACKUP.checksum")]
+        public void DoomTheDarkAges_Checksums_AreNotCovered(string blob)
+        {
+            Assert.Equal(Outcome.NoTranslation, DoomTheDarkAges().ToNonXbox(new XboxFile("GAME-AUTOSAVE1", "GAME-AUTOSAVE1", blob)).Outcome);
+        }
+
+        [Fact]
+        public void DoomTheDarkAges_OtherSlot_GoesToSteamFolderOfItsName()
+        {
+            var toNonXbox = DoomTheDarkAges().ToNonXbox(new XboxFile("GAME-AUTOSAVE2", "GAME-AUTOSAVE2", "game_duration.dat"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("GAME-AUTOSAVE2\\game_duration.dat", toNonXbox.PathOnDisk);
+        }
+
+        [Fact]
+        public void DoomTheDarkAges_SteamOnlySlot_HasNoXboxContainerYet()
+        {
+            Assert.Equal(Outcome.NoContainer, DoomTheDarkAges().ToXbox("GAME-AUTOSAVE2\\game_duration.dat").Outcome);
         }
 
         #endregion
