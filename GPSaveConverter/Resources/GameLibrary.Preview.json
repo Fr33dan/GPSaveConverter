@@ -540,22 +540,6 @@
       ]
     },
     {
-      "Name": "FINAL FANTASY VII REMAKE INTERGRADE",
-      "PackageName": "39EA002F.EXED1_n746a19ndrrjg",
-      "BaseNonXboxSaveLocation": "%USERPROFILE%\\Documents\\My Games\\FINAL FANTASY VII REMAKE\\Steam\\<user-id_SteamID64>\\",
-      "TargetProfileTypes": [ "Steam" ],
-      "Issues": [ 354 ],
-      "FileTranslations": [
-        {
-          "NonXboxFilename": "ff7remake${Slot}\\.sav",
-          "XboxFileID": "Data",
-          "ContainerName1": "ff7remake${Slot}",
-          "ContainerName2": "ff7remake${Slot}",
-          "NamedRegexGroups": [ "(?<Slot>[0-9]{3}|common)" ]
-        }
-      ]
-    },
-    {
       "Name": "The Outer Worlds 2",
       "PackageName": "Microsoft.OE-Arkansas_8wekyb3d8bbwe",
       "BaseNonXboxSaveLocation": "%USERPROFILE%\\Saved Games\\TheOuterWorlds2\\",
@@ -574,6 +558,22 @@
           "ContainerName1": "${Save}",
           "ContainerName2": "TOW Save Game",
           "NamedRegexGroups": [ "(?<Save>[0-9A-Za-z]+)", "(?<File>Metadata\\.dat|SaveGameScreenshot\\.png)" ]
+        }
+      ]
+    },
+    {
+      "Name": "DOOM: The Dark Ages",
+      "PackageName": "BethesdaSoftworks.ProjectTitan_3275kfvn8vcwc",
+      "BaseNonXboxSaveLocation": "<Steam-folder>\\userdata\\<user-id>\\3017860\\remote\\",
+      "TargetProfileTypes": [ "Steam" ],
+      "Issues": [ 379 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "${Folder}\\\\${File}",
+          "XboxFileID": "${File}",
+          "ContainerName1": "${Folder}",
+          "ContainerName2": "${Folder}",
+          "NamedRegexGroups": [ "(?<Folder>GAME-[A-Z0-9]+|PROFILE)", "(?<File>game\\.details|game\\.details-BACKUP|game_duration\\.dat|game_duration\\.dat-BACKUP|profile\\.bin)" ]
         }
       ]
     }
