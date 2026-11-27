@@ -1,0 +1,20 @@
+{
+  "Name": "Shadow of the Tomb Raider",
+  "PackageName": "39C668CD.TombRaider11BaseGame_r7bfsmp40f67j",
+  "FileTranslations": [
+    {
+      "NonXboxFilename": "save${Slot}\\.dat",
+      "XboxFileID": "data_98",
+      "ContainerName1": "GameSlot${Slot}",
+      "ContainerName2": "GameSlot${Slot}",
+      "NamedRegexGroups": [ "(?<Slot>[1-9][0-9]?)" ]
+    },
+    {
+      "NonXboxFilename": "profile\\.dat",
+      "XboxFileID": "data_98",
+      "ContainerName1": "Profile",
+      "ContainerName2": "Profile",
+      "NamedRegexGroups": []
+    }
+  ]
+}
