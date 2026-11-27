@@ -576,6 +576,27 @@
           "NamedRegexGroups": [ "(?<Folder>GAME-[A-Z0-9]+|PROFILE)", "(?<File>game\\.details|game\\.details-BACKUP|game_duration\\.dat|game_duration\\.dat-BACKUP|profile\\.bin)" ]
         }
       ]
+    },
+    {
+      "Name": "Shadow of the Tomb Raider",
+      "PackageName": "39C668CD.TombRaider11BaseGame_r7bfsmp40f67j",
+      "Issues": [ 382 ],
+      "FileTranslations": [
+        {
+          "NonXboxFilename": "save${Slot}\\.dat",
+          "XboxFileID": "data_98",
+          "ContainerName1": "GameSlot${Slot}",
+          "ContainerName2": "GameSlot${Slot}",
+          "NamedRegexGroups": [ "(?<Slot>[1-9][0-9]?)" ]
+        },
+        {
+          "NonXboxFilename": "profile\\.dat",
+          "XboxFileID": "data_98",
+          "ContainerName1": "Profile",
+          "ContainerName2": "Profile",
+          "NamedRegexGroups": []
+        }
+      ]
     }
   ]
 }

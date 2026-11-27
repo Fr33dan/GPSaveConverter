@@ -75,6 +75,7 @@ namespace GPSaveConverter.Tests
         [InlineData("TotallyReliableDeliveryService")]
         [InlineData("TheOuterWorlds2")]
         [InlineData("DoomTheDarkAges")]
+        [InlineData("ShadowOfTheTombRaider")]
         public void Profile_PassesTheLibraryChecks(string game)
         {
             foreach (FileTranslation translation in Profile(game))
@@ -3689,6 +3690,78 @@ namespace GPSaveConverter.Tests
         public void DoomTheDarkAges_SteamOnlySlot_HasNoXboxContainerYet()
         {
             Assert.Equal(Outcome.NoContainer, DoomTheDarkAges().ToXbox("GAME-AUTOSAVE2\\game_duration.dat").Outcome);
+        }
+
+        #endregion
+
+        #region Shadow of the Tomb Raider (#382)
+
+        // Each Game Pass save is a container whose two names are the same, holding one data_98 blob.
+        // The Epic version keeps save1.dat and profile.dat, which pair with GameSlot1 and Profile.
+        // LastAutosave, LastBackup and LastCampsite have no file on the Epic side in the tables, and
+        // save202.dat has no container, so none of those is covered until someone shows where they go.
+        private static TranslationSimulator ShadowOfTheTombRaider()
+        {
+            // The tables as posted in #382, from v.0.4.17.
+            var xboxFiles = new[]
+            {
+                new XboxFile("GameSlot1", "GameSlot1", "data_98"),
+                new XboxFile("GameSlot2", "GameSlot2", "data_98"),
+                new XboxFile("LastAutosave", "LastAutosave", "data_98"),
+                new XboxFile("LastBackup", "LastBackup", "data_98"),
+                new XboxFile("LastCampsite", "LastCampsite", "data_98"),
+                new XboxFile("Profile", "Profile", "data_98")
+            };
+            var nonXboxFiles = new[] { "profile.dat", "save1.dat", "save202.dat" };
+            return new TranslationSimulator(Profile("ShadowOfTheTombRaider"), xboxFiles, nonXboxFiles);
+        }
+
+        [Theory]
+        [InlineData("GameSlot1", "save1.dat")]
+        [InlineData("Profile", "profile.dat")]
+        public void ShadowOfTheTombRaider_XboxFile_ReplacesEpicFile(string container, string path)
+        {
+            var toNonXbox = ShadowOfTheTombRaider().ToNonXbox(new XboxFile(container, container, "data_98"));
+
+            Assert.Equal(Outcome.ExistingFile, toNonXbox.Outcome);
+            Assert.Equal(path, toNonXbox.PathOnDisk);
+        }
+
+        [Fact]
+        public void ShadowOfTheTombRaider_SecondSlot_BecomesANewEpicFile()
+        {
+            var toNonXbox = ShadowOfTheTombRaider().ToNonXbox(new XboxFile("GameSlot2", "GameSlot2", "data_98"));
+
+            Assert.Equal(Outcome.NewFile, toNonXbox.Outcome);
+            Assert.Equal("save2.dat", toNonXbox.PathOnDisk);
+        }
+
+        [Theory]
+        [InlineData("save1.dat", "GameSlot1")]
+        [InlineData("profile.dat", "Profile")]
+        public void ShadowOfTheTombRaider_EpicFile_ReplacesXboxBlob(string path, string container)
+        {
+            var toXbox = ShadowOfTheTombRaider().ToXbox(path);
+
+            Assert.Equal(Outcome.ExistingFile, toXbox.Outcome);
+            Assert.Equal(container, toXbox.XboxFile.ContainerName1);
+            Assert.Equal(container, toXbox.XboxFile.ContainerName2);
+            Assert.Equal("data_98", toXbox.XboxFile.FileID);
+        }
+
+        [Theory]
+        [InlineData("LastAutosave")]
+        [InlineData("LastBackup")]
+        [InlineData("LastCampsite")]
+        public void ShadowOfTheTombRaider_OtherContainers_AreNotCovered(string container)
+        {
+            Assert.Equal(Outcome.NoTranslation, ShadowOfTheTombRaider().ToNonXbox(new XboxFile(container, container, "data_98")).Outcome);
+        }
+
+        [Fact]
+        public void ShadowOfTheTombRaider_Save202_IsNotCovered()
+        {
+            Assert.Equal(Outcome.NoTranslation, ShadowOfTheTombRaider().ToXbox("save202.dat").Outcome);
         }
 
         #endregion
